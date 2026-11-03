@@ -2,6 +2,8 @@
 
 数据集 1 的天气四分类实验项目。目前已完成数据检查、基线比较、NumPy 手写 CART 决策树与随机森林，以及测试集预测生成。交叉验证和消融实验留待后续完成。
 
+Task1 的后续工作见 [详细开发计划](docs/task1-development-plan.md) 和 [评分与交付检查表](docs/task1-delivery-checklist.md)；分支、PR、数据与实验结果的协作规则见 [CONTRIBUTING.md](CONTRIBUTING.md)。计划中列出的新模块尚未实现，当前可运行入口如下。
+
 ## 当前结果
 
 训练集共 9,900 条记录，四类各 2,475 条；测试集共 3,300 条。包含 7 个数值属性和 3 个类别属性。未发现缺失值、训练集重复特征记录或训练与测试之间的相同特征记录。
@@ -73,6 +75,18 @@ python3 -m venv .venv
 .venv/bin/python code/dataset1_custom.py
 .venv/bin/python -m unittest discover -s code/tests -v
 ```
+
+Windows PowerShell 示例：如果数据位于本仓库外层的 `Dataset` 文件夹，从仓库根目录执行：
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r code/requirements.txt
+.\.venv\Scripts\python.exe code/dataset1_baseline.py --data-dir ..\Dataset --output-dir outputs/local_baseline
+.\.venv\Scripts\python.exe code/dataset1_custom.py --data-dir ..\Dataset --output-dir outputs/local_custom
+.\.venv\Scripts\python.exe -m unittest discover -s code/tests -v
+```
+
+命令直接使用虚拟环境的 Python，不要求 PowerShell 激活脚本。`outputs/local_*` 保持本地，不会覆盖仓库中的参考结果；实际数据位置不同则修改 `--data-dir`。
 
 指定其他数据位置或输出位置：
 
