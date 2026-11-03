@@ -1,0 +1,25 @@
+.venv/
+__pycache__/
+.DS_Store
+.mplconfig/
+
+# Local credentials and machine-specific configuration.
+.env
+.env.*
+!.env.example
+
+# Obtain competition inputs separately; do not publish course materials.
+Project.pdf
+comp-5434-20261-project-task-1/
+data/
+*.zip
+
+# Track aggregate results only. Recreate record-level outputs locally.
+outputs/*
+!outputs/dataset1_baseline/
+outputs/dataset1_baseline/*
+!outputs/dataset1_baseline/audit.json
+!outputs/dataset1_baseline/details.json
+!outputs/dataset1_baseline/metrics.csv
+!outputs/dataset1_baseline/data_overview.png
+!outputs/dataset1_baseline/baseline_comparison.png

@@ -1,0 +1,276 @@
+{
+  "rows": {
+    "train": 9900,
+    "test": 3300,
+    "sample": 3300
+  },
+  "features": [
+    "Temperature",
+    "Humidity",
+    "Wind Speed",
+    "Precipitation (%)",
+    "Cloud Cover",
+    "Atmospheric Pressure",
+    "UV Index",
+    "Season",
+    "Visibility (km)",
+    "Location"
+  ],
+  "numeric_features": [
+    "Temperature",
+    "Humidity",
+    "Wind Speed",
+    "Precipitation (%)",
+    "Atmospheric Pressure",
+    "UV Index",
+    "Visibility (km)"
+  ],
+  "categorical_features": [
+    "Cloud Cover",
+    "Season",
+    "Location"
+  ],
+  "label_mapping": {
+    "1": "Sunny",
+    "2": "Cloudy",
+    "3": "Rainy",
+    "4": "Snowy"
+  },
+  "class_counts": {
+    "1": 2475,
+    "2": 2475,
+    "3": 2475,
+    "4": 2475
+  },
+  "missing_counts": {
+    "train": {
+      "id": 0,
+      "Temperature": 0,
+      "Humidity": 0,
+      "Wind Speed": 0,
+      "Precipitation (%)": 0,
+      "Cloud Cover": 0,
+      "Atmospheric Pressure": 0,
+      "UV Index": 0,
+      "Season": 0,
+      "Visibility (km)": 0,
+      "Location": 0,
+      "label": 0
+    },
+    "test": {
+      "id": 0,
+      "Temperature": 0,
+      "Humidity": 0,
+      "Wind Speed": 0,
+      "Precipitation (%)": 0,
+      "Cloud Cover": 0,
+      "Atmospheric Pressure": 0,
+      "UV Index": 0,
+      "Season": 0,
+      "Visibility (km)": 0,
+      "Location": 0
+    },
+    "sample": {
+      "id": 0,
+      "label": 0
+    }
+  },
+  "duplicate_feature_rows_train": 0,
+  "conflicting_feature_groups_train": 0,
+  "train_test_feature_overlap_rows": 0,
+  "train_test_id_overlap": 0,
+  "sample_ids_same_order_as_test": true,
+  "category_counts": {
+    "train": {
+      "Cloud Cover": {
+        "overcast": 4568,
+        "partly cloudy": 3400,
+        "clear": 1609,
+        "cloudy": 323
+      },
+      "Season": {
+        "Winter": 4211,
+        "Spring": 1917,
+        "Summer": 1891,
+        "Autumn": 1881
+      },
+      "Location": {
+        "mountain": 3624,
+        "inland": 3589,
+        "coastal": 2687
+      }
+    },
+    "test": {
+      "Cloud Cover": {
+        "overcast": 1522,
+        "partly cloudy": 1160,
+        "clear": 530,
+        "cloudy": 88
+      },
+      "Season": {
+        "Winter": 1399,
+        "Spring": 681,
+        "Autumn": 619,
+        "Summer": 601
+      },
+      "Location": {
+        "inland": 1227,
+        "mountain": 1189,
+        "coastal": 884
+      }
+    }
+  },
+  "unseen_test_categories": {
+    "Cloud Cover": [],
+    "Season": [],
+    "Location": []
+  },
+  "numeric_statistics": {
+    "train": {
+      "Temperature": {
+        "min": -24.0,
+        "max": 109.0,
+        "mean": 19.15020202020202,
+        "std": 17.449430925384227,
+        "median": 21.0
+      },
+      "Humidity": {
+        "min": 20.0,
+        "max": 109.0,
+        "mean": 68.69878787878788,
+        "std": 20.238560516909303,
+        "median": 70.0
+      },
+      "Wind Speed": {
+        "min": 0.0,
+        "max": 47.5,
+        "mean": 9.877929292929293,
+        "std": 6.952116598530703,
+        "median": 9.0
+      },
+      "Precipitation (%)": {
+        "min": 0.0,
+        "max": 109.0,
+        "mean": 53.70575757575757,
+        "std": 31.898306490266577,
+        "median": 58.0
+      },
+      "Atmospheric Pressure": {
+        "min": 800.12,
+        "max": 1199.21,
+        "mean": 1005.8235949494949,
+        "std": 37.409253157957046,
+        "median": 1007.64
+      },
+      "UV Index": {
+        "min": 0.0,
+        "max": 14.0,
+        "mean": 4.008181818181818,
+        "std": 3.8540964869280705,
+        "median": 3.0
+      },
+      "Visibility (km)": {
+        "min": 0.0,
+        "max": 20.0,
+        "mean": 5.461111111111111,
+        "std": 3.383956188932234,
+        "median": 5.0
+      }
+    },
+    "test": {
+      "Temperature": {
+        "min": -25.0,
+        "max": 99.0,
+        "mean": 19.05969696969697,
+        "std": 17.198070833825085,
+        "median": 22.0
+      },
+      "Humidity": {
+        "min": 20.0,
+        "max": 109.0,
+        "mean": 68.7469696969697,
+        "std": 20.063733852273558,
+        "median": 70.0
+      },
+      "Wind Speed": {
+        "min": 0.0,
+        "max": 48.5,
+        "mean": 9.695,
+        "std": 6.775986599178018,
+        "median": 8.5
+      },
+      "Precipitation (%)": {
+        "min": 0.0,
+        "max": 109.0,
+        "mean": 53.46030303030303,
+        "std": 32.09495327892924,
+        "median": 58.0
+      },
+      "Atmospheric Pressure": {
+        "min": 800.82,
+        "max": 1195.34,
+        "mean": 1005.8408000000001,
+        "std": 36.568985348066285,
+        "median": 1007.785
+      },
+      "UV Index": {
+        "min": 0.0,
+        "max": 14.0,
+        "mean": 3.9984848484848485,
+        "std": 3.8646779692589273,
+        "median": 3.0
+      },
+      "Visibility (km)": {
+        "min": 0.0,
+        "max": 20.0,
+        "mean": 5.468333333333334,
+        "std": 3.3343509990436946,
+        "median": 5.0
+      }
+    }
+  },
+  "values_outside_percentage_range": {
+    "train": {
+      "Humidity": {
+        "count": 315,
+        "fraction": 0.031818181818181815,
+        "count_by_label": {
+          "1": 77,
+          "2": 83,
+          "3": 80,
+          "4": 75
+        }
+      },
+      "Precipitation (%)": {
+        "count": 294,
+        "fraction": 0.029696969696969697,
+        "count_by_label": {
+          "1": 70,
+          "2": 72,
+          "3": 90,
+          "4": 62
+        }
+      }
+    },
+    "test": {
+      "Humidity": {
+        "count": 101,
+        "fraction": 0.030606060606060605
+      },
+      "Precipitation (%)": {
+        "count": 98,
+        "fraction": 0.029696969696969697
+      }
+    }
+  },
+  "sample_label_values": [
+    "Rainy"
+  ],
+  "submission_encoding_status": "UNCONFIRMED: assignment/train use integers 1..4; sample uses weather names.",
+  "data_policy": "Retain source rows and out-of-range values; exclude id; fit preprocessing on training partition only.",
+  "source_sha256": {
+    "train.csv": "4eb4439290751585213f3638bc238bf8a973d8e960b9f05f5d8641c34521bfbb",
+    "test.csv": "c8c036dd75562eef41da3a75edafb3904597a1c5291c97735829f03866c3c080",
+    "sample_submission.csv": "4b7ff8d2c44df622432a6f8d7f87c478e32deba3b976722cf87fe13c3505ee4b"
+  }
+}
