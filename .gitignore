@@ -23,3 +23,12 @@ outputs/dataset1_baseline/*
 !outputs/dataset1_baseline/metrics.csv
 !outputs/dataset1_baseline/data_overview.png
 !outputs/dataset1_baseline/baseline_comparison.png
+!outputs/dataset1_custom/
+outputs/dataset1_custom/*
+!outputs/dataset1_custom/audit.json
+!outputs/dataset1_custom/details.json
+!outputs/dataset1_custom/metrics.csv
+!outputs/dataset1_custom/feature_importances.csv
+!outputs/dataset1_custom/original_feature_importances.csv
+!outputs/dataset1_custom/custom_comparison.png
+!outputs/dataset1_custom/feature_importance.png

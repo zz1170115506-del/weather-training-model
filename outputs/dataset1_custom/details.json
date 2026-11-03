@@ -1,0 +1,405 @@
+{
+  "seed": 5434,
+  "validation_fraction": 0.2,
+  "training_rows": 7920,
+  "validation_rows": 1980,
+  "validation_class_counts": {
+    "1": 495,
+    "2": 495,
+    "3": 495,
+    "4": 495
+  },
+  "same_partition_as_saved_baseline": true,
+  "preprocessing_fitted_on_validation": false,
+  "id_used_as_feature": false,
+  "encoded_feature_count": 18,
+  "preprocessing_seconds_shared": 0.009025707986438647,
+  "evaluation_scope": "Exploratory single holdout; library references use matched parameters and shared preprocessing. Different RNG/tie-breaking policies can produce different trees.",
+  "models": {
+    "custom_cart": {
+      "implementation": "NumPy",
+      "parameters": {
+        "max_depth": 8,
+        "min_samples_split": 2,
+        "min_samples_leaf": 5,
+        "max_features": null,
+        "min_impurity_decrease": 0.0,
+        "random_state": 5434
+      },
+      "structure": {
+        "nodes": 197,
+        "leaves": 99,
+        "depth": 8
+      },
+      "classification_report": {
+        "Sunny": {
+          "precision": 0.9490445859872612,
+          "recall": 0.9030303030303031,
+          "f1-score": 0.9254658385093167,
+          "support": 495.0
+        },
+        "Cloudy": {
+          "precision": 0.8764940239043825,
+          "recall": 0.8888888888888888,
+          "f1-score": 0.8826479438314945,
+          "support": 495.0
+        },
+        "Rainy": {
+          "precision": 0.8659003831417624,
+          "recall": 0.9131313131313131,
+          "f1-score": 0.8888888888888888,
+          "support": 495.0
+        },
+        "Snowy": {
+          "precision": 0.9443298969072165,
+          "recall": 0.9252525252525252,
+          "f1-score": 0.9346938775510204,
+          "support": 495.0
+        },
+        "accuracy": 0.9075757575757576,
+        "macro avg": {
+          "precision": 0.9089422224851558,
+          "recall": 0.9075757575757575,
+          "f1-score": 0.9079241371951802,
+          "support": 1980.0
+        },
+        "weighted avg": {
+          "precision": 0.9089422224851557,
+          "recall": 0.9075757575757576,
+          "f1-score": 0.9079241371951802,
+          "support": 1980.0
+        }
+      },
+      "confusion_matrix": [
+        [
+          447,
+          18,
+          22,
+          8
+        ],
+        [
+          13,
+          440,
+          33,
+          9
+        ],
+        [
+          3,
+          30,
+          452,
+          10
+        ],
+        [
+          8,
+          14,
+          15,
+          458
+        ]
+      ]
+    },
+    "sklearn_cart": {
+      "implementation": "scikit-learn reference",
+      "parameters": {
+        "ccp_alpha": 0.0,
+        "class_weight": null,
+        "criterion": "gini",
+        "max_depth": 8,
+        "max_features": null,
+        "max_leaf_nodes": null,
+        "min_impurity_decrease": 0.0,
+        "min_samples_leaf": 5,
+        "min_samples_split": 2,
+        "min_weight_fraction_leaf": 0.0,
+        "monotonic_cst": null,
+        "random_state": 5434,
+        "splitter": "best"
+      },
+      "structure": null,
+      "classification_report": {
+        "Sunny": {
+          "precision": 0.9490445859872612,
+          "recall": 0.9030303030303031,
+          "f1-score": 0.9254658385093167,
+          "support": 495.0
+        },
+        "Cloudy": {
+          "precision": 0.8764940239043825,
+          "recall": 0.8888888888888888,
+          "f1-score": 0.8826479438314945,
+          "support": 495.0
+        },
+        "Rainy": {
+          "precision": 0.8659003831417624,
+          "recall": 0.9131313131313131,
+          "f1-score": 0.8888888888888888,
+          "support": 495.0
+        },
+        "Snowy": {
+          "precision": 0.9443298969072165,
+          "recall": 0.9252525252525252,
+          "f1-score": 0.9346938775510204,
+          "support": 495.0
+        },
+        "accuracy": 0.9075757575757576,
+        "macro avg": {
+          "precision": 0.9089422224851558,
+          "recall": 0.9075757575757575,
+          "f1-score": 0.9079241371951802,
+          "support": 1980.0
+        },
+        "weighted avg": {
+          "precision": 0.9089422224851557,
+          "recall": 0.9075757575757576,
+          "f1-score": 0.9079241371951802,
+          "support": 1980.0
+        }
+      },
+      "confusion_matrix": [
+        [
+          447,
+          18,
+          22,
+          8
+        ],
+        [
+          13,
+          440,
+          33,
+          9
+        ],
+        [
+          3,
+          30,
+          452,
+          10
+        ],
+        [
+          8,
+          14,
+          15,
+          458
+        ]
+      ]
+    },
+    "custom_forest": {
+      "implementation": "NumPy",
+      "parameters": {
+        "n_estimators": 100,
+        "max_depth": null,
+        "min_samples_split": 2,
+        "min_samples_leaf": 2,
+        "max_features": "sqrt",
+        "min_impurity_decrease": 0.0,
+        "bootstrap": true,
+        "oob_score": true,
+        "random_state": 5434
+      },
+      "structure": {
+        "trees": 100,
+        "mean_nodes": 798.28,
+        "mean_depth": 18.15,
+        "mean_unique_bootstrap_records": 5007.97
+      },
+      "classification_report": {
+        "Sunny": {
+          "precision": 0.9458333333333333,
+          "recall": 0.9171717171717172,
+          "f1-score": 0.9312820512820513,
+          "support": 495.0
+        },
+        "Cloudy": {
+          "precision": 0.8631984585741811,
+          "recall": 0.9050505050505051,
+          "f1-score": 0.883629191321499,
+          "support": 495.0
+        },
+        "Rainy": {
+          "precision": 0.9109311740890689,
+          "recall": 0.9090909090909091,
+          "f1-score": 0.910010111223458,
+          "support": 495.0
+        },
+        "Snowy": {
+          "precision": 0.9363449691991786,
+          "recall": 0.9212121212121213,
+          "f1-score": 0.9287169042769857,
+          "support": 495.0
+        },
+        "accuracy": 0.9131313131313131,
+        "macro avg": {
+          "precision": 0.9140769837989404,
+          "recall": 0.9131313131313132,
+          "f1-score": 0.9134095645259985,
+          "support": 1980.0
+        },
+        "weighted avg": {
+          "precision": 0.9140769837989405,
+          "recall": 0.9131313131313131,
+          "f1-score": 0.9134095645259985,
+          "support": 1980.0
+        }
+      },
+      "confusion_matrix": [
+        [
+          454,
+          23,
+          8,
+          10
+        ],
+        [
+          12,
+          448,
+          24,
+          11
+        ],
+        [
+          7,
+          28,
+          450,
+          10
+        ],
+        [
+          7,
+          20,
+          12,
+          456
+        ]
+      ],
+      "oob": {
+        "coverage": 1.0,
+        "accuracy": 0.9160353535353535,
+        "macro_f1": 0.9162230185113732
+      }
+    },
+    "sklearn_forest": {
+      "implementation": "scikit-learn reference",
+      "parameters": {
+        "bootstrap": true,
+        "ccp_alpha": 0.0,
+        "class_weight": null,
+        "criterion": "gini",
+        "max_depth": null,
+        "max_features": "sqrt",
+        "max_leaf_nodes": null,
+        "max_samples": null,
+        "min_impurity_decrease": 0.0,
+        "min_samples_leaf": 2,
+        "min_samples_split": 2,
+        "min_weight_fraction_leaf": 0.0,
+        "monotonic_cst": null,
+        "n_estimators": 100,
+        "n_jobs": 1,
+        "oob_score": true,
+        "random_state": 5434,
+        "verbose": 0,
+        "warm_start": false
+      },
+      "structure": null,
+      "classification_report": {
+        "Sunny": {
+          "precision": 0.941908713692946,
+          "recall": 0.9171717171717172,
+          "f1-score": 0.9293756397134084,
+          "support": 495.0
+        },
+        "Cloudy": {
+          "precision": 0.8684719535783365,
+          "recall": 0.907070707070707,
+          "f1-score": 0.8873517786561265,
+          "support": 495.0
+        },
+        "Rainy": {
+          "precision": 0.9118236472945892,
+          "recall": 0.9191919191919192,
+          "f1-score": 0.9154929577464789,
+          "support": 495.0
+        },
+        "Snowy": {
+          "precision": 0.9439834024896265,
+          "recall": 0.9191919191919192,
+          "f1-score": 0.9314227226202662,
+          "support": 495.0
+        },
+        "accuracy": 0.9156565656565656,
+        "macro avg": {
+          "precision": 0.9165469292638746,
+          "recall": 0.9156565656565656,
+          "f1-score": 0.91591077468407,
+          "support": 1980.0
+        },
+        "weighted avg": {
+          "precision": 0.9165469292638747,
+          "recall": 0.9156565656565656,
+          "f1-score": 0.91591077468407,
+          "support": 1980.0
+        }
+      },
+      "confusion_matrix": [
+        [
+          454,
+          25,
+          7,
+          9
+        ],
+        [
+          12,
+          449,
+          28,
+          6
+        ],
+        [
+          6,
+          22,
+          455,
+          12
+        ],
+        [
+          10,
+          21,
+          9,
+          455
+        ]
+      ],
+      "oob": {
+        "coverage": 1.0,
+        "accuracy": 0.9147727272727273,
+        "macro_f1": 0.9149525620652214
+      }
+    }
+  },
+  "best_custom_model": "custom_forest",
+  "full_refit_parameters": {
+    "n_estimators": 100,
+    "max_depth": null,
+    "min_samples_split": 2,
+    "min_samples_leaf": 2,
+    "max_features": "sqrt",
+    "min_impurity_decrease": 0.0,
+    "bootstrap": true,
+    "oob_score": false,
+    "random_state": 5434
+  },
+  "full_training_fit_seconds_including_preprocessing": 3.1883098329999484,
+  "full_test_inference_seconds_including_preprocessing": 0.08956974998000078,
+  "training_epochs": "not applicable; greedy trees and bootstrap ensemble",
+  "saved_model_reload_exact_match": true,
+  "total_workflow_seconds": 10.38106612500269,
+  "source_sha256": {
+    "train.csv": "4eb4439290751585213f3638bc238bf8a973d8e960b9f05f5d8641c34521bfbb",
+    "test.csv": "c8c036dd75562eef41da3a75edafb3904597a1c5291c97735829f03866c3c080",
+    "sample_submission.csv": "4b7ff8d2c44df622432a6f8d7f87c478e32deba3b976722cf87fe13c3505ee4b"
+  },
+  "submission_encoding_status": "UNCONFIRMED: assignment/train use integers 1..4; sample uses weather names.",
+  "environment": {
+    "python": "3.12.14",
+    "platform": "macOS-26.6-arm64-arm-64bit",
+    "training_threads": 1,
+    "gpu": "not used",
+    "packages": {
+      "numpy": "2.3.5",
+      "pandas": "2.2.3",
+      "scikit-learn": "1.7.2",
+      "joblib": "1.6.0"
+    }
+  }
+}

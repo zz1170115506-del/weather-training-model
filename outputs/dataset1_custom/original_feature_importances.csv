@@ -1,0 +1,41 @@
+model,original_feature,importance
+custom_cart,Atmospheric Pressure,0.021480195482963822
+custom_cart,Cloud Cover,0.04686549359294655
+custom_cart,Humidity,0.014604353829533366
+custom_cart,Location,0.0006164930639302637
+custom_cart,Precipitation (%),0.07904319992862159
+custom_cart,Season,0.029496548242519807
+custom_cart,Temperature,0.299487247322972
+custom_cart,UV Index,0.24465589462643128
+custom_cart,Visibility (km),0.2525646685301694
+custom_cart,Wind Speed,0.011185905379911883
+custom_forest,Atmospheric Pressure,0.11234552587861782
+custom_forest,Cloud Cover,0.1275674391189523
+custom_forest,Humidity,0.04904305514452255
+custom_forest,Location,0.014160432991727463
+custom_forest,Precipitation (%),0.13357861913366642
+custom_forest,Season,0.04908961867622533
+custom_forest,Temperature,0.22097660850442796
+custom_forest,UV Index,0.11412047559316023
+custom_forest,Visibility (km),0.14692951602573504
+custom_forest,Wind Speed,0.03218870893296489
+sklearn_cart,Atmospheric Pressure,0.02165086793740211
+sklearn_cart,Cloud Cover,0.04686549359294649
+sklearn_cart,Humidity,0.014294256327220001
+sklearn_cart,Location,0.0007559181118054617
+sklearn_cart,Precipitation (%),0.07904319992862152
+sklearn_cart,Season,0.02949654824251974
+sklearn_cart,Temperature,0.29926317135317276
+sklearn_cart,UV Index,0.24465589462643136
+sklearn_cart,Visibility (km),0.25305307115323217
+sklearn_cart,Wind Speed,0.010921578726648484
+sklearn_forest,Atmospheric Pressure,0.12265246483555792
+sklearn_forest,Cloud Cover,0.11539718292792049
+sklearn_forest,Humidity,0.05627006654614146
+sklearn_forest,Location,0.016005867044935736
+sklearn_forest,Precipitation (%),0.1305226130726723
+sklearn_forest,Season,0.06236615824298765
+sklearn_forest,Temperature,0.19451164615287417
+sklearn_forest,UV Index,0.11899204132135356
+sklearn_forest,Visibility (km),0.15037146054268496
+sklearn_forest,Wind Speed,0.032910499312871856

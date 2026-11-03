@@ -1,0 +1,73 @@
+model,encoded_feature,original_feature,importance
+custom_cart,numeric__Temperature,Temperature,0.299487247322972
+custom_cart,numeric__Humidity,Humidity,0.014604353829533366
+custom_cart,numeric__Wind Speed,Wind Speed,0.011185905379911883
+custom_cart,numeric__Precipitation (%),Precipitation (%),0.07904319992862159
+custom_cart,numeric__Atmospheric Pressure,Atmospheric Pressure,0.021480195482963822
+custom_cart,numeric__UV Index,UV Index,0.24465589462643128
+custom_cart,numeric__Visibility (km),Visibility (km),0.2525646685301694
+custom_cart,categorical__Cloud Cover_clear,Cloud Cover,0.04361434722988794
+custom_cart,categorical__Cloud Cover_cloudy,Cloud Cover,0.0009755805692055337
+custom_cart,categorical__Cloud Cover_overcast,Cloud Cover,0.0014010439711025157
+custom_cart,categorical__Cloud Cover_partly cloudy,Cloud Cover,0.0008745218227505576
+custom_cart,categorical__Season_Autumn,Season,0.0009597338312724833
+custom_cart,categorical__Season_Spring,Season,0.0007158255365631842
+custom_cart,categorical__Season_Summer,Season,0.0
+custom_cart,categorical__Season_Winter,Season,0.02782098887468414
+custom_cart,categorical__Location_coastal,Location,0.0005148289665212673
+custom_cart,categorical__Location_inland,Location,0.00010166409740899643
+custom_cart,categorical__Location_mountain,Location,0.0
+sklearn_cart,numeric__Temperature,Temperature,0.29926317135317276
+sklearn_cart,numeric__Humidity,Humidity,0.014294256327220001
+sklearn_cart,numeric__Wind Speed,Wind Speed,0.010921578726648484
+sklearn_cart,numeric__Precipitation (%),Precipitation (%),0.07904319992862152
+sklearn_cart,numeric__Atmospheric Pressure,Atmospheric Pressure,0.02165086793740211
+sklearn_cart,numeric__UV Index,UV Index,0.24465589462643136
+sklearn_cart,numeric__Visibility (km),Visibility (km),0.25305307115323217
+sklearn_cart,categorical__Cloud Cover_clear,Cloud Cover,0.04361434722988793
+sklearn_cart,categorical__Cloud Cover_cloudy,Cloud Cover,0.0009755805692054832
+sklearn_cart,categorical__Cloud Cover_overcast,Cloud Cover,0.0014010439711025153
+sklearn_cart,categorical__Cloud Cover_partly cloudy,Cloud Cover,0.0008745218227505575
+sklearn_cart,categorical__Season_Autumn,Season,0.0009597338312724841
+sklearn_cart,categorical__Season_Spring,Season,0.0007158255365631841
+sklearn_cart,categorical__Season_Summer,Season,0.0
+sklearn_cart,categorical__Season_Winter,Season,0.027820988874684073
+sklearn_cart,categorical__Location_coastal,Location,0.0005148289665212703
+sklearn_cart,categorical__Location_inland,Location,0.00010166409740899635
+sklearn_cart,categorical__Location_mountain,Location,0.00013942504787519498
+custom_forest,numeric__Temperature,Temperature,0.22097660850442796
+custom_forest,numeric__Humidity,Humidity,0.04904305514452255
+custom_forest,numeric__Wind Speed,Wind Speed,0.03218870893296489
+custom_forest,numeric__Precipitation (%),Precipitation (%),0.13357861913366642
+custom_forest,numeric__Atmospheric Pressure,Atmospheric Pressure,0.11234552587861782
+custom_forest,numeric__UV Index,UV Index,0.11412047559316023
+custom_forest,numeric__Visibility (km),Visibility (km),0.14692951602573504
+custom_forest,categorical__Cloud Cover_clear,Cloud Cover,0.08314679008908665
+custom_forest,categorical__Cloud Cover_cloudy,Cloud Cover,0.0063418269471453214
+custom_forest,categorical__Cloud Cover_overcast,Cloud Cover,0.02520964641027393
+custom_forest,categorical__Cloud Cover_partly cloudy,Cloud Cover,0.012869175672446387
+custom_forest,categorical__Season_Autumn,Season,0.0034781654671745678
+custom_forest,categorical__Season_Spring,Season,0.00522851644866716
+custom_forest,categorical__Season_Summer,Season,0.0057875784975480425
+custom_forest,categorical__Season_Winter,Season,0.03459535826283556
+custom_forest,categorical__Location_coastal,Location,0.008928230396508294
+custom_forest,categorical__Location_inland,Location,0.0026687271542849794
+custom_forest,categorical__Location_mountain,Location,0.00256347544093419
+sklearn_forest,numeric__Temperature,Temperature,0.19451164615287417
+sklearn_forest,numeric__Humidity,Humidity,0.05627006654614146
+sklearn_forest,numeric__Wind Speed,Wind Speed,0.032910499312871856
+sklearn_forest,numeric__Precipitation (%),Precipitation (%),0.1305226130726723
+sklearn_forest,numeric__Atmospheric Pressure,Atmospheric Pressure,0.12265246483555792
+sklearn_forest,numeric__UV Index,UV Index,0.11899204132135356
+sklearn_forest,numeric__Visibility (km),Visibility (km),0.15037146054268496
+sklearn_forest,categorical__Cloud Cover_clear,Cloud Cover,0.08043356026492886
+sklearn_forest,categorical__Cloud Cover_cloudy,Cloud Cover,0.005051050615146896
+sklearn_forest,categorical__Cloud Cover_overcast,Cloud Cover,0.021276022961618884
+sklearn_forest,categorical__Cloud Cover_partly cloudy,Cloud Cover,0.008636549086225848
+sklearn_forest,categorical__Season_Autumn,Season,0.004611605981190787
+sklearn_forest,categorical__Season_Spring,Season,0.007309561494250653
+sklearn_forest,categorical__Season_Summer,Season,0.0076211414395884166
+sklearn_forest,categorical__Season_Winter,Season,0.04282384932795779
+sklearn_forest,categorical__Location_coastal,Location,0.011190568492928842
+sklearn_forest,categorical__Location_inland,Location,0.0025392227478062608
+sklearn_forest,categorical__Location_mountain,Location,0.002276075804200634
