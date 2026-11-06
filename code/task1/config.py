@@ -9,12 +9,41 @@ import re
 from .models import MODEL_IDS
 
 
+def validate_experiment(value):
+    """Validate optional human-authored provenance without inventing rounds."""
+    required = {"round", "label", "parent_run_id", "change_note"}
+    if not isinstance(value, dict) or set(value) != required:
+        raise ValueError("experiment requires exactly round, label, parent_run_id and change_note.")
+    round_number = value["round"]
+    if isinstance(round_number, bool) or not isinstance(round_number, int) or round_number < 1:
+        raise ValueError("experiment.round must be a positive integer.")
+    for field, limit in (("label", 80), ("parent_run_id", 160)):
+        text = value[field]
+        if not isinstance(text, str) or re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0," + str(limit - 1) + "}", text) is None:
+            raise ValueError(f"experiment.{field} must be a safe name of at most {limit} characters.")
+    note = value["change_note"]
+    if (not isinstance(note, str) or not note.strip() or len(note) > 500
+            or any(ord(character) < 32 or ord(character) == 127 for character in note)):
+        raise ValueError("experiment.change_note must be a nonempty single-line string of at most 500 characters.")
+    return {"round": round_number, "label": value["label"],
+            "parent_run_id": value["parent_run_id"], "change_note": note.strip()}
+
+
 def resolve_config(raw):
     result = deepcopy(raw)
     if result.get("schema_version") != 1:
         raise ValueError("Expected schema_version 1.")
     if not isinstance(result.get("models"), list) or not result["models"]:
         raise ValueError("models must be a nonempty list.")
+    if "experiment" in result:
+        result["experiment"] = validate_experiment(result["experiment"])
+    if "diagnostics" in result:
+        diagnostics = result["diagnostics"]
+        if not isinstance(diagnostics, dict) or set(diagnostics) != {"learning_curve_every"}:
+            raise ValueError("diagnostics supports only learning_curve_every.")
+        every = diagnostics["learning_curve_every"]
+        if isinstance(every, bool) or not isinstance(every, int) or every < 1:
+            raise ValueError("diagnostics.learning_curve_every must be a positive integer.")
     validation = {"n_splits": 5, "split_seed": 5434, "model_seed": 5434} | result.get("validation", {})
     if set(validation) != {"n_splits", "split_seed", "model_seed"}:
         raise ValueError("Unknown validation option.")

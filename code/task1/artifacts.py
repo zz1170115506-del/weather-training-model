@@ -94,16 +94,26 @@ def environment():
 
 
 def new_run(stage, config, artifact_root=None):
+    # Imported here because config's model/data imports also use artifacts.
+    from .config import validate_experiment
+    experiment = validate_experiment(config["experiment"]) if "experiment" in config else None
+    config_sha256 = content_hash(config)
     root = Path(artifact_root or DEFAULT_ARTIFACT_ROOT).resolve()
     now = datetime.now(timezone.utc)
-    run_id = f"{now:%Y%m%dT%H%M%SZ}_{stage}_{content_hash(config)[:8]}_{uuid.uuid4().hex[:6]}"
+    run_id = f"{now:%Y%m%dT%H%M%SZ}_{stage}_{config_sha256[:8]}_{uuid.uuid4().hex[:6]}"
     out = root / run_id
     out.mkdir(parents=True, exist_ok=False)
     save_json(out / "resolved_config.json", config)
     save_json(out / "environment.json", environment())
-    save_json(out / "run.json", {"run_id": run_id, "stage": stage,
-                                "timestamp_utc": now.isoformat(), "git": git_state(),
-                                "config_sha256": content_hash(config), "status": "running"})
+    record = {"run_id": run_id, "stage": stage,
+              "timestamp_utc": now.isoformat(), "git": git_state(),
+              "config_sha256": config_sha256,
+              "resolved_config_sha256": config_sha256,
+              "resolved_config_file_sha256": file_hash(out / "resolved_config.json"),
+              "status": "running"}
+    if experiment is not None:
+        record["experiment"] = experiment
+    save_json(out / "run.json", record)
     return out
 
 

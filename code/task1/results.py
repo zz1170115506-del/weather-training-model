@@ -99,6 +99,70 @@ def _data_hashes(value):
     return {name: _sha(digest, f"data {name}") for name, digest in value.items()}
 
 
+def _config_snapshot(root, manifest, model_names):
+    """Check persisted parameters; a missing legacy snapshot stays unknown."""
+    from .artifacts import content_hash
+    from .config import validate_experiment
+
+    hint = ("参数摘要只列运行快照中的显式设置；未列出的分类器默认值和实际折内种子，"
+            "见 models/<模型名>/summary.json 的 folds[*].effective_model_parameters；"
+            "最终拟合参数见候选的 submission_manifest.json。HGB max_iter、权重生成器 max_iter、森林树数是不同参数。")
+    path = _within(root, "resolved_config.json")
+    if not path.exists():
+        if any(key in manifest for key in ("experiment", "resolved_config_sha256", "resolved_config_file_sha256")):
+            raise ValueError("A run with experiment/snapshot provenance requires resolved_config.json.")
+        return None, {"status": "unavailable_legacy_run", "path": None,
+                      "resolved_config_sha256": None, "resolved_config_file_sha256": None,
+                      "models": [], "validation": None, "diagnostics": None,
+                      "source_hint": "旧运行没有配置快照，不推断轮次或补造参数。" + hint}
+    snapshot = _json(root, "resolved_config.json", manifest)
+    if not isinstance(snapshot, dict):
+        raise ValueError("resolved_config.json must contain a configuration object.")
+    actual_hash = content_hash(snapshot)
+    checked_hash = False
+    for key in ("config_sha256", "resolved_config_sha256"):
+        if key in manifest:
+            if _sha(manifest[key], key) != actual_hash:
+                raise ValueError(f"Configuration snapshot semantic SHA256 mismatch: {key}")
+            checked_hash = True
+    actual_file_hash = _hash(path.read_bytes())
+    if "resolved_config_file_sha256" in manifest:
+        if _sha(manifest["resolved_config_file_sha256"], "resolved_config_file_sha256") != actual_file_hash:
+            raise ValueError("Configuration snapshot file SHA256 mismatch.")
+        checked_hash = True
+    if "resolved_config.json" in manifest.get("files_sha256", {}):
+        checked_hash = True  # _json/_bytes already compared the actual bytes.
+    declared = validate_experiment(manifest["experiment"]) if "experiment" in manifest else None
+    configured = validate_experiment(snapshot["experiment"]) if "experiment" in snapshot else None
+    if declared != configured:
+        raise ValueError("Run experiment metadata and configuration snapshot disagree.")
+    if configured is not None and not checked_hash:
+        raise ValueError("An experiment run requires a recorded configuration snapshot SHA256.")
+    raw_models = snapshot.get("models")
+    if not isinstance(raw_models, list) or not raw_models:
+        raise ValueError("Configuration snapshot is missing model parameters.")
+    params, seen = [], set()
+    for model in raw_models:
+        if not isinstance(model, dict) or not isinstance(model.get("name"), str):
+            raise ValueError("Configuration snapshot has invalid model entries.")
+        name = model["name"]
+        if name in seen or name not in model_names or not isinstance(model.get("model_params", {}), dict):
+            raise ValueError("Configuration snapshot models do not match the reported comparison.")
+        seen.add(name)
+        params.append({"name": name, "model_id": model.get("model_id"),
+                       "model_params": model.get("model_params", {}),
+                       "noise_weighting": model.get("noise_weighting"),
+                       "features": model.get("features", {}),
+                       "group_features": model.get("group_features", False)})
+    if seen != set(model_names):
+        raise ValueError("Configuration snapshot models do not match the reported comparison.")
+    return configured, {"status": "verified" if checked_hash else "unverified_legacy_snapshot",
+                        "path": str(path), "resolved_config_sha256": actual_hash,
+                        "resolved_config_file_sha256": actual_file_hash,
+                        "models": params, "validation": snapshot.get("validation"),
+                        "diagnostics": snapshot.get("diagnostics"), "source_hint": hint}
+
+
 def _metrics(root, summary, manifest):
     comparison = summary.get("comparison")
     if not isinstance(comparison, dict) or not isinstance(comparison.get("metrics"), list):
@@ -230,6 +294,7 @@ def summarize_run(run_dir):
         raise ValueError("training_summary.json must contain an object.")
     models = _metrics(root, summary, manifest)
     by_name = {model["name"]: model for model in models}
+    experiment, config_snapshot = _config_snapshot(root, manifest, by_name)
     protocol = _protocol(summary["comparison"].get("fold_protocol"))
     declared_protocol = manifest.get("result", {}).get("comparison", {}).get("fold_protocol")
     if declared_protocol is not None and declared_protocol != protocol:
@@ -281,6 +346,7 @@ def summarize_run(run_dir):
         candidate["platform_scores"] = [entry for entry in scores or [] if entry["candidate"] == key] or None
     return {"run_id": manifest.get("run_id", root.name), "run_dir": str(root),
             "status": "complete", "stage": "train", "evaluation_scope": LOCAL_NOTICE,
+            "experiment": experiment, "config_snapshot": config_snapshot,
             "data_sha256": _data_hashes(manifest.get("source_sha256")), "fold_protocol": protocol,
             "models": models, "candidates": candidates, "platform_scores": scores, "notes": notes}
 
@@ -314,6 +380,7 @@ def compare_runs(current, previous):
     if not comparisons:
         raise ValueError("No matching candidate_a/candidate_b export slots to compare.")
     return {"current_run_id": current["run_id"], "previous_run_id": previous["run_id"],
+            "current_experiment": current.get("experiment"), "previous_experiment": previous.get("experiment"),
             "same_data_and_folds": True, "candidates": comparisons,
             "evaluation_scope": "Descriptive same-fold local differences; not independent significance or Kaggle score gains."}
 
@@ -321,6 +388,27 @@ def compare_runs(current, previous):
 def print_results(summary):
     """Print a compact local table and the verified integer upload filenames."""
     print(f"Run: {summary['run_id']}")
+    experiment = summary.get("experiment")
+    if experiment is not None:
+        print(f"实验轮次: 第 {experiment['round']} 轮 | {experiment['label']}")
+        print(f"父运行: {experiment['parent_run_id']}")
+        print(f"本轮改动: {experiment['change_note']}")
+    else:
+        print("实验轮次: 历史记录未标注，不自动推断。")
+    snapshot = summary.get("config_snapshot", {})
+    if snapshot.get("path"):
+        print(f"配置快照: {snapshot['status']} | {snapshot['path']}")
+        print(f"配置 SHA256: {snapshot['resolved_config_sha256']}")
+        for model in snapshot["models"]:
+            parameters = ", ".join(f"{key}={json.dumps(value, ensure_ascii=False)}"
+                                   for key, value in sorted(model["model_params"].items()))
+            print(f"  {model['name']}: {parameters or '(快照未显式列出分类器参数)'}")
+            if model.get("noise_weighting"):
+                weighting = ", ".join(f"{key}={json.dumps(value, ensure_ascii=False)}"
+                                      for key, value in sorted(model["noise_weighting"].items()))
+                print(f"    自主权重生成器（独立参数）: {weighting}")
+    if snapshot.get("source_hint"):
+        print(snapshot["source_hint"])
     print(LOCAL_NOTICE)
     print(f"{'model':28} {'mean':>9} {'std':>9} {'OOF F1':>9} {'accuracy':>9}")
     for model in summary["models"]:
@@ -331,6 +419,9 @@ def print_results(summary):
     for key, candidate in summary["candidates"].items():
         print(f"\n{key} = {candidate['model_name']} | integer | {candidate['rows']} rows")
         print(f"整数上传 CSV: {candidate['integer_upload_csv']}")
+    best_key, best = max(summary["candidates"].items(), key=lambda item: item[1]["metrics"]["oof_macro_f1"])
+    print(f"\n已导出候选中，本地 OOF 最高: {best_key} ({best['model_name']}) "
+          f"Macro-F1={best['metrics']['oof_macro_f1']:.6f}；仅供手动选型，不保证 Kaggle 更高。")
     if summary.get("platform_scores"):
         print("\nKaggle 平台记录（用户填报，未通过网络核验）：")
         for entry in summary["platform_scores"]:

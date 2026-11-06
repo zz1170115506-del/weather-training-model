@@ -25,7 +25,7 @@ def main():
     parser.add_argument("--output", type=Path)
     parser.add_argument("--run-dir", type=Path, help="Completed manual-training run for results or record-score; results defaults to the latest run.")
     parser.add_argument("--compare-run", type=Path, help="Prior same-data/same-fold run to compare in results.")
-    parser.add_argument("--candidate", default="candidate_a", help="Candidate key printed by train.")
+    parser.add_argument("--candidate", help="Explicit candidate key printed by train; required for record-score.")
     parser.add_argument("--submission-id", help="Submission ID shown by Kaggle, recorded locally only.")
     parser.add_argument("--public-score", type=float)
     parser.add_argument("--note", default="")

@@ -24,6 +24,7 @@ _FOLD_COLUMNS = (
     "fold", "fit_rows", "validation_rows", "train_macro_f1", "macro_f1", "accuracy",
     "inference_seconds_including_preprocessing", "preprocessing_seconds", "fit_seconds",
     "training_seconds_including_inner_selection", "selected_iterations",
+    "actual_iterations", "trees_per_iteration", "learning_curve_diagnostics_seconds",
     "preprocessing_fitted_rows", "encoded_feature_count", "early_stopping_uses_evaluation_fold",
 )
 _COMPARISON_COLUMNS = (
@@ -161,7 +162,8 @@ def _candidate(summary_path, protocol, run_context):
     for col in folds:
         folds[col] = pd.to_numeric(folds[col], errors="raise")
         values = folds[col].to_numpy(dtype=float)
-        if (np.isinf(values).any() or (col != "selected_iterations" and np.isnan(values).any())
+        nullable = {"selected_iterations", "actual_iterations", "trees_per_iteration"}
+        if (np.isinf(values).any() or (col not in nullable and np.isnan(values).any())
                 or np.any(values[np.isfinite(values)] < 0)):
             raise ValueError(f"{name}: invalid numeric fold metric {col}.")
     count = protocol["n_splits"]
