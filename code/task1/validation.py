@@ -74,14 +74,14 @@ def group_diagnostics(data, probabilities):
     return pd.DataFrame(rows)
 
 
-def cross_validate(data, config, folds, model_seed=5434, out=None, verbose=True):
+def cross_validate(data, config, folds, model_seed=5434, out=None, verbose=True, learning_curve_every=None):
     X, y = data.X, data.y
     folds = np.asarray(folds)
     if folds.shape != y.shape or len(np.unique(folds)) < 2 or set(np.unique(folds)) != set(range(len(np.unique(folds)))):
         raise ValueError("Expected contiguous nonnegative folds for every training row.")
     oof = np.full((len(y), 4), np.nan)
     seen = np.zeros(len(y), dtype=int)
-    records, details, importance_rows = [], [], []
+    records, details, importance_rows, curve_rows = [], [], [], []
     started = perf_counter()
     for fold in sorted(np.unique(folds)):
         fit, valid = np.flatnonzero(folds != fold), np.flatnonzero(folds == fold)
@@ -93,9 +93,19 @@ def cross_validate(data, config, folds, model_seed=5434, out=None, verbose=True)
         seen[valid] += 1
         result = metrics(y[valid], probability)
         train_result = metrics(y[fit], predict_probabilities(bundle, X.iloc[fit]))
+        diagnostics_seconds = 0.0
+        if learning_curve_every is not None and config["model_id"] in ("hgb", "hgb_native"):
+            from .diagnostics import boosting_curve
+            diagnostics_started = perf_counter()
+            curve = boosting_curve(bundle, X.iloc[fit], y[fit], X.iloc[valid], y[valid], learning_curve_every)
+            if not np.isclose(curve[-1]["validation_macro_f1"], result["macro_f1"], atol=1e-12, rtol=0):
+                raise RuntimeError("Final learning-curve stage disagrees with the retained model.")
+            curve_rows.extend({"fold": int(fold), **point} for point in curve)
+            diagnostics_seconds = perf_counter() - diagnostics_started
         row = {"fold": int(fold), "fit_rows": len(fit), "validation_rows": len(valid),
                "train_macro_f1": train_result["macro_f1"], "macro_f1": result["macro_f1"],
                "accuracy": result["accuracy"], "inference_seconds_including_preprocessing": inference_seconds,
+               "learning_curve_diagnostics_seconds": diagnostics_seconds,
                **fit_info}
         records.append(row)
         details.append({**row, "metrics": result,
@@ -123,6 +133,10 @@ def cross_validate(data, config, folds, model_seed=5434, out=None, verbose=True)
         save_json(out / "summary.json", summary)
         pd.DataFrame(records).to_csv(out / "fold_metrics.csv", index=False, lineterminator="\n")
         np.savez_compressed(out / "oof.npz", ids=data.train.id.to_numpy(), y=y, folds=folds, probabilities=oof)
+        if curve_rows:
+            from .diagnostics import save_boosting_curves
+            summary["learning_curve"] = save_boosting_curves(curve_rows, out)
+            save_json(out / "summary.json", summary)
         group_diagnostics(data, oof).to_csv(out / "group_metrics.csv", index=False, lineterminator="\n")
         if importance_rows:
             importance = pd.DataFrame(importance_rows).groupby(["fold", "feature"], as_index=False).importance.sum()

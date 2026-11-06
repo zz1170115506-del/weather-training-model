@@ -153,6 +153,8 @@ def fit_model(X, y, config, seed):
     metadata = {"preprocessing_seconds": preprocessing_seconds, "fit_seconds": fit_seconds,
                 "training_seconds_including_inner_selection": perf_counter() - started,
                 "selected_iterations": iterations,
+                "actual_iterations": int(model.n_iter_) if name in ("hgb", "hgb_native") else None,
+                "trees_per_iteration": int(model.n_trees_per_iteration_) if name in ("hgb", "hgb_native") else None,
                 "preprocessing_fitted_rows": features.fitted_rows_,
                 "encoded_feature_count": len(features.groups_),
                 "effective_model_parameters": (model.get_all_params() if name == "catboost" else model.get_params()),

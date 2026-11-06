@@ -102,6 +102,12 @@ class ManualWorkflowTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             record_score(args)
 
+    def test_record_score_requires_explicit_candidate_before_reading_run(self):
+        args = Namespace(run_dir=self.directory / "not_a_run", candidate=None,
+                         submission_id="fixture", public_score=0.9)
+        with self.assertRaisesRegex(ValueError, "--candidate"):
+            record_score(args)
+
     def test_check_does_not_fit_or_start_training(self):
         config_file = self.directory / "config.json"
         config_file.write_text(json.dumps(small_config()), encoding="utf-8")
@@ -130,6 +136,8 @@ class ManualWorkflowTests(unittest.TestCase):
         out = Path(pointer["run_dir"])
         self.assertTrue(Path(pointer["candidates"]["candidate_a"]).is_file())
         self.assertEqual(json.loads((out / "run.json").read_text(encoding="utf-8"))["status"], "complete")
+        manifest = json.loads((out / "run.json").read_text(encoding="utf-8"))
+        self.assertIn((out / "resolved_config.json").as_posix(), manifest["frozen_reproduce_command_template"])
         self.assertEqual(json.loads((out / "training_summary.json").read_text(encoding="utf-8"))["figures"]["status"], "tested separately")
         self.assertFalse((out / "platform_scores.json").exists())
 

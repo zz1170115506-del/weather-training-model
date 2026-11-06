@@ -152,6 +152,16 @@ class ResultsTests(unittest.TestCase):
             with self.subTest(stage=stage, status=status), self.assertRaisesRegex(ValueError, "complete.*train"):
                 summarize_run(root)
 
+    def test_upload_hint_follows_exported_metrics_instead_of_fixed_letter_a(self):
+        result = summarize_run(self.fixture())
+        candidates = result["candidates"]
+        candidates["candidate_a"], candidates["candidate_b"] = candidates["candidate_b"], candidates["candidate_a"]
+        stream = io.StringIO()
+        with contextlib.redirect_stdout(stream):
+            print_results(result)
+        self.assertIn("本地 OOF 最高: candidate_b", stream.getvalue())
+        self.assertIn("不保证 Kaggle 更高", stream.getvalue())
+
     def test_refuses_candidate_csv_changed_after_training(self):
         root = self.fixture()
         (root / "submissions/candidate_a_integer.csv").write_bytes(b"id,label\n101,4\n102,2\n103,3\n104,4\n")

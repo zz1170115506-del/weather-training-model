@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "description": "Third user-started experiment: exactly 120 HGB iterations with a larger learning rate. Same architecture, preprocessing, common folds and RF100 control. Not yet trained or validated on competition data.",
+  "experiment": {
+    "round": 3,
+    "label": "round3_hgb120_lr015",
+    "parent_run_id": "20261106T125741Z_train_cd70c482_5b00b4",
+    "change_note": "Relative to round 2: both HGB max_iter 1600->120 and learning_rate 0.015->0.15; retain 15 leaves, min leaf 40, L2 15, weighting floor 0.2 and RF100. Add post-fit learning curves only."
+  },
+  "validation": {
+    "n_splits": 5,
+    "split_seed": 5434,
+    "model_seed": 5434
+  },
+  "finalization": {
+    "method": "full_refit"
+  },
+  "diagnostics": {
+    "learning_curve_every": 10
+  },
+  "models": [
+    {
+      "name": "hgb_weighted_r3_120",
+      "model_id": "hgb",
+      "model_params": {
+        "max_iter": 120,
+        "learning_rate": 0.15,
+        "max_leaf_nodes": 15,
+        "min_samples_leaf": 40,
+        "l2_regularization": 15.0,
+        "early_stopping": false
+      },
+      "noise_weighting": {
+        "floor": 0.2
+      }
+    },
+    {
+      "name": "hgb_plain_r3_120",
+      "model_id": "hgb",
+      "model_params": {
+        "max_iter": 120,
+        "learning_rate": 0.15,
+        "max_leaf_nodes": 15,
+        "min_samples_leaf": 40,
+        "l2_regularization": 15.0,
+        "early_stopping": false
+      }
+    },
+    {
+      "name": "numpy_forest100",
+      "model_id": "numpy_forest",
+      "model_params": {
+        "n_estimators": 100,
+        "min_samples_leaf": 2,
+        "max_features": "sqrt"
+      }
+    }
+  ],
+  "training": {
+    "export_models": [
+      "hgb_weighted_r3_120",
+      "hgb_plain_r3_120"
+    ]
+  },
+  "blend": {
+    "n_trials": 0,
+    "allow_class_multipliers": false
+  }
+}

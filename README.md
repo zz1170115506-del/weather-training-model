@@ -35,7 +35,7 @@ $taskRun = Get-Content ..\local_artifacts\task1\latest_training_run.json -Raw -E
 $taskRun.candidates
 ```
 
-在课程竞赛的 **File Upload** 窗口选择 `submissions/candidate_a.csv`；默认使用整数标签 `1/2/3/4`，包含 3,300 条预测和表头。评测器已明确拒绝英文 `Rainy`，提交样例中的英文标签不代表实际接受格式。新版 `check/train/finalize` 拒绝以英文或样例推断格式运行。旧版第一轮请直接上传已有的 `candidate_a_integer.csv`，无需重训。英文 `_name.csv` 仅供查看，不能上传评测。
+先查看程序打印的各候选本地指标，在课程竞赛的 **File Upload** 窗口手动选择对应的 `submissions/candidate_a.csv` 或 `candidate_b.csv`。程序会提示已导出候选中的本地OOF最高者，但不自动替换候选或上传，也不保证它在Kaggle更高。默认使用整数标签 `1/2/3/4`，包含 3,300 条预测和表头。评测器已明确拒绝英文 `Rainy`，提交样例中的英文标签不代表实际接受格式。新版 `check/train/finalize` 拒绝以英文或样例推断格式运行。旧版第一轮请直接上传已有的整数备用文件，无需重训。英文 `_name.csv` 仅供查看，不能上传评测。
 
 查看最近一轮的实际本地分数与正确整数文件位置，不会训练：
 
@@ -48,15 +48,16 @@ $taskRun.candidates
 验证或记录上传后的真实成绩：
 
 ```powershell
-.\.venv\Scripts\python.exe code/run_task1.py validate-submission --submission $taskRun.candidates.candidate_a
+$taskCandidate = Read-Host '实际上传的候选键，例如 candidate_a 或 candidate_b'
+.\.venv\Scripts\python.exe code/run_task1.py validate-submission --submission $taskRun.candidates.$taskCandidate
 $taskSubmissionId = Read-Host 'Kaggle实际提交编号'
 $taskPublicScore = Read-Host 'Kaggle实际Macro-F1，小数点用英文句点'
-.\.venv\Scripts\python.exe code/run_task1.py record-score --run-dir $taskRun.run_dir --candidate candidate_a --submission-id $taskSubmissionId --public-score $taskPublicScore
+.\.venv\Scripts\python.exe code/run_task1.py record-score --run-dir $taskRun.run_dir --candidate $taskCandidate --submission-id $taskSubmissionId --public-score $taskPublicScore
 ```
 
 `record-score` 只保存本地人工记录，不查询或操作平台。相同配置/seed 重跑主要用于复现，不能保证分数提高。第二轮配置为 `configs/task1/second_run.json`：保持三条模型路线、权重算法、特征与划分不变，两套 HGB 从700增至1600轮，学习率0.03降至0.015，叶样本下限30增至40，L2从10增至15。手写100树森林保留为固定参照；更多树此前未显示稳定收益。
 
-第二轮仍由使用者输入命令启动；这是一套待验证的更长训练/更强正则化配方，不是已证明更好的成绩：
+以下保留第二轮的手动复现命令；它增加训练并加强正则化，实际结果见下节。当前新实验使用下一节的`third_run.json`：
 
 ```powershell
 .\.venv\Scripts\python.exe -X utf8 -B code/run_task1.py check --config configs/task1/second_run.json
@@ -66,6 +67,23 @@ $taskPublicScore = Read-Host 'Kaggle实际Macro-F1，小数点用英文句点'
 参数直接在 JSON 的 `models` 中调整，无须修改模型实现。每个 HGB 的 `model_params` 可调 `max_iter`、`learning_rate`、`max_leaf_nodes`、`min_samples_leaf`、`l2_regularization`；加权模型的 `noise_weighting.floor` 控制最小样本权重；森林树数为 `n_estimators`。两个 HGB 的基础参数同步修改，以隔离样本权重的影响；保持验证seed不变做公平比较。
 
 第一轮配置保留在 `first_run.json`。`iteration_leaf50.json` 是其他单因素研究预设，`stability_seed2026.json` 只核查划分稳定性。修改代码和共享配置前仍按新分支 → push → PR → 负责人审阅协作；个人调参配置可放仓库外，正式复现使用干净源码和明确配置哈希。
+
+## 第三轮：固定120轮，手动启动
+
+`configs/task1/third_run.json` 独立保存第三轮参数，保留前两轮配置。两套HGB均为 `max_iter=120`、`learning_rate=0.15`、15叶、最小叶样本40、L2=15，并关闭早停；自主权重floor仍为0.2，森林仍为100树参照。特征和五折/seed不变，候选A仍为加权、B仍为普通HGB。学习率增加是为了适配较少轮数，并非已验证提高成绩。
+
+```powershell
+.\.venv\Scripts\python.exe -X utf8 -B code/run_task1.py check --config configs/task1/third_run.json
+.\.venv\Scripts\python.exe -X utf8 -B code/run_task1.py train --config configs/task1/third_run.json
+```
+
+HGB的120轮是120个提升阶段，四分类每阶段4棵小树；独立于权重生成器的30次EM上限和森林100树。`check`不训练；只有使用者执行`train`才启动真实数据拟合。
+
+每次运行自动保存独立目录、`resolved_config.json`冻结参数、`run.json`轮次/标签/父运行/改动说明/双哈希、每折有效参数和实际迭代数、最终候选参数、源码/环境/数据/折哈希及可重放模型。`run.json`的`frozen_reproduce_command_template`引用该次快照，避免以后编辑原配置路径导致错复现。`results`会核验并显示这些记录；旧运行不虚构轮次。记录平台分数必须显式指定`--candidate`。
+
+第三轮还在各HGB的`models/<模型名>/learning_curve.csv`和`.png`保存每10轮及首末轮的训练/验证Macro-F1、各验证类别F1和log-loss。它们只观察同一次已拟合模型，不追加训练、不自动选择轮数、不使用测试标签。曲线属于开发诊断；若据曲线再调参，后续成绩仍是模型选择估计。新增诊断会增加CV总耗时，比较效率时同时看原始fit_seconds和单列诊断耗时。
+
+第二轮实际聚合结果见`results/task1/round2_20261106/`：普通HGB OOF=0.916810，加权HGB=0.915784。两轮证据不支持“轮数越多或加权必然更好”；0.92是争取的目标，并非已实现分数或老师的满分阈值。
 
 ## 统一入口与文件职责
 

@@ -45,7 +45,8 @@ def run_cv(data, config, out):
     rows = []
     for candidate in config["models"]:
         result, _ = cross_validate(data, candidate, folds, config["validation"]["model_seed"],
-                                   out / "models" / candidate["name"])
+                                   out / "models" / candidate["name"],
+                                   learning_curve_every=config.get("diagnostics", {}).get("learning_curve_every"))
         rows.append({"name": candidate["name"], "model_id": candidate["model_id"],
                      "config_sha256": result["config_sha256"],
                      "fold_macro_f1_mean": result["fold_macro_f1_mean"],
@@ -246,7 +247,7 @@ def run_train(data, config, out, label_format):
         print(f"READY_TO_UPLOAD={submissions / csv_name}", flush=True)
     result = {"comparison": comparison, "candidates": candidates,
               "candidate_policy": "Fixed named single-model candidates; no automatic Kaggle submission or OOF-based candidate replacement.",
-              "manual_next_step": "Upload candidate_a.csv using the competition File Upload window; verify the platform response, then record the real score.",
+              "manual_next_step": "Review the exported candidates' CV metrics, manually choose an integer CSV in the competition File Upload window, verify the platform response, then record its actual candidate key and score.",
               "score_log_policy": "Append-only user-reported platform_scores.json entries after training."}
     save_json(out / "training_summary.json", result)
     print("[3/3] CSV/schema/hash and model reload checks passed. Kaggle upload is manual.", flush=True)
@@ -254,8 +255,8 @@ def run_train(data, config, out, label_format):
 
 
 def record_score(args):
-    if args.run_dir is None or args.submission_id is None or args.public_score is None:
-        raise ValueError("record-score requires --run-dir, --submission-id and --public-score.")
+    if args.run_dir is None or args.submission_id is None or args.public_score is None or args.candidate is None:
+        raise ValueError("record-score requires --run-dir, --candidate, --submission-id and --public-score.")
     if not args.submission_id.strip() or not np.isfinite(args.public_score) or not 0 <= args.public_score <= 1:
         raise ValueError("A real submission ID and a finite Public Macro-F1 in [0,1] are required.")
     out = args.run_dir.resolve()
@@ -324,6 +325,8 @@ def execute(args):
                           "data_rows": data.audit["rows"], "source_sha256": data.audit["source_sha256"],
                           "models": [model["name"] for model in config["models"]],
                           "export_models": config["training"]["export_models"],
+                          "experiment": config.get("experiment"),
+                          "config_sha256": content_hash(config),
                           "label_format_from_sample": infer_label_format(data.sample),
                           "export_label_format": "integer",
                           "sample_label_format_is_authoritative": False,
@@ -372,6 +375,10 @@ def execute(args):
                              f"python code/run_task1.py {args.stage} "
                              + (f"--config {args.config.as_posix()} " if args.config else "")
                              + "--data-dir <DATA_DIR> --artifact-root <ARTIFACT_ROOT> "
+                             + (f"--label-format {args.label_format}" if args.stage in ("finalize", "train") else "")),
+                         "frozen_reproduce_command_template": (
+                             f"python code/run_task1.py {args.stage} --config \"{(out / 'resolved_config.json').as_posix()}\" "
+                             + "--data-dir <DATA_DIR> --artifact-root <NEW_ARTIFACT_ROOT> "
                              + (f"--label-format {args.label_format}" if args.stage in ("finalize", "train") else "")),
                          "result": result})
         if args.stage == "train":
