@@ -35,7 +35,15 @@ $taskRun = Get-Content ..\local_artifacts\task1\latest_training_run.json -Raw -E
 $taskRun.candidates
 ```
 
-在课程竞赛的 **File Upload** 窗口选择 `submissions/candidate_a.csv`；它使用与当前样例一致的英文标签，包含 3,300 条预测和表头。另有整数标签备用文件；平台实际接受与评分必须由使用者核实。`training_summary.json`、`comparison.csv`、`summary/` 图表和本地 manifest 为后续报告提供证据，不能将开发 CV 称为 Kaggle 成绩。
+在课程竞赛的 **File Upload** 窗口选择 `submissions/candidate_a.csv`；默认使用整数标签 `1/2/3/4`，包含 3,300 条预测和表头。评测器已明确拒绝英文 `Rainy`，提交样例中的英文标签不代表实际接受格式。新版 `check/train/finalize` 拒绝以英文或样例推断格式运行。旧版第一轮请直接上传已有的 `candidate_a_integer.csv`，无需重训。英文 `_name.csv` 仅供查看，不能上传评测。
+
+查看最近一轮的实际本地分数与正确整数文件位置，不会训练：
+
+```powershell
+.\.venv\Scripts\python.exe -X utf8 -B code/run_task1.py results
+```
+
+`training_summary.json`、`comparison.csv`、`summary/` 图表和本地 manifest 为后续报告提供证据，不能将开发 CV 称为 Kaggle 成绩。上传报错也不是一个有效的 Kaggle 分数。
 
 验证或记录上传后的真实成绩：
 
@@ -46,11 +54,22 @@ $taskPublicScore = Read-Host 'Kaggle实际Macro-F1，小数点用英文句点'
 .\.venv\Scripts\python.exe code/run_task1.py record-score --run-dir $taskRun.run_dir --candidate candidate_a --submission-id $taskSubmissionId --public-score $taskPublicScore
 ```
 
-`record-score` 只保存本地人工记录，不查询或操作平台。相同配置/seed 重跑主要用于复现，不能保证分数提高。`configs/task1/iteration_leaf50.json` 为尚未验证的下一轮单因素预设；`stability_seed2026.json` 只核查划分稳定性。修改代码和共享配置前仍按新分支 → push → PR → 负责人审阅协作；个人调参配置可放仓库外，正式复现使用干净源码和明确配置哈希。
+`record-score` 只保存本地人工记录，不查询或操作平台。相同配置/seed 重跑主要用于复现，不能保证分数提高。第二轮配置为 `configs/task1/second_run.json`：保持三条模型路线、权重算法、特征与划分不变，两套 HGB 从700增至1600轮，学习率0.03降至0.015，叶样本下限30增至40，L2从10增至15。手写100树森林保留为固定参照；更多树此前未显示稳定收益。
+
+第二轮仍由使用者输入命令启动；这是一套待验证的更长训练/更强正则化配方，不是已证明更好的成绩：
+
+```powershell
+.\.venv\Scripts\python.exe -X utf8 -B code/run_task1.py check --config configs/task1/second_run.json
+.\.venv\Scripts\python.exe -X utf8 -B code/run_task1.py train --config configs/task1/second_run.json
+```
+
+参数直接在 JSON 的 `models` 中调整，无须修改模型实现。每个 HGB 的 `model_params` 可调 `max_iter`、`learning_rate`、`max_leaf_nodes`、`min_samples_leaf`、`l2_regularization`；加权模型的 `noise_weighting.floor` 控制最小样本权重；森林树数为 `n_estimators`。两个 HGB 的基础参数同步修改，以隔离样本权重的影响；保持验证seed不变做公平比较。
+
+第一轮配置保留在 `first_run.json`。`iteration_leaf50.json` 是其他单因素研究预设，`stability_seed2026.json` 只核查划分稳定性。修改代码和共享配置前仍按新分支 → push → PR → 负责人审阅协作；个人调参配置可放仓库外，正式复现使用干净源码和明确配置哈希。
 
 ## 统一入口与文件职责
 
-- `code/run_task1.py`：`check/train/cv/nested/finalize/predict/validate-submission/record-score`。
+- `code/run_task1.py`：`check/train/cv/nested/finalize/predict/validate-submission/record-score/results`。
 - `code/task1/`：共用数据、折内预处理、模型工厂、验证、工件与提交校验；baseline/custom 共用这条新流程。
 - `code/weather_models.py`：手写树/森林；增加可选叶概率平滑和原始属性分组采样，默认保留旧行为。
 - `code/generative_weather.py`：自主直方图 NB 与共享污染成分 EM；第一候选用其训练责任度生成样本权重，测试推理只使用已训练 HGB。
@@ -157,11 +176,11 @@ python3 -m venv .venv
 - 以验证集 Macro-F1 最高的基线在完整训练集上重新训练，生成本地测试预测。
 - 已核对原始文件哈希、训练和验证记录互不交叉、指标重算、概率和、预测行数与 ID 顺序；两次运行的划分、预测、概率和分数完全一致。计时不要求相同。
 
-## 标签格式待核对
+## 提交标签使用整数
 
-训练集标签为整数：`1 = Sunny`、`2 = Cloudy`、`3 = Rainy`、`4 = Snowy`。当前下载的提交样例中，`label` 填写的是英文 `Rainy`。
+训练集标签为整数：`1 = Sunny`、`2 = Cloudy`、`3 = Rainy`、`4 = Snowy`。虽然样例填写英文 `Rainy`，实际评测器已拒绝该字符串，因此上传文件必须用整数。
 
-脚本生成 `baseline_predictions_integer.csv`，使用与训练集一致的整数标签。实际 Kaggle 提交编码仍需核对。本脚本不会自动提交比赛。
+旧脚本生成 `baseline_predictions_integer.csv`，新统一入口默认同样输出整数。英文编码仅保留用于历史文件检查和语义哈希对照。程序不会自动提交比赛。
 
 ## 文件结构
 

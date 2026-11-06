@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "description": "User-started second round, same architecture and five folds: longer, smaller-step HGB with stronger regularization. Untested preset, not a promised improvement. Keep the handwritten 100-tree forest as a fixed control.",
+  "validation": {
+    "n_splits": 5,
+    "split_seed": 5434,
+    "model_seed": 5434
+  },
+  "finalization": {
+    "method": "full_refit"
+  },
+  "models": [
+    {
+      "name": "hgb_noise_long1600",
+      "model_id": "hgb",
+      "model_params": {
+        "max_iter": 1600,
+        "learning_rate": 0.015,
+        "max_leaf_nodes": 15,
+        "min_samples_leaf": 40,
+        "l2_regularization": 15.0
+      },
+      "noise_weighting": {
+        "floor": 0.2
+      }
+    },
+    {
+      "name": "hgb_plain_long1600",
+      "model_id": "hgb",
+      "model_params": {
+        "max_iter": 1600,
+        "learning_rate": 0.015,
+        "max_leaf_nodes": 15,
+        "min_samples_leaf": 40,
+        "l2_regularization": 15.0
+      }
+    },
+    {
+      "name": "numpy_forest100",
+      "model_id": "numpy_forest",
+      "model_params": {
+        "n_estimators": 100,
+        "min_samples_leaf": 2,
+        "max_features": "sqrt"
+      }
+    }
+  ],
+  "training": {
+    "export_models": [
+      "hgb_noise_long1600",
+      "hgb_plain_long1600"
+    ]
+  },
+  "blend": {
+    "n_trials": 0,
+    "allow_class_multipliers": false
+  }
+}

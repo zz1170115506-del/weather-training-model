@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 
 from . import LABELS
-from .artifacts import (ROOT, content_hash, file_hash, finish_run, git_state,
+from .artifacts import (ROOT, DEFAULT_ARTIFACT_ROOT, content_hash, file_hash, finish_run, git_state,
                         new_run, save_json)
 from .config import load_config
 from .data import FEATURES, infer_label_format, load_data
@@ -259,12 +259,13 @@ def record_score(args):
     if not args.submission_id.strip() or not np.isfinite(args.public_score) or not 0 <= args.public_score <= 1:
         raise ValueError("A real submission ID and a finite Public Macro-F1 in [0,1] are required.")
     out = args.run_dir.resolve()
-    summary = json.loads((out / "training_summary.json").read_text(encoding="utf-8"))
+    from .results import summarize_run
+    summary = summarize_run(out)
     if args.candidate not in summary["candidates"]:
         raise ValueError("Unknown candidate; use a key in training_summary.json.")
     candidate = summary["candidates"][args.candidate]
-    path = out / candidate["csv"]
-    if file_hash(path) != candidate["submission"]["csv_sha256"]:
+    path = Path(candidate["integer_upload_csv"])
+    if file_hash(path) != candidate["csv_sha256"]:
         raise ValueError("The submitted CSV has changed since training.")
     log_path = out / "platform_scores.json"
     entries = json.loads(log_path.read_text(encoding="utf-8")) if log_path.exists() else []
@@ -273,7 +274,7 @@ def record_score(args):
     entry = {"recorded_at_utc": datetime.now(timezone.utc).isoformat(),
              "candidate": args.candidate, "model_name": candidate["model_name"],
              "submission_id": args.submission_id, "public_macro_f1": args.public_score,
-             "csv_sha256": candidate["submission"]["csv_sha256"],
+             "csv_sha256": candidate["csv_sha256"], "label_format": "integer",
              "note": args.note, "source": "User-reported Kaggle result; not verified by a network API."}
     entries.append(entry)
     save_json(log_path, entries)
@@ -281,9 +282,22 @@ def record_score(args):
 
 
 def execute(args):
+    if args.stage == "results":
+        from .results import summarize_run, print_results, compare_runs
+        run_dir = args.run_dir
+        if run_dir is None:
+            pointer = Path(args.artifact_root or DEFAULT_ARTIFACT_ROOT) / "latest_training_run.json"
+            run_dir = Path(json.loads(pointer.read_text(encoding="utf-8"))["run_dir"])
+        summary = summarize_run(run_dir)
+        print_results(summary)
+        if args.compare_run is not None:
+            print(json.dumps(compare_runs(summary, summarize_run(args.compare_run)), indent=2, ensure_ascii=False))
+        return
     if args.stage == "record-score":
         record_score(args)
         return
+    if args.stage in ("check", "train", "finalize") and args.label_format != "integer":
+        raise ValueError("Task1 evaluation requires integer labels 1..4: the evaluator rejected 'Rainy'. Use --label-format integer; sample/name are historical inspection formats.")
     overall_started = perf_counter()
     data = load_data(args.data_dir)
     data_load_seconds = perf_counter() - overall_started
@@ -311,6 +325,9 @@ def execute(args):
                           "models": [model["name"] for model in config["models"]],
                           "export_models": config["training"]["export_models"],
                           "label_format_from_sample": infer_label_format(data.sample),
+                          "export_label_format": "integer",
+                          "sample_label_format_is_authoritative": False,
+                          "format_evidence": "Assignment labels are 1..4; Kaggle evaluator rejected English 'Rainy'.",
                           "platform_acceptance_verified": False, "git": git_state()}, indent=2))
         return
     if args.stage in ("finalize", "train") and args.output is not None and args.output.exists():
@@ -365,9 +382,12 @@ def execute(args):
                 result["figures"] = {"status": "failed", "error": str(error)}
                 print(f"Figure export failed; validated CSVs remain available: {error}", flush=True)
             save_json(out / "training_summary.json", result)
-            finish_run(out, {"result": result})
+            finish_run(out, {"result": result,
+                             "workflow_seconds": perf_counter() - overall_started})
             save_json(out.parent / "latest_training_run.json", {"run_dir": str(out),
                        "candidates": {key: str(out / value["csv"]) for key, value in result["candidates"].items()}})
+            from .results import summarize_run, print_results
+            print_results(summarize_run(out))
     except BaseException as error:
         save_json(out / "error.json", {"type": type(error).__name__, "message": str(error)})
         state = json.loads((out / "run.json").read_text(encoding="utf-8"))

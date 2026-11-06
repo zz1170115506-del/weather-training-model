@@ -44,10 +44,10 @@ The best validation model is refitted on all training records to produce
 baseline test predictions. Validation performance is a model-selection
 estimate, not a Kaggle or independent final-test result.
 
-IMPORTANT: train.csv uses integer labels 1..4, while sample_submission.csv
-contains the string Rainy. Predictions use the integer mapping specified
-by the assignment: 1 Sunny, 2 Cloudy, 3 Rainy, 4 Snowy. The actual Kaggle
-label encoding still needs confirmation before a submission is made.
+IMPORTANT: the Kaggle evaluator rejected the string Rainy. Submit integer
+labels 1..4 even though sample_submission.csv contains English names.
+Mapping: 1 Sunny, 2 Cloudy, 3 Rainy, 4 Snowy. The unified CLI now defaults
+to integers and refuses name/sample output for check/train/finalize.
 No Kaggle submission is performed by this script.
 
 Main outputs:
