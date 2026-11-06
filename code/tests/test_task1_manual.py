@@ -32,6 +32,7 @@ class ManualWorkflowTests(unittest.TestCase):
         self.directory.mkdir(parents=True)
         self.data = synthetic_dataset()
         self.data.audit["rows"] = {"train": len(self.data.train), "test": len(self.data.test), "sample": len(self.data.sample)}
+        self.data.audit["source_sha256"] = {key: "a" * 64 for key in self.data.audit["source_sha256"]}
 
     def tearDown(self):
         target = self.directory.resolve()
@@ -62,25 +63,55 @@ class ManualWorkflowTests(unittest.TestCase):
 
     def test_record_score_is_local_append_only_and_rejects_changed_csv(self):
         with redirect_stdout(io.StringIO()):
-            run_train(self.data, small_config(), self.directory, "integer")
-        args = Namespace(run_dir=self.directory, candidate="candidate_a", submission_id="real-id-from-test-fixture",
+            out = new_run("train", small_config(), self.directory)
+            summary = run_train(self.data, small_config(), out, "integer")
+            finish_run(out, {"source_sha256": self.data.audit["source_sha256"], "result": summary})
+        args = Namespace(run_dir=out, candidate="candidate_a", submission_id="real-id-from-test-fixture",
                          public_score=0.7, note="Synthetic test entry, not a competition result.")
         with redirect_stdout(io.StringIO()):
             record_score(args)
-        log = json.loads((self.directory / "platform_scores.json").read_text(encoding="utf-8"))
+        log = json.loads((out / "platform_scores.json").read_text(encoding="utf-8"))
         self.assertEqual(log[0]["public_macro_f1"], 0.7)
         self.assertIn("User-reported", log[0]["source"])
         with self.assertRaises(ValueError):
             record_score(args)
+
         args.submission_id = "another-test-id"
-        (self.directory / "submissions/candidate_a.csv").write_text("changed", encoding="utf-8")
+        (out / "submissions/candidate_a.csv").write_text("changed", encoding="utf-8")
         with self.assertRaises(ValueError):
+            record_score(args)
+
+    def test_legacy_name_run_records_the_integer_file_actually_uploaded(self):
+        with redirect_stdout(io.StringIO()):
+            out = new_run("train", small_config(), self.directory)
+            summary = run_train(self.data, small_config(), out, "name")
+            finish_run(out, {"source_sha256": self.data.audit["source_sha256"], "result": summary})
+        candidate = summary["candidates"]["candidate_a"]
+        english_hash = candidate["submission"]["csv_sha256"]
+        integer_hash = candidate["fit_and_export"]["alternative_submission"]["csv_sha256"]
+        self.assertNotEqual(english_hash, integer_hash)
+        args = Namespace(run_dir=out, candidate="candidate_a", submission_id="legacy-integer-fixture",
+                         public_score=0.8, note="Synthetic fixture only.")
+        with redirect_stdout(io.StringIO()):
+            record_score(args)
+        saved = json.loads((out / "platform_scores.json").read_text(encoding="utf-8"))[0]
+        self.assertEqual(saved["csv_sha256"], integer_hash)
+        self.assertEqual(saved["label_format"], "integer")
+        args.submission_id = "another-test-id"
+        (out / "submissions/candidate_a.csv").write_text("changed", encoding="utf-8")
+        with self.assertRaises(ValueError):
+            record_score(args)
+
+    def test_record_score_requires_explicit_candidate_before_reading_run(self):
+        args = Namespace(run_dir=self.directory / "not_a_run", candidate=None,
+                         submission_id="fixture", public_score=0.9)
+        with self.assertRaisesRegex(ValueError, "--candidate"):
             record_score(args)
 
     def test_check_does_not_fit_or_start_training(self):
         config_file = self.directory / "config.json"
         config_file.write_text(json.dumps(small_config()), encoding="utf-8")
-        args = Namespace(stage="check", data_dir=self.directory, config=config_file, artifact_root=None)
+        args = Namespace(stage="check", data_dir=self.directory, config=config_file, artifact_root=None, label_format="integer")
         output = io.StringIO()
         with patch("task1.pipeline.load_data", return_value=self.data), \
                 patch("task1.pipeline.fit_model", side_effect=AssertionError("check started training")), \
@@ -93,7 +124,7 @@ class ManualWorkflowTests(unittest.TestCase):
         config_file = self.directory / "config.json"
         config_file.write_text(json.dumps(small_config()), encoding="utf-8")
         args = Namespace(stage="train", data_dir=self.directory, config=config_file,
-                         artifact_root=self.directory, label_format="sample", output=None,
+                         artifact_root=self.directory, label_format="integer", output=None,
                          allow_dirty=False)
         self.data.audit["source_sha256"] = {key: "a" * 64 for key in self.data.audit["source_sha256"]}
         with patch("task1.pipeline.load_data", return_value=self.data), \
@@ -105,6 +136,8 @@ class ManualWorkflowTests(unittest.TestCase):
         out = Path(pointer["run_dir"])
         self.assertTrue(Path(pointer["candidates"]["candidate_a"]).is_file())
         self.assertEqual(json.loads((out / "run.json").read_text(encoding="utf-8"))["status"], "complete")
+        manifest = json.loads((out / "run.json").read_text(encoding="utf-8"))
+        self.assertIn((out / "resolved_config.json").as_posix(), manifest["frozen_reproduce_command_template"])
         self.assertEqual(json.loads((out / "training_summary.json").read_text(encoding="utf-8"))["figures"]["status"], "tested separately")
         self.assertFalse((out / "platform_scores.json").exists())
 
@@ -112,7 +145,7 @@ class ManualWorkflowTests(unittest.TestCase):
         config_file = self.directory / "config.json"
         config_file.write_text(json.dumps(small_config()), encoding="utf-8")
         args = Namespace(stage="train", data_dir=self.directory, config=config_file,
-                         artifact_root=self.directory, label_format="sample", output=None,
+                         artifact_root=self.directory, label_format="integer", output=None,
                          allow_dirty=False)
         with patch("task1.pipeline.load_data", return_value=self.data), \
                 patch("task1.pipeline.git_state", return_value={"dirty": True}), \

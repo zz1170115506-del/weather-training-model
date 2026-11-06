@@ -89,7 +89,7 @@ def load_data(data_dir):
             for name, frame in (("train", train), ("test", test))},
         "sample_label_values": sorted(str(x) for x in sample.label.unique()),
         "sample_ids_same_order_as_test": sample.id.equals(test.id),
-        "submission_format_basis": "Choose explicitly or infer encoding from sample; platform acceptance not yet verified.",
+        "submission_format_basis": "Competition requires integers 1..4: the evaluator rejected English Rainy. The provided sample's name labels are not authoritative.",
     }
     return Dataset(train, test, sample, audit, groups)
 
