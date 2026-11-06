@@ -135,11 +135,21 @@ def _training_recipe(data, config):
     return recipe, fold_info
 
 
-def run_finalize(data, config, out, label_format):
+def run_finalize(data, config, out, label_format, frozen_recipe=None):
     if len(config["models"]) > 1 and config.get("prediction_strategy") != "learned_blend":
         raise ValueError("Use train for separate fixed candidate exports; multi-model finalize requires explicit prediction_strategy=learned_blend.")
     started = perf_counter()
-    recipe, weight_protocol = _training_recipe(data, config)
+    if frozen_recipe is None:
+        recipe, weight_protocol = _training_recipe(data, config)
+    else:
+        # This recipe was selected and frozen by the explicit nested-search mode.
+        # Validate before any fit; do not rerun OOF selection during finalization.
+        recipe = deepcopy(frozen_recipe)
+        names = {candidate["name"] for candidate in config["models"]}
+        apply_blend({name: np.full((1, 4), 0.25) for name in names}, recipe)
+        weight_protocol = {"method": "frozen_full_training_oof_recipe",
+                           "selection_scope": recipe.get("selection_scope", recipe.get("evaluation_scope")),
+                           "recipe_sha256": content_hash(recipe)}
     save_json(out / "blend_recipe.json", recipe)
     bundles, times = {}, {}
     for candidate in config["models"]:
@@ -206,19 +216,32 @@ def run_predict(data, bundle_path, output, label_format):
 def run_train(data, config, out, label_format):
     """User-started full workflow: common CV, fixed candidates, export and replay.
 
-    Candidate model names are fixed in config.training.export_models. We do not
-    silently replace them with an OOF winner or adopt a learned blend that has
-    failed outer evaluation. All files are local and this function has no
-    Kaggle/GitHub network calls.
+    Legacy configs keep fixed exports. Only an explicit config.search enables
+    deterministic search-selected single models and a separately gated blend.
+    All files are local; this function has no Kaggle/GitHub network calls.
     """
     print("[1/3] Common-fold development validation", flush=True)
     comparison = run_cv(data, config, out)
+    search = None
+    export_names = config["training"]["export_models"]
+    if "search" in config:
+        from .search import evaluate_search
+        print("[search] Training-only nested candidate/recipe selection", flush=True)
+        search = evaluate_search(data, config, out)
+        export_names = search["selected_models"]
+        selected = deepcopy(config)
+        selected.pop("search", None)
+        selected["models"] = [model for model in config["models"] if model["name"] in export_names]
+        selected["training"] = {"export_models": export_names}
+        selected["blend"] = {"n_trials": 0, "allow_class_multipliers": False}
+        save_json(out / "selected_config.json", selected)
     candidates = {}
     submissions = out / "submissions"
     submissions.mkdir()
-    for index, name in enumerate(config["training"]["export_models"]):
+    for index, name in enumerate(export_names):
         candidate_key = f"candidate_{chr(97 + index)}" if index < 26 else f"candidate_{index+1}"
         single = deepcopy(config)
+        single.pop("search", None)
         single["models"] = [next(model for model in config["models"] if model["name"] == name)]
         single["blend"] = {"n_trials": 0, "allow_class_multipliers": False}
         single["training"] = {"export_models": [name]}
@@ -245,10 +268,33 @@ def run_train(data, config, out, label_format):
                                      "fit_and_export": result,
                                      "platform_acceptance_verified": False}
         print(f"READY_TO_UPLOAD={submissions / csv_name}", flush=True)
+    research_export = None
+    if search is not None and search["blend_export_eligible"]:
+        recipe = search["full_oof_recipe"]
+        blend_config = deepcopy(config)
+        blend_config.pop("search", None)
+        blend_config["models"] = [model for model in config["models"] if model["name"] in recipe["model_ids"]]
+        blend_config["training"] = {"export_models": recipe["model_ids"]}
+        blend_config["prediction_strategy"] = "learned_blend"
+        destination = out / "research_blend"
+        destination.mkdir()
+        blend_result = run_finalize(data, blend_config, destination, label_format, frozen_recipe=recipe)
+        replay = run_predict(data, destination / "model_bundle.joblib", destination / "replay_check.csv", "integer")
+        if replay["csv_sha256"] != blend_result["submission"]["csv_sha256"]:
+            raise RuntimeError("Frozen research-blend replay changed the submission bytes.")
+        research_export = {"model_name": "research_blend", "csv": "research_blend/submission.csv",
+                           "alternative_format": "name", "alternative_csv": "research_blend/submission_name.csv",
+                           "bundle": "research_blend/model_bundle.joblib", "submission": blend_result["submission"],
+                           "fit_and_export": blend_result, "recipe": recipe,
+                           "evaluation_scope": search["evaluation_scope"]}
+        save_json(out / "research_blend_config.json", blend_config)
     result = {"comparison": comparison, "candidates": candidates,
-              "candidate_policy": "Fixed named single-model candidates; no automatic Kaggle submission or OOF-based candidate replacement.",
+              "candidate_policy": ("Explicit search-selected single candidates; scores are development selection estimates, not independent test scores."
+                                   if search is not None else "Fixed named single-model candidates; no automatic Kaggle submission or OOF-based candidate replacement."),
               "manual_next_step": "Review the exported candidates' CV metrics, manually choose an integer CSV in the competition File Upload window, verify the platform response, then record its actual candidate key and score.",
               "score_log_policy": "Append-only user-reported platform_scores.json entries after training."}
+    if search is not None:
+        result.update({"search": search, "research_blend_export": research_export})
     save_json(out / "training_summary.json", result)
     print("[3/3] CSV/schema/hash and model reload checks passed. Kaggle upload is manual.", flush=True)
     return result
@@ -262,9 +308,12 @@ def record_score(args):
     out = args.run_dir.resolve()
     from .results import summarize_run
     summary = summarize_run(out)
-    if args.candidate not in summary["candidates"]:
+    available = dict(summary["candidates"])
+    if summary.get("research_blend") is not None:
+        available["research_blend"] = summary["research_blend"]
+    if args.candidate not in available:
         raise ValueError("Unknown candidate; use a key in training_summary.json.")
-    candidate = summary["candidates"][args.candidate]
+    candidate = available[args.candidate]
     path = Path(candidate["integer_upload_csv"])
     if file_hash(path) != candidate["csv_sha256"]:
         raise ValueError("The submitted CSV has changed since training.")
@@ -321,11 +370,24 @@ def execute(args):
             raise ValueError("check requires --config.")
         for model in config["models"]:
             make_model(model, config["validation"]["model_seed"])
+            if model["model_id"] == "xgboost":
+                import xgboost  # Dependency preflight only; never fit here.
+        count, outer = len(config["models"]), config["validation"]["n_splits"]
+        inner = config.get("search", {}).get("inner_splits", 0)
+        calls = count * outer * (1 + inner)
+        stopping = sum("early_stopping_rounds" in model for model in config["models"])
         print(json.dumps({"status": "ready", "training_started": False,
                           "data_rows": data.audit["rows"], "source_sha256": data.audit["source_sha256"],
                           "models": [model["name"] for model in config["models"]],
                           "export_models": config["training"]["export_models"],
                           "experiment": config.get("experiment"),
+                          "search_plan": ({"candidate_recipes": count, "outer_folds": outer, "inner_folds": inner,
+                                           "cv_fit_model_calls": calls,
+                                           "additional_inner_stopping_fits": stopping * outer * (1 + inner),
+                                           "final_single_fit_model_calls": 2,
+                                           "conditional_blend_fit_model_calls": config["search"]["blend_pool_size"],
+                                           "policy": "Complete fixed-budget nested search; fail loudly on errors, no partial-ranking shortcuts. Final refits with stopping may require an additional inner fit."}
+                                          if "search" in config else None),
                           "config_sha256": content_hash(config),
                           "label_format_from_sample": infer_label_format(data.sample),
                           "export_label_format": "integer",
@@ -333,6 +395,8 @@ def execute(args):
                           "format_evidence": "Assignment labels are 1..4; Kaggle evaluator rejected English 'Rainy'.",
                           "platform_acceptance_verified": False, "git": git_state()}, indent=2))
         return
+    if args.stage == "finalize" and "search" in config:
+        raise ValueError("Search configs require train. Reproduce an exported frozen candidate with predict, not a new unvalidated finalize.")
     if args.stage in ("finalize", "train") and args.output is not None and args.output.exists():
         raise FileExistsError(f"Refusing to overwrite {args.output}.")
     state = git_state()

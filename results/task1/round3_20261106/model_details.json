@@ -1,0 +1,376 @@
+{
+  "schema_version": 1,
+  "labels": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "label_names": [
+    "Sunny",
+    "Cloudy",
+    "Rainy",
+    "Snowy"
+  ],
+  "source_sha256": {
+    "train.csv": "4eb4439290751585213f3638bc238bf8a973d8e960b9f05f5d8641c34521bfbb",
+    "test.csv": "c8c036dd75562eef41da3a75edafb3904597a1c5291c97735829f03866c3c080",
+    "sample_submission.csv": "4b7ff8d2c44df622432a6f8d7f87c478e32deba3b976722cf87fe13c3505ee4b"
+  },
+  "fold_protocol": {
+    "method": "StratifiedKFold",
+    "n_splits": 5,
+    "seed": 5434,
+    "canonical_input_order": "ascending record id",
+    "fold_sha256": "baef26daea37bf760b4bb9f971d3cb42ae6185f364538f577b5bb5d041e676ef",
+    "probability_order": [
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  "models": {
+    "hgb_plain_r3_120": {
+      "config": {
+        "name": "hgb_plain_r3_120",
+        "model_id": "hgb",
+        "model_params": {
+          "max_iter": 120,
+          "learning_rate": 0.15,
+          "max_leaf_nodes": 15,
+          "min_samples_leaf": 40,
+          "l2_regularization": 15.0,
+          "early_stopping": false
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "0f6d5f852329bb7fbae20400f35d22b9dfc66a74baccc1d39fa662c1952d5953",
+      "oof_metrics": {
+        "macro_f1": 0.9150818815700787,
+        "accuracy": 0.915050505050505,
+        "confusion_matrix": [
+          [
+            2273,
+            93,
+            56,
+            53
+          ],
+          [
+            73,
+            2221,
+            116,
+            65
+          ],
+          [
+            54,
+            116,
+            2258,
+            47
+          ],
+          [
+            53,
+            63,
+            52,
+            2307
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9266204647370566,
+            "recall": 0.9183838383838384,
+            "f1-score": 0.9224837662337663,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8908945046129162,
+            "recall": 0.8973737373737374,
+            "f1-score": 0.894122383252818,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.9097502014504432,
+            "recall": 0.9123232323232323,
+            "f1-score": 0.9110349001412145,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.933252427184466,
+            "recall": 0.9321212121212121,
+            "f1-score": 0.9326864766525167,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9151293994962205,
+            "recall": 0.9150505050505051,
+            "f1-score": 0.9150818815700787,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9151293994962205,
+            "recall": 0.915050505050505,
+            "f1-score": 0.915081881570079,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T134144Z_train_98bfbc3b_ccc6da",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T13:41:44.745759+00:00",
+        "git": {
+          "available": true,
+          "commit": "412ad4fa922b44201f3ba7e28635d20157a74160",
+          "dirty": false,
+          "branch": "feat/task1-round3-120"
+        },
+        "source_tree_sha256": "bb52ab5915a89f40cdc4c481e3f773e30476dceaaf8d3de6ceb242c2dc729eaf"
+      },
+      "source_summary_sha256": "f9000e8b3b53e1cc953ae28284ec696d65babb5c92dc4913f302159ebb379339",
+      "source_fold_metrics_sha256": "2955ba716c3428f5da768c5bf641593f485417e08e5eac70e7f3259e4af6fb40",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "hgb_weighted_r3_120": {
+      "config": {
+        "name": "hgb_weighted_r3_120",
+        "model_id": "hgb",
+        "model_params": {
+          "max_iter": 120,
+          "learning_rate": 0.15,
+          "max_leaf_nodes": 15,
+          "min_samples_leaf": 40,
+          "l2_regularization": 15.0,
+          "early_stopping": false
+        },
+        "noise_weighting": {
+          "floor": 0.2,
+          "n_bins": 24,
+          "alpha": 0.5,
+          "contamination": 0.1,
+          "max_iter": 30,
+          "tol": 1e-05,
+          "min_contamination": 0.01,
+          "max_contamination": 0.4
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "43bb802721299ec1acef3f4b0316b930eb9e8252ae706d16f914ad7c3ee6c8a6",
+      "oof_metrics": {
+        "macro_f1": 0.9145555854465399,
+        "accuracy": 0.9145454545454546,
+        "confusion_matrix": [
+          [
+            2275,
+            95,
+            55,
+            50
+          ],
+          [
+            68,
+            2199,
+            146,
+            62
+          ],
+          [
+            55,
+            94,
+            2282,
+            44
+          ],
+          [
+            61,
+            60,
+            56,
+            2298
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9251728344855632,
+            "recall": 0.9191919191919192,
+            "f1-score": 0.922172679367653,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8982843137254902,
+            "recall": 0.8884848484848484,
+            "f1-score": 0.8933577087141986,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.898779046868846,
+            "recall": 0.9220202020202021,
+            "f1-score": 0.9102512963701636,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9364303178484108,
+            "recall": 0.9284848484848485,
+            "f1-score": 0.9324406573341448,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9146666282320776,
+            "recall": 0.9145454545454546,
+            "f1-score": 0.9145555854465399,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9146666282320774,
+            "recall": 0.9145454545454546,
+            "f1-score": 0.9145555854465401,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T134144Z_train_98bfbc3b_ccc6da",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T13:41:44.745759+00:00",
+        "git": {
+          "available": true,
+          "commit": "412ad4fa922b44201f3ba7e28635d20157a74160",
+          "dirty": false,
+          "branch": "feat/task1-round3-120"
+        },
+        "source_tree_sha256": "bb52ab5915a89f40cdc4c481e3f773e30476dceaaf8d3de6ceb242c2dc729eaf"
+      },
+      "source_summary_sha256": "22e29462dadbf3e0b3d00ba00fdaef64b4bcb97e1a9c9e4d7588f8489e1dc7d8",
+      "source_fold_metrics_sha256": "333029daffacda46788a4a9ef8aca424cb93c72cbdfb17db958396db15f5683c",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "numpy_forest100": {
+      "config": {
+        "name": "numpy_forest100",
+        "model_id": "numpy_forest",
+        "model_params": {
+          "n_estimators": 100,
+          "min_samples_leaf": 2,
+          "max_features": "sqrt"
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "e9ebccd18426616000b9c0cbf298f615c125ac424ed9af09893cd1fe41104755",
+      "oof_metrics": {
+        "macro_f1": 0.9143831884831561,
+        "accuracy": 0.9141414141414141,
+        "confusion_matrix": [
+          [
+            2257,
+            127,
+            50,
+            41
+          ],
+          [
+            61,
+            2244,
+            125,
+            45
+          ],
+          [
+            38,
+            133,
+            2264,
+            40
+          ],
+          [
+            55,
+            75,
+            60,
+            2285
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9361260887598507,
+            "recall": 0.9119191919191919,
+            "f1-score": 0.9238641015145314,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8701046917409849,
+            "recall": 0.9066666666666666,
+            "f1-score": 0.88800949742778,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.9059623849539816,
+            "recall": 0.9147474747474748,
+            "f1-score": 0.9103337354242059,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9477395271671506,
+            "recall": 0.9232323232323232,
+            "f1-score": 0.9353254195661073,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.914983173155492,
+            "recall": 0.9141414141414141,
+            "f1-score": 0.9143831884831561,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9149831731554919,
+            "recall": 0.9141414141414141,
+            "f1-score": 0.9143831884831561,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T134144Z_train_98bfbc3b_ccc6da",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T13:41:44.745759+00:00",
+        "git": {
+          "available": true,
+          "commit": "412ad4fa922b44201f3ba7e28635d20157a74160",
+          "dirty": false,
+          "branch": "feat/task1-round3-120"
+        },
+        "source_tree_sha256": "bb52ab5915a89f40cdc4c481e3f773e30476dceaaf8d3de6ceb242c2dc729eaf"
+      },
+      "source_summary_sha256": "babae0d3ea5d340c50d934a06a571d291be0ffed6f6a47bc5479725eb74f56a4",
+      "source_fold_metrics_sha256": "0f5b584bec36b0822152246c7bee2fec9a188de0183700087814b9a93237b45e",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    }
+  },
+  "runs": [
+    {
+      "run_id": "20261106T134144Z_train_98bfbc3b_ccc6da",
+      "status": "complete",
+      "run_complete": true,
+      "timestamp_utc": "2026-11-06T13:41:44.745759+00:00",
+      "git": {
+        "available": true,
+        "commit": "412ad4fa922b44201f3ba7e28635d20157a74160",
+        "dirty": false,
+        "branch": "feat/task1-round3-120"
+      },
+      "source_tree_sha256": "bb52ab5915a89f40cdc4c481e3f773e30476dceaaf8d3de6ceb242c2dc729eaf"
+    }
+  ],
+  "nested_evaluations": [],
+  "export_notes": [],
+  "development_scope": "CV used for model selection, not an independent test or Kaggle result.",
+  "timing_scope": "Per-fold final model fit excludes preprocessing and inner iteration selection; total CV includes workflow costs. Cross-run speed comparisons require matching hardware."
+}

@@ -70,7 +70,7 @@ def git_state():
 def environment():
     packages = {}
     for name in ("numpy", "pandas", "scipy", "scikit-learn", "joblib",
-                 "matplotlib", "threadpoolctl", "catboost"):
+                 "matplotlib", "threadpoolctl", "catboost", "xgboost"):
         try:
             packages[name] = version(name)
         except PackageNotFoundError:

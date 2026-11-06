@@ -68,6 +68,23 @@ def resolve_config(raw):
     if not isinstance(blend["allow_class_multipliers"], bool):
         raise ValueError("blend.allow_class_multipliers must be boolean.")
     result["blend"] = blend
+    if "search" in result:
+        search = result["search"]
+        required = {"inner_splits", "blend_pool_size", "minimum_blend_gain", "min_blend_fold_wins"}
+        if not isinstance(search, dict) or set(search) != required:
+            raise ValueError("search requires inner_splits, blend_pool_size, minimum_blend_gain and min_blend_fold_wins.")
+        for key, lower in (("inner_splits", 2), ("blend_pool_size", 2), ("min_blend_fold_wins", 1)):
+            if isinstance(search[key], bool) or not isinstance(search[key], int) or search[key] < lower:
+                raise ValueError(f"search.{key} must be an integer >= {lower}.")
+        if search["min_blend_fold_wins"] > validation["n_splits"]:
+            raise ValueError("search.min_blend_fold_wins exceeds the outer fold count.")
+        gain = search["minimum_blend_gain"]
+        if isinstance(gain, bool) or not isinstance(gain, (int, float)) or not 0 <= gain <= 1:
+            raise ValueError("search.minimum_blend_gain must be finite and in [0,1].")
+        if search["blend_pool_size"] > len(result["models"]):
+            raise ValueError("search.blend_pool_size exceeds the number of candidates.")
+        if not 2 <= len(result["models"]) <= 16:
+            raise ValueError("Nested search requires between 2 and 16 complete candidate recipes.")
     if "inner_splits" in result and (isinstance(result["inner_splits"], bool)
                                       or not isinstance(result["inner_splits"], int) or result["inner_splits"] < 2):
         raise ValueError("inner_splits must be an integer >=2.")
@@ -85,6 +102,11 @@ def resolve_config(raw):
             raise ValueError("model_params must be an object.")
         if "random_state" in model["model_params"] or "random_seed" in model["model_params"]:
             raise ValueError("Use validation.model_seed, not model_params random_state/random_seed.")
+        if "early_stopping_rounds" in model:
+            patience = model["early_stopping_rounds"]
+            if (model["model_id"] not in ("hgb", "hgb_native", "catboost", "xgboost")
+                    or isinstance(patience, bool) or not isinstance(patience, int) or patience < 1):
+                raise ValueError("early_stopping_rounds requires a supported boosting model and positive integer patience.")
         features = {"percentage_policy": "retain", "out_of_range_flags": False,
                     "interactions": False} | model.get("features", {})
         if set(features) != {"percentage_policy", "out_of_range_flags", "interactions"}:
