@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "description": "Development CV: fixed common folds; candidate selection scores, not independent test.",
+  "validation": {
+    "n_splits": 5,
+    "split_seed": 5434,
+    "model_seed": 5434
+  },
+  "models": [
+    {
+      "name": "catboost_d4",
+      "model_id": "catboost",
+      "model_params": {
+        "iterations": 1000,
+        "depth": 4,
+        "learning_rate": 0.035,
+        "l2_leaf_reg": 5.0
+      },
+      "early_stopping_rounds": 100
+    },
+    {
+      "name": "catboost_d6",
+      "model_id": "catboost",
+      "model_params": {
+        "iterations": 1400,
+        "depth": 6,
+        "learning_rate": 0.035,
+        "l2_leaf_reg": 5.0
+      },
+      "early_stopping_rounds": 100
+    },
+    {
+      "name": "catboost_d8",
+      "model_id": "catboost",
+      "model_params": {
+        "iterations": 1400,
+        "depth": 8,
+        "learning_rate": 0.035,
+        "l2_leaf_reg": 8.0
+      },
+      "early_stopping_rounds": 100
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "description": "Supervised generative training-only responsibility weighting ablation. Shared five folds; actual noise rates are unknown.",
+  "validation": {
+    "n_splits": 5,
+    "split_seed": 5434,
+    "model_seed": 5434
+  },
+  "models": [
+    {
+      "name": "hgb_noise_floor0",
+      "model_id": "hgb",
+      "model_params": {
+        "max_iter": 700,
+        "learning_rate": 0.03,
+        "max_leaf_nodes": 15,
+        "min_samples_leaf": 30,
+        "l2_regularization": 10.0
+      },
+      "noise_weighting": {
+        "floor": 0.0
+      }
+    },
+    {
+      "name": "hgb_noise_floor20",
+      "model_id": "hgb",
+      "model_params": {
+        "max_iter": 700,
+        "learning_rate": 0.03,
+        "max_leaf_nodes": 15,
+        "min_samples_leaf": 30,
+        "l2_regularization": 10.0
+      },
+      "noise_weighting": {
+        "floor": 0.2
+      }
+    },
+    {
+      "name": "hgb_noise_floor50",
+      "model_id": "hgb",
+      "model_params": {
+        "max_iter": 700,
+        "learning_rate": 0.03,
+        "max_leaf_nodes": 15,
+        "min_samples_leaf": 30,
+        "l2_regularization": 10.0
+      },
+      "noise_weighting": {
+        "floor": 0.5
+      }
+    }
+  ]
+}

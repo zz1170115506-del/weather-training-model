@@ -108,6 +108,86 @@ class CARTTests(unittest.TestCase):
             tree.predict([[0, 1]])
         self.assertEqual(tree.predict_proba(np.empty((0, 1))).shape, (0, 2))
 
+    def test_leaf_smoothing_matches_hand_counts_without_changing_gini(self):
+        tree = CARTClassifier(leaf_smoothing=0.5).fit(np.ones((4, 1)), [1, 1, 1, 4])
+        np.testing.assert_allclose(tree.predict_proba([[1]]), [[3.5 / 5, 1.5 / 5]])
+        self.assertAlmostEqual(tree.root_.impurity, 1 - (3 / 4) ** 2 - (1 / 4) ** 2)
+        # Large finite alpha must still produce finite, normalized probabilities.
+        extreme = CARTClassifier(leaf_smoothing=1e308).fit(np.ones((4, 1)), [1, 1, 1, 4])
+        np.testing.assert_allclose(extreme.predict_proba([[1]]), [[0.5, 0.5]])
+
+    def test_smoothing_preserves_splits_and_stops_at_pure_children(self):
+        X = np.arange(4).reshape(-1, 1)
+        y = [1, 1, 4, 4]
+        plain = CARTClassifier().fit(X, y)
+        smooth = CARTClassifier(leaf_smoothing=1).fit(X, y)
+        self.assertEqual(smooth.node_count_, plain.node_count_)
+        self.assertEqual(smooth.node_count_, 3)
+        self.assertEqual(smooth.root_.threshold, plain.root_.threshold)
+        self.assertEqual(smooth.root_.left.impurity, 0)
+        self.assertEqual(smooth.root_.right.impurity, 0)
+        np.testing.assert_allclose(smooth.predict_proba([[0], [3]]), [[3 / 4, 1 / 4], [1 / 4, 3 / 4]])
+
+    def test_group_sampling_searches_all_columns_of_selected_attribute(self):
+        # The larger group is interleaved and only its third encoded column
+        # perfectly separates y. The other group's column has a valid split.
+        X = np.array([[0, 0, 0, 0], [1, 1, 0, 0], [0, 0, 1, 0], [1, 1, 1, 0]])
+        y = np.array([1, 1, 4, 4])
+        groups = ["weather", "location", "weather", "weather"]
+        selected_groups = set()
+        for seed in range(10):
+            expected_group = int(np.random.default_rng(seed).permutation(2)[0])
+            selected_groups.add(expected_group)
+            tree = CARTClassifier(max_depth=1, max_features=1, feature_groups=groups,
+                                  random_state=seed).fit(X, y)
+            self.assertEqual(tree.n_feature_groups_, 2)
+            self.assertEqual(tree.max_features_, 1)
+            self.assertEqual(tree.root_.feature, 2 if expected_group == 0 else 1)
+        self.assertEqual(selected_groups, {0, 1})
+
+    def test_group_sampling_falls_back_when_sampled_groups_are_constant(self):
+        X = np.zeros((12, 4))
+        X[6:, 3] = 1
+        tree = CARTClassifier(max_features=1, feature_groups=["a", "a", "b", "c"],
+                              random_state=4).fit(X, [1] * 6 + [4] * 6)
+        self.assertEqual(tree.root_.feature, 3)
+        np.testing.assert_array_equal(tree.predict(X), [1] * 6 + [4] * 6)
+
+    def test_group_max_features_uses_number_of_original_attributes(self):
+        X = np.zeros((4, 8))
+        groups = ["a"] * 5 + ["b", "c", "d"]
+        for value, expected in [(None, 4), ("sqrt", 2), ("log2", 2), (0.5, 2), (3, 3)]:
+            tree = CARTClassifier(max_features=value, feature_groups=groups).fit(X, [1, 1, 4, 4])
+            self.assertEqual(tree.max_features_, expected)
+        with self.assertRaises(ValueError):
+            CARTClassifier(max_features=5, feature_groups=groups).fit(X, [1, 1, 4, 4])
+
+    def test_new_parameter_validation_and_get_params(self):
+        X, y = [[0, 1], [1, 0]], [1, 4]
+        invalid_groups = [[], ["only_one"], [["a", "b"]], "ab", ["a", None],
+                          ["a", float("nan")], ["a", float("inf")], ["a", {}]]
+        for groups in invalid_groups:
+            with self.subTest(feature_groups=groups), self.assertRaises(ValueError):
+                CARTClassifier(feature_groups=groups).fit(X, y)
+        for alpha in [-1, float("nan"), float("inf"), True, "0.5", None]:
+            with self.subTest(leaf_smoothing=alpha), self.assertRaises(ValueError):
+                CARTClassifier(leaf_smoothing=alpha).fit(X, y)
+        groups = ["temperature", "season"]
+        tree = CARTClassifier(leaf_smoothing=0.5, feature_groups=groups)
+        self.assertEqual(tree.get_params()["leaf_smoothing"], 0.5)
+        self.assertIs(tree.get_params()["feature_groups"], groups)
+
+    def test_explicit_zero_and_individual_groups_retain_default_tree_result(self):
+        rng = np.random.default_rng(97)
+        X = rng.normal(size=(45, 4))
+        y = rng.integers(0, 3, size=45)
+        kwargs = dict(max_features="sqrt", random_state=32)
+        default = CARTClassifier(**kwargs).fit(X, y)
+        explicit = CARTClassifier(**kwargs, leaf_smoothing=0, feature_groups=list(range(4))).fit(X, y)
+        np.testing.assert_array_equal(default.predict_proba(X), explicit.predict_proba(X))
+        np.testing.assert_array_equal(default.feature_importances_, explicit.feature_importances_)
+        self.assertEqual(default.node_count_, explicit.node_count_)
+
 
 class ForestTests(unittest.TestCase):
     def setUp(self):
@@ -160,6 +240,71 @@ class ForestTests(unittest.TestCase):
         self.assertTrue(all(np.array_equal(sample, np.arange(len(self.X))) for sample in forest.estimators_samples_))
         loaded = pickle.loads(pickle.dumps(forest))
         np.testing.assert_array_equal(forest.predict_proba(self.X), loaded.predict_proba(self.X))
+
+    def test_smoothed_forest_retains_global_classes_and_hand_computed_average(self):
+        X = np.ones((len(self.y), 2))
+        alpha = 0.5
+        forest = RandomForestClassifier(n_estimators=9, leaf_smoothing=alpha,
+                                        random_state=15).fit(X, self.y)
+        expected = []
+        for tree, sample in zip(forest.estimators_, forest.estimators_samples_):
+            counts = np.array([np.sum(self.y[sample] == k) for k in forest.classes_])
+            probabilities = (counts + alpha) / (len(sample) + len(forest.classes_) * alpha)
+            expected.append(probabilities)
+            self.assertEqual(tree.leaf_smoothing, alpha)
+            self.assertEqual(tree.node_count_, 1)
+            np.testing.assert_allclose(tree.predict_proba(X[:1])[0], probabilities)
+            self.assertTrue((tree.predict_proba(X[:1]) > 0).all())
+        np.testing.assert_allclose(forest.predict_proba(X[:1])[0], np.mean(expected, axis=0))
+
+    def test_grouped_smoothed_forest_seed_params_and_serialization(self):
+        import pickle
+        groups = ["temperature", "cloud", "cloud", "location", "location"]
+        kwargs = dict(n_estimators=9, leaf_smoothing=0.5, feature_groups=groups,
+                      max_features="sqrt", random_state=53, oob_score=True)
+        forest = RandomForestClassifier(**kwargs).fit(self.X, self.y)
+        repeated = RandomForestClassifier(**forest.get_params()).fit(self.X, self.y)
+        self.assertEqual(forest.n_feature_groups_, 3)
+        for tree in forest.estimators_:
+            self.assertEqual(tree.n_feature_groups_, 3)
+            self.assertEqual(tree.max_features_, 1)
+            self.assertEqual(tree.feature_groups, groups)
+            self.assertEqual(tree.leaf_smoothing, 0.5)
+        np.testing.assert_array_equal(forest.predict_proba(self.X), repeated.predict_proba(self.X))
+        np.testing.assert_allclose(forest.oob_decision_function_, repeated.oob_decision_function_, equal_nan=True)
+        loaded = pickle.loads(pickle.dumps(forest))
+        np.testing.assert_array_equal(forest.predict_proba(self.X), loaded.predict_proba(self.X))
+
+    def test_forest_extension_validation_and_default_equivalence(self):
+        for kwargs in [{"leaf_smoothing": -1}, {"leaf_smoothing": True},
+                       {"feature_groups": []}, {"feature_groups": [[1, 2, 3, 4, 5]]},
+                       {"feature_groups": ["a"] * 5, "max_features": 2}]:
+            with self.subTest(kwargs=kwargs), self.assertRaises(ValueError):
+                RandomForestClassifier(n_estimators=1, **kwargs).fit(self.X, self.y)
+        kwargs = dict(n_estimators=9, random_state=32)
+        default = RandomForestClassifier(**kwargs).fit(self.X, self.y)
+        explicit = RandomForestClassifier(**kwargs, leaf_smoothing=0,
+                                          feature_groups=list(range(5))).fit(self.X, self.y)
+        np.testing.assert_array_equal(default.predict_proba(self.X), explicit.predict_proba(self.X))
+
+    def test_legacy_serialized_state_restores_extension_defaults(self):
+        import pickle
+        for model in [CARTClassifier(random_state=4),
+                      RandomForestClassifier(n_estimators=3, random_state=4)]:
+            with self.subTest(model=type(model).__name__):
+                model.fit(self.X, self.y)
+                probabilities = model.predict_proba(self.X)
+                # Earlier pickle state has neither of the new parameters.
+                objects = [model] + getattr(model, "estimators_", [])
+                for item in objects:
+                    del item.leaf_smoothing
+                    del item.feature_groups
+                loaded = pickle.loads(pickle.dumps(model))
+                self.assertEqual(loaded.get_params()["leaf_smoothing"], 0.0)
+                self.assertIsNone(loaded.get_params()["feature_groups"])
+                np.testing.assert_array_equal(loaded.predict_proba(self.X), probabilities)
+                loaded.fit(self.X, self.y)
+                np.testing.assert_array_equal(loaded.predict_proba(self.X), probabilities)
 
 
 if __name__ == "__main__":

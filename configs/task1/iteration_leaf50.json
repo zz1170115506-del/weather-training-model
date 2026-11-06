@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "description": "Unvalidated next-iteration preset: change only primary min_samples_leaf from 30 to 50; keep controls and folds fixed.",
+  "validation": {
+    "n_splits": 5,
+    "split_seed": 5434,
+    "model_seed": 5434
+  },
+  "finalization": {
+    "method": "full_refit"
+  },
+  "models": [
+    {
+      "name": "hgb_noise_leaf50",
+      "model_id": "hgb",
+      "model_params": {
+        "max_iter": 700,
+        "learning_rate": 0.03,
+        "max_leaf_nodes": 15,
+        "min_samples_leaf": 50,
+        "l2_regularization": 10.0
+      },
+      "noise_weighting": {
+        "floor": 0.2
+      }
+    },
+    {
+      "name": "hgb_regularized",
+      "model_id": "hgb",
+      "model_params": {
+        "max_iter": 700,
+        "learning_rate": 0.03,
+        "max_leaf_nodes": 15,
+        "min_samples_leaf": 30,
+        "l2_regularization": 10.0
+      }
+    },
+    {
+      "name": "numpy_forest100",
+      "model_id": "numpy_forest",
+      "model_params": {
+        "n_estimators": 100,
+        "min_samples_leaf": 2,
+        "max_features": "sqrt"
+      }
+    }
+  ],
+  "training": {
+    "export_models": [
+      "hgb_noise_leaf50",
+      "hgb_regularized"
+    ]
+  },
+  "blend": {
+    "n_trials": 0,
+    "allow_class_multipliers": false
+  }
+}

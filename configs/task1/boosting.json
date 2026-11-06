@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "description": "Common-fold CatBoost candidates using built-in one-hot encoding for low-cardinality categories; fixed iterations without outer-fold early stopping.",
+  "validation": {
+    "n_splits": 5,
+    "split_seed": 5434,
+    "model_seed": 5434
+  },
+  "models": [
+    {
+      "name": "catboost_onehot_d6",
+      "model_id": "catboost",
+      "model_params": {
+        "iterations": 600,
+        "depth": 6,
+        "learning_rate": 0.05,
+        "l2_leaf_reg": 5.0,
+        "one_hot_max_size": 10
+      }
+    },
+    {
+      "name": "catboost_onehot_d8",
+      "model_id": "catboost",
+      "model_params": {
+        "iterations": 1000,
+        "depth": 8,
+        "learning_rate": 0.035,
+        "l2_leaf_reg": 8.0,
+        "one_hot_max_size": 10
+      }
+    },
+    {
+      "name": "catboost_onehot_d4",
+      "model_id": "catboost",
+      "model_params": {
+        "iterations": 1000,
+        "depth": 4,
+        "learning_rate": 0.035,
+        "l2_leaf_reg": 5.0,
+        "one_hot_max_size": 10
+      }
+    }
+  ]
+}

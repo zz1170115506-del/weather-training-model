@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "prediction_strategy": "learned_blend",
+  "validation": {
+    "n_splits": 5,
+    "split_seed": 5434,
+    "model_seed": 5434
+  },
+  "inner_splits": 3,
+  "finalization": {
+    "method": "full_refit"
+  },
+  "description": "Research blend only. Inner-selected weights did not beat the fixed single-model references in outer evaluation. Not the first-run export policy.",
+  "models": [
+    {
+      "name": "hgb_reference",
+      "model_id": "hgb",
+      "model_params": {
+        "max_iter": 250,
+        "learning_rate": 0.07,
+        "max_leaf_nodes": 15,
+        "l2_regularization": 1.0
+      },
+      "features": {
+        "percentage_policy": "retain",
+        "out_of_range_flags": false,
+        "interactions": false
+      },
+      "group_features": false
+    },
+    {
+      "name": "hgb_regularized",
+      "model_id": "hgb",
+      "model_params": {
+        "max_iter": 700,
+        "learning_rate": 0.03,
+        "max_leaf_nodes": 15,
+        "min_samples_leaf": 30,
+        "l2_regularization": 10.0
+      },
+      "features": {
+        "percentage_policy": "retain",
+        "out_of_range_flags": false,
+        "interactions": false
+      },
+      "group_features": false
+    },
+    {
+      "name": "numpy_forest100",
+      "model_id": "numpy_forest",
+      "model_params": {
+        "n_estimators": 100,
+        "min_samples_leaf": 2,
+        "max_features": "sqrt"
+      },
+      "features": {
+        "percentage_policy": "retain",
+        "out_of_range_flags": false,
+        "interactions": false
+      },
+      "group_features": false
+    }
+  ],
+  "blend": {
+    "n_trials": 256,
+    "allow_class_multipliers": false
+  }
+}

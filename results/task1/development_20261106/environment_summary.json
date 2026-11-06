@@ -1,0 +1,96 @@
+{
+  "environments": {
+    "b7547b67b1d31cfbc6a35a6c5940d50efdaa3b493f2454d2c1e41f6c6f922cf8": {
+      "environment": {
+        "python": "3.12.10",
+        "platform": "Windows-11-10.0.26200-SP0",
+        "cpu": "Intel(R) Core(TM) Ultra 9 275HX",
+        "logical_cpu_count": 24,
+        "servers": 1,
+        "gpu": "not used",
+        "packages": {
+          "numpy": "2.4.2",
+          "pandas": "2.3.3",
+          "scipy": "1.17.1",
+          "scikit-learn": "1.8.0",
+          "joblib": "1.5.3",
+          "matplotlib": "3.10.8",
+          "threadpoolctl": "3.6.0",
+          "catboost": null
+        },
+        "threadpools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "version": "0.3.31.dev"
+          },
+          {
+            "user_api": "openmp",
+            "internal_api": "openmp",
+            "num_threads": 1,
+            "version": null
+          },
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "version": "0.3.30"
+          }
+        ]
+      },
+      "run_ids": [
+        "20261106T075315Z_cv_0edce7a8_c8143a"
+      ]
+    },
+    "72c924babba33bb16e7d53c2b7851a6157ed3ce1c939f0fe07ef718b017c2888": {
+      "environment": {
+        "python": "3.12.10",
+        "platform": "Windows-11-10.0.26200-SP0",
+        "cpu": "Intel(R) Core(TM) Ultra 9 275HX",
+        "logical_cpu_count": 24,
+        "servers": 1,
+        "gpu": "not used",
+        "packages": {
+          "numpy": "2.4.2",
+          "pandas": "2.3.3",
+          "scipy": "1.17.1",
+          "scikit-learn": "1.8.0",
+          "joblib": "1.5.3",
+          "matplotlib": "3.10.8",
+          "threadpoolctl": "3.6.0",
+          "catboost": "1.2.8"
+        },
+        "threadpools": [
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "version": "0.3.31.dev"
+          },
+          {
+            "user_api": "openmp",
+            "internal_api": "openmp",
+            "num_threads": 1,
+            "version": null
+          },
+          {
+            "user_api": "blas",
+            "internal_api": "openblas",
+            "num_threads": 1,
+            "version": "0.3.30"
+          }
+        ]
+      },
+      "run_ids": [
+        "20261106T080116Z_cv_44bb9668_162043",
+        "20261106T081019Z_cv_59d0760d_92a354",
+        "20261106T081633Z_cv_848a5546_f8372b",
+        "20261106T082242Z_cv_397c348c_246968",
+        "20261106T082753Z_nested_81a47e6a_de44f7",
+        "20261106T083032Z_nested_442297e6_f909ec"
+      ]
+    }
+  },
+  "timing_note": "Individual configurations have different computational costs. Recorded CV totals include workflow costs; do not compare old macOS single-holdout timings to these Windows CV runs."
+}

@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "description": "Controlled development ablations: raw/clip/flags/interactions, native categorical splits, and autonomous generative candidates; same five folds.",
+  "validation": {
+    "n_splits": 5,
+    "split_seed": 5434,
+    "model_seed": 5434
+  },
+  "models": [
+    {
+      "name": "hgb_native_regularized",
+      "model_id": "hgb_native",
+      "model_params": {
+        "max_iter": 700,
+        "learning_rate": 0.03,
+        "max_leaf_nodes": 15,
+        "min_samples_leaf": 30,
+        "l2_regularization": 10.0
+      },
+      "features": {}
+    },
+    {
+      "name": "hgb_native_reference",
+      "model_id": "hgb_native",
+      "model_params": {
+        "max_iter": 400,
+        "learning_rate": 0.05,
+        "max_leaf_nodes": 15,
+        "min_samples_leaf": 20,
+        "l2_regularization": 5.0
+      },
+      "features": {}
+    },
+    {
+      "name": "hgb_clip",
+      "model_id": "hgb",
+      "model_params": {
+        "max_iter": 700,
+        "learning_rate": 0.03,
+        "max_leaf_nodes": 15,
+        "min_samples_leaf": 30,
+        "l2_regularization": 10.0
+      },
+      "features": {
+        "percentage_policy": "clip"
+      }
+    },
+    {
+      "name": "hgb_flags",
+      "model_id": "hgb",
+      "model_params": {
+        "max_iter": 700,
+        "learning_rate": 0.03,
+        "max_leaf_nodes": 15,
+        "min_samples_leaf": 30,
+        "l2_regularization": 10.0
+      },
+      "features": {
+        "out_of_range_flags": true
+      }
+    },
+    {
+      "name": "hgb_clip_flags",
+      "model_id": "hgb",
+      "model_params": {
+        "max_iter": 700,
+        "learning_rate": 0.03,
+        "max_leaf_nodes": 15,
+        "min_samples_leaf": 30,
+        "l2_regularization": 10.0
+      },
+      "features": {
+        "percentage_policy": "clip",
+        "out_of_range_flags": true
+      }
+    },
+    {
+      "name": "hgb_interactions",
+      "model_id": "hgb",
+      "model_params": {
+        "max_iter": 700,
+        "learning_rate": 0.03,
+        "max_leaf_nodes": 15,
+        "min_samples_leaf": 30,
+        "l2_regularization": 10.0
+      },
+      "features": {
+        "interactions": true
+      }
+    },
+    {
+      "name": "histogram_nb_plain",
+      "model_id": "histogram_nb",
+      "model_params": {
+        "n_bins": 24,
+        "alpha": 0.1,
+        "contamination": 0.0
+      },
+      "features": {}
+    },
+    {
+      "name": "histogram_nb_mixture",
+      "model_id": "histogram_nb",
+      "model_params": {
+        "n_bins": 40,
+        "alpha": 0.5,
+        "contamination": 0.1,
+        "max_iter": 30
+      },
+      "features": {}
+    }
+  ]
+}

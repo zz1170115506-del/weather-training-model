@@ -1,6 +1,65 @@
 # weather-training-model
 
-数据集 1 的天气四分类实验项目。目前已完成数据检查、基线比较、NumPy 手写 CART 决策树与随机森林，以及测试集预测生成。交叉验证和消融实验留待后续完成。
+数据集 1 的天气四分类项目。包含 NumPy 手写 CART/随机森林、自主直方图混合模型、统一交叉验证、对照与消融、可复现预测和 CSV 校验。真实数据训练和 Kaggle 上传由使用者手动启动。
+
+## 手动启动第一次训练
+
+从 `weather-training-model` 仓库根目录打开 PowerShell。数据放在仓库外的 `../Dataset/`，包含 `train.csv`、`test.csv`、`sample_submission.csv`。
+
+首次安装（已有 `.venv` 时可直接检查）：
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r code/requirements.txt
+```
+
+先检查环境、配置和数据；`check` 不训练：
+
+```powershell
+.\.venv\Scripts\python.exe -B code/run_task1.py check --config configs/task1/first_run.json
+.\.venv\Scripts\python.exe -B -m unittest discover -s code/tests -v
+```
+
+由使用者手动输入以下命令才会训练：
+
+```powershell
+.\.venv\Scripts\python.exe -B code/run_task1.py train --config configs/task1/first_run.json
+```
+
+流程为三种模型的共同五折评估，再将配置指定的两个候选全量重训、保存模型、导出 CSV、读回校验和重载复现。候选 A 为自主生成式训练权重 + HGB，候选 B 为同参数无权重 HGB；NumPy 随机森林作自主对照。默认不采用未显示稳健增益的学习权重融合。
+
+程序只写本地文件，没有 Kaggle 上传或 Git 推送动作。输出目录在仓库外 `../local_artifacts/task1/<唯一run_id>/`，不覆盖历史结果。完成后查看路径：
+
+```powershell
+$taskRun = Get-Content ..\local_artifacts\task1\latest_training_run.json -Raw -Encoding UTF8 | ConvertFrom-Json
+$taskRun.candidates
+```
+
+在课程竞赛的 **File Upload** 窗口选择 `submissions/candidate_a.csv`；它使用与当前样例一致的英文标签，包含 3,300 条预测和表头。另有整数标签备用文件；平台实际接受与评分必须由使用者核实。`training_summary.json`、`comparison.csv`、`summary/` 图表和本地 manifest 为后续报告提供证据，不能将开发 CV 称为 Kaggle 成绩。
+
+验证或记录上传后的真实成绩：
+
+```powershell
+.\.venv\Scripts\python.exe code/run_task1.py validate-submission --submission $taskRun.candidates.candidate_a
+$taskSubmissionId = Read-Host 'Kaggle实际提交编号'
+$taskPublicScore = Read-Host 'Kaggle实际Macro-F1，小数点用英文句点'
+.\.venv\Scripts\python.exe code/run_task1.py record-score --run-dir $taskRun.run_dir --candidate candidate_a --submission-id $taskSubmissionId --public-score $taskPublicScore
+```
+
+`record-score` 只保存本地人工记录，不查询或操作平台。相同配置/seed 重跑主要用于复现，不能保证分数提高。`configs/task1/iteration_leaf50.json` 为尚未验证的下一轮单因素预设；`stability_seed2026.json` 只核查划分稳定性。修改代码和共享配置前仍按新分支 → push → PR → 负责人审阅协作；个人调参配置可放仓库外，正式复现使用干净源码和明确配置哈希。
+
+## 统一入口与文件职责
+
+- `code/run_task1.py`：`check/train/cv/nested/finalize/predict/validate-submission/record-score`。
+- `code/task1/`：共用数据、折内预处理、模型工厂、验证、工件与提交校验；baseline/custom 共用这条新流程。
+- `code/weather_models.py`：手写树/森林；增加可选叶概率平滑和原始属性分组采样，默认保留旧行为。
+- `code/generative_weather.py`：自主直方图 NB 与共享污染成分 EM；第一候选用其训练责任度生成样本权重，测试推理只使用已训练 HGB。
+- `configs/task1/`：共享模型参数与实验配方；`research_blend_*` 仅研究，外层结果未优于固定单模型，不是首次训练默认方案。
+- `results/task1/`：经过校验的开发期聚合结果和图；原始数据、OOF、预测、模型、环境和私人计划留本地。
+
+研究实验须另行手动启动，例如 `cv --config configs/task1/comparison.json`、`cv --config configs/task1/ablations.json`。CatBoost 比较额外安装 `code/requirements-boosting.txt`；首次训练不依赖 CatBoost。`code/requirements-lock.txt` 保存开发期完整依赖。macOS/Linux 使用 `.venv/bin/python` 替换上述解释器路径。
+
+以下保留旧单次 Holdout 的历史参考，运行环境和验证协议与新流程不同，不能直接比较分数并宣称改进。
 
 ## 当前结果
 

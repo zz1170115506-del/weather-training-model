@@ -1,0 +1,15 @@
+{
+  "snapshot_date": "2026-11-06",
+  "scope": "Earlier agent-run development experiments, not the user-started first training run and not Kaggle results.",
+  "candidate_a": "hgb_noise_floor20",
+  "candidate_b": "hgb_regularized",
+  "candidate_a_oof_macro_f1": 0.9162005633531267,
+  "candidate_b_oof_macro_f1": 0.9159908502400317,
+  "development_delta": 0.0002097131130950336,
+  "interpretation": "The difference is small and does not establish a stable improvement or rank. Both fixed candidates are exported for manual evaluation.",
+  "learned_blend_default_enabled": false,
+  "reason": "Both recorded outer-fold learned-blend evaluations were lower than the fixed single-model references.",
+  "next_iteration_leaf50_validated": false,
+  "user_started_real_training_after_manual_control_request": false,
+  "reproduction": "Raw outputs and per-file source fingerprints remain local. Shared JSON configs reproduce the experimental recipes; code/requirements-lock.txt captures the tested environment."
+}

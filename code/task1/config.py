@@ -1,0 +1,97 @@
+"""Versioned, deliberately small JSON configuration schema."""
+from __future__ import annotations
+
+from copy import deepcopy
+from pathlib import Path
+import json
+import re
+
+from .models import MODEL_IDS
+
+
+def resolve_config(raw):
+    result = deepcopy(raw)
+    if result.get("schema_version") != 1:
+        raise ValueError("Expected schema_version 1.")
+    if not isinstance(result.get("models"), list) or not result["models"]:
+        raise ValueError("models must be a nonempty list.")
+    validation = {"n_splits": 5, "split_seed": 5434, "model_seed": 5434} | result.get("validation", {})
+    if set(validation) != {"n_splits", "split_seed", "model_seed"}:
+        raise ValueError("Unknown validation option.")
+    if isinstance(validation["n_splits"], bool) or not isinstance(validation["n_splits"], int) or validation["n_splits"] < 2:
+        raise ValueError("n_splits must be an integer >=2.")
+    for key in ("split_seed", "model_seed"):
+        if isinstance(validation[key], bool) or not isinstance(validation[key], int) or validation[key] < 0:
+            raise ValueError(f"{key} must be a nonnegative integer.")
+    result["validation"] = validation
+    finalization = {"method": "full_refit"} | result.get("finalization", {})
+    if finalization != {"method": "full_refit"}:
+        raise ValueError("Only finalization.method=full_refit is implemented.")
+    result["finalization"] = finalization
+    result.setdefault("prediction_strategy", "independent_candidates")
+    if result["prediction_strategy"] not in ("independent_candidates", "learned_blend"):
+        raise ValueError("prediction_strategy must be independent_candidates or learned_blend.")
+    blend = {"n_trials": 128, "allow_class_multipliers": False} | result.get("blend", {})
+    if set(blend) != {"n_trials", "allow_class_multipliers"}:
+        raise ValueError("Unknown blend option.")
+    if isinstance(blend["n_trials"], bool) or not isinstance(blend["n_trials"], int) or blend["n_trials"] < 0:
+        raise ValueError("blend.n_trials must be a nonnegative integer.")
+    if not isinstance(blend["allow_class_multipliers"], bool):
+        raise ValueError("blend.allow_class_multipliers must be boolean.")
+    result["blend"] = blend
+    if "inner_splits" in result and (isinstance(result["inner_splits"], bool)
+                                      or not isinstance(result["inner_splits"], int) or result["inner_splits"] < 2):
+        raise ValueError("inner_splits must be an integer >=2.")
+    names = set()
+    for model in result["models"]:
+        name = model.get("name", "")
+        reserved = {"ids", "y", "folds", "blend", "equal", "probabilities", "file", "allow_pickle"}
+        if not isinstance(name, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,79}", name) or name in names or name in reserved:
+            raise ValueError("Model names must be unique safe directory names.")
+        if model.get("model_id") not in MODEL_IDS:
+            raise ValueError(f"Unknown model_id: {model.get('model_id')}")
+        names.add(name)
+        model.setdefault("model_params", {})
+        if not isinstance(model["model_params"], dict):
+            raise ValueError("model_params must be an object.")
+        if "random_state" in model["model_params"] or "random_seed" in model["model_params"]:
+            raise ValueError("Use validation.model_seed, not model_params random_state/random_seed.")
+        features = {"percentage_policy": "retain", "out_of_range_flags": False,
+                    "interactions": False} | model.get("features", {})
+        if set(features) != {"percentage_policy", "out_of_range_flags", "interactions"}:
+            raise ValueError("Unknown feature option.")
+        if features["percentage_policy"] not in ("retain", "clip"):
+            raise ValueError("Invalid percentage_policy.")
+        for key in ("out_of_range_flags", "interactions"):
+            if not isinstance(features[key], bool):
+                raise ValueError(f"{key} must be boolean.")
+        model["features"] = features
+        model.setdefault("group_features", False)
+        if not isinstance(model["group_features"], bool):
+            raise ValueError("group_features must be boolean.")
+        if "noise_weighting" in model and not isinstance(model["noise_weighting"], dict):
+            raise ValueError("noise_weighting must be a parameter object.")
+        if model.get("noise_weighting"):
+            defaults = {"floor": 0.2, "n_bins": 24, "alpha": 0.5,
+                        "contamination": 0.1, "max_iter": 30, "tol": 1e-5,
+                        "min_contamination": 0.01, "max_contamination": 0.4}
+            if set(model["noise_weighting"]) - set(defaults):
+                raise ValueError("Unknown noise_weighting option.")
+            model["noise_weighting"] = defaults | model["noise_weighting"]
+            floor = model["noise_weighting"]["floor"]
+            if isinstance(floor, bool) or not isinstance(floor, (int, float)) or not 0 <= floor <= 1:
+                raise ValueError("noise_weighting.floor must be in [0,1].")
+    training = result.get("training", {})
+    if not isinstance(training, dict) or set(training) - {"export_models"}:
+        raise ValueError("training supports only export_models.")
+    exports = training.get("export_models", [result["models"][0]["name"]])
+    if not isinstance(exports, list) or not exports or len(exports) != len(set(exports)):
+        raise ValueError("training.export_models must be a nonempty unique list.")
+    if any(name not in names for name in exports):
+        raise ValueError("Every export model must occur in models.")
+    result["training"] = {"export_models": exports}
+    return result
+
+
+def load_config(path):
+    return resolve_config(json.loads(Path(path).read_text(encoding="utf-8")))

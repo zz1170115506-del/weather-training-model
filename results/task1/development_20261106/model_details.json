@@ -1,0 +1,5002 @@
+{
+  "schema_version": 1,
+  "labels": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "label_names": [
+    "Sunny",
+    "Cloudy",
+    "Rainy",
+    "Snowy"
+  ],
+  "source_sha256": {
+    "train.csv": "4eb4439290751585213f3638bc238bf8a973d8e960b9f05f5d8641c34521bfbb",
+    "test.csv": "c8c036dd75562eef41da3a75edafb3904597a1c5291c97735829f03866c3c080",
+    "sample_submission.csv": "4b7ff8d2c44df622432a6f8d7f87c478e32deba3b976722cf87fe13c3505ee4b"
+  },
+  "fold_protocol": {
+    "method": "StratifiedKFold",
+    "n_splits": 5,
+    "seed": 5434,
+    "canonical_input_order": "ascending record id",
+    "fold_sha256": "baef26daea37bf760b4bb9f971d3cb42ae6185f364538f577b5bb5d041e676ef",
+    "probability_order": [
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  "models": {
+    "extra_trees400": {
+      "config": {
+        "name": "extra_trees400",
+        "model_id": "extra_trees",
+        "model_params": {
+          "n_estimators": 400,
+          "min_samples_leaf": 2,
+          "max_features": 0.7
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "3666953d624a82ef4cd44cee736256777647a146adcb4acbe5fcb6c61f157502",
+      "oof_metrics": {
+        "macro_f1": 0.9104547266990246,
+        "accuracy": 0.9101010101010101,
+        "confusion_matrix": [
+          [
+            2230,
+            153,
+            58,
+            34
+          ],
+          [
+            66,
+            2232,
+            135,
+            42
+          ],
+          [
+            32,
+            134,
+            2269,
+            40
+          ],
+          [
+            60,
+            91,
+            45,
+            2279
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9338358458961474,
+            "recall": 0.901010101010101,
+            "f1-score": 0.9171293440263212,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8551724137931035,
+            "recall": 0.9018181818181819,
+            "f1-score": 0.8778761061946903,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.9050658157159952,
+            "recall": 0.9167676767676768,
+            "f1-score": 0.9108791649939784,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9515657620041754,
+            "recall": 0.9208080808080809,
+            "f1-score": 0.9359342915811089,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9114099593523554,
+            "recall": 0.9101010101010101,
+            "f1-score": 0.9104547266990246,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9114099593523554,
+            "recall": 0.9101010101010101,
+            "f1-score": 0.9104547266990248,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T075315Z_cv_0edce7a8_c8143a",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T07:53:15.905667+00:00",
+        "git": {
+          "available": null,
+          "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+          "dirty": true,
+          "branch": "feat/task1-reproducible-pipeline"
+        },
+        "source_tree_sha256": "9c8cc7f510da78dd6e09d763ee5f23c761b250de7073b1cf081314c656428ad5"
+      },
+      "source_summary_sha256": "9ceffac2901f18162fa7f296ce400b49908a231bcfd2c57e37d1a063475272ea",
+      "source_fold_metrics_sha256": "8654b10cfb2166dcc84907b00581f021fddcbfd4ad13118b5bda59fb3353f28b",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "hgb_medium": {
+      "config": {
+        "name": "hgb_medium",
+        "model_id": "hgb",
+        "model_params": {
+          "max_iter": 500,
+          "learning_rate": 0.05,
+          "max_leaf_nodes": 15,
+          "min_samples_leaf": 20,
+          "l2_regularization": 5.0
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "0eae1c3fe0a3d7fea66aeb530354ca63d0a81a39537ee583450592d927564732",
+      "oof_metrics": {
+        "macro_f1": 0.9150134627546118,
+        "accuracy": 0.914949494949495,
+        "confusion_matrix": [
+          [
+            2274,
+            94,
+            55,
+            52
+          ],
+          [
+            74,
+            2221,
+            122,
+            58
+          ],
+          [
+            56,
+            121,
+            2258,
+            40
+          ],
+          [
+            51,
+            68,
+            51,
+            2305
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9262729124236253,
+            "recall": 0.9187878787878788,
+            "f1-score": 0.9225152129817444,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8869808306709265,
+            "recall": 0.8973737373737374,
+            "f1-score": 0.8921470174733882,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.9082864038616251,
+            "recall": 0.9123232323232323,
+            "f1-score": 0.9103003426728482,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9389002036659878,
+            "recall": 0.9313131313131313,
+            "f1-score": 0.9350912778904665,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9151100876555411,
+            "recall": 0.914949494949495,
+            "f1-score": 0.9150134627546118,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9151100876555411,
+            "recall": 0.914949494949495,
+            "f1-score": 0.9150134627546118,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T075315Z_cv_0edce7a8_c8143a",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T07:53:15.905667+00:00",
+        "git": {
+          "available": null,
+          "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+          "dirty": true,
+          "branch": "feat/task1-reproducible-pipeline"
+        },
+        "source_tree_sha256": "9c8cc7f510da78dd6e09d763ee5f23c761b250de7073b1cf081314c656428ad5"
+      },
+      "source_summary_sha256": "377456f808a04eefa7dfd75dc7871971ca24b40990b2e5a75a5dd0fa5cad7a37",
+      "source_fold_metrics_sha256": "6232420c2e2bd8cced40fa8330d273891f3b33314178797bbf94ac9231ccab74",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "hgb_reference": {
+      "config": {
+        "name": "hgb_reference",
+        "model_id": "hgb",
+        "model_params": {
+          "max_iter": 250,
+          "learning_rate": 0.07,
+          "max_leaf_nodes": 15,
+          "l2_regularization": 1.0
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "835d595ed36b79f449d14e704d717849c24e9eda5181e7798f1b6ae27c771ec7",
+      "oof_metrics": {
+        "macro_f1": 0.9155978565360945,
+        "accuracy": 0.9155555555555556,
+        "confusion_matrix": [
+          [
+            2272,
+            100,
+            54,
+            49
+          ],
+          [
+            77,
+            2220,
+            115,
+            63
+          ],
+          [
+            52,
+            115,
+            2266,
+            42
+          ],
+          [
+            58,
+            60,
+            51,
+            2306
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9239528263521757,
+            "recall": 0.917979797979798,
+            "f1-score": 0.9209566274827726,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8897795591182365,
+            "recall": 0.896969696969697,
+            "f1-score": 0.8933601609657947,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.911504424778761,
+            "recall": 0.9155555555555556,
+            "f1-score": 0.9135254988913526,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9373983739837398,
+            "recall": 0.9317171717171717,
+            "f1-score": 0.934549138804458,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9156587960582283,
+            "recall": 0.9155555555555557,
+            "f1-score": 0.9155978565360945,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9156587960582282,
+            "recall": 0.9155555555555556,
+            "f1-score": 0.9155978565360945,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T075315Z_cv_0edce7a8_c8143a",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T07:53:15.905667+00:00",
+        "git": {
+          "available": null,
+          "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+          "dirty": true,
+          "branch": "feat/task1-reproducible-pipeline"
+        },
+        "source_tree_sha256": "9c8cc7f510da78dd6e09d763ee5f23c761b250de7073b1cf081314c656428ad5"
+      },
+      "source_summary_sha256": "3fe0763cc052e739444473b6ccc4ff9d1a5da49b9bd3a3623a81a84d7f790635",
+      "source_fold_metrics_sha256": "5fa56ff7336d8e425909934ff24bf234c050879a326c14e4fc1cc403a9c98add",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "hgb_regularized": {
+      "config": {
+        "name": "hgb_regularized",
+        "model_id": "hgb",
+        "model_params": {
+          "max_iter": 700,
+          "learning_rate": 0.03,
+          "max_leaf_nodes": 15,
+          "min_samples_leaf": 30,
+          "l2_regularization": 10.0
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "7567f2bc7ff5df041c6bd6c5cf18b936a1ea55a32f74ecd07e59714066dc80c0",
+      "oof_metrics": {
+        "macro_f1": 0.9159908502400317,
+        "accuracy": 0.915959595959596,
+        "confusion_matrix": [
+          [
+            2278,
+            95,
+            51,
+            51
+          ],
+          [
+            75,
+            2220,
+            114,
+            66
+          ],
+          [
+            58,
+            115,
+            2260,
+            42
+          ],
+          [
+            57,
+            66,
+            42,
+            2310
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9230145867098866,
+            "recall": 0.9204040404040404,
+            "f1-score": 0.9217074651021647,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8894230769230769,
+            "recall": 0.896969696969697,
+            "f1-score": 0.8931804465902233,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.9160924199432509,
+            "recall": 0.9131313131313131,
+            "f1-score": 0.914609469850263,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9356014580801945,
+            "recall": 0.9333333333333333,
+            "f1-score": 0.9344660194174758,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9160328854141021,
+            "recall": 0.9159595959595961,
+            "f1-score": 0.9159908502400317,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9160328854141021,
+            "recall": 0.915959595959596,
+            "f1-score": 0.9159908502400318,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T075315Z_cv_0edce7a8_c8143a",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T07:53:15.905667+00:00",
+        "git": {
+          "available": null,
+          "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+          "dirty": true,
+          "branch": "feat/task1-reproducible-pipeline"
+        },
+        "source_tree_sha256": "9c8cc7f510da78dd6e09d763ee5f23c761b250de7073b1cf081314c656428ad5"
+      },
+      "source_summary_sha256": "505b6ce481d18fa0a5b4c7ee565da9281ae239dfc3e358b3139bf6689eec38b4",
+      "source_fold_metrics_sha256": "277c2dacb841a5f3dd31c6f291ab8d8f017b443fa551ac17cdd5f5107609d87a",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "hgb_shallow": {
+      "config": {
+        "name": "hgb_shallow",
+        "model_id": "hgb",
+        "model_params": {
+          "max_iter": 700,
+          "learning_rate": 0.03,
+          "max_leaf_nodes": 7,
+          "min_samples_leaf": 30,
+          "l2_regularization": 10.0
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "5c03e78836eb6f736e0f9978c2f459f579522c982d337d903b70bcf0f4915e02",
+      "oof_metrics": {
+        "macro_f1": 0.9137739300511015,
+        "accuracy": 0.9137373737373737,
+        "confusion_matrix": [
+          [
+            2266,
+            100,
+            52,
+            57
+          ],
+          [
+            70,
+            2210,
+            131,
+            64
+          ],
+          [
+            50,
+            114,
+            2266,
+            45
+          ],
+          [
+            56,
+            64,
+            51,
+            2304
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9279279279279279,
+            "recall": 0.9155555555555556,
+            "f1-score": 0.9217002237136466,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8882636655948553,
+            "recall": 0.8929292929292929,
+            "f1-score": 0.8905903687285915,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.9064,
+            "recall": 0.9155555555555556,
+            "f1-score": 0.9109547738693468,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9327935222672065,
+            "recall": 0.9309090909090909,
+            "f1-score": 0.931850353892821,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9138462789474975,
+            "recall": 0.9137373737373737,
+            "f1-score": 0.9137739300511015,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9138462789474974,
+            "recall": 0.9137373737373737,
+            "f1-score": 0.9137739300511017,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T075315Z_cv_0edce7a8_c8143a",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T07:53:15.905667+00:00",
+        "git": {
+          "available": null,
+          "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+          "dirty": true,
+          "branch": "feat/task1-reproducible-pipeline"
+        },
+        "source_tree_sha256": "9c8cc7f510da78dd6e09d763ee5f23c761b250de7073b1cf081314c656428ad5"
+      },
+      "source_summary_sha256": "bd261dc05b29f8c88977d034d4f7b82106b6d4e104d8119fb7c631c9b61dd0c6",
+      "source_fold_metrics_sha256": "84ba5e3f117f8f3266519ee828888d8209425f6e7656ff122f84427ee4ee5166",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "numpy_bagging100": {
+      "config": {
+        "name": "numpy_bagging100",
+        "model_id": "numpy_forest",
+        "model_params": {
+          "n_estimators": 100,
+          "min_samples_leaf": 2,
+          "max_features": null
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "90e774dff14c5d0f9c2e4997c2d76cadecd7fa846d7894db3408711ff5017c85",
+      "oof_metrics": {
+        "macro_f1": 0.9114820969529469,
+        "accuracy": 0.9113131313131313,
+        "confusion_matrix": [
+          [
+            2248,
+            121,
+            58,
+            48
+          ],
+          [
+            75,
+            2237,
+            110,
+            53
+          ],
+          [
+            46,
+            135,
+            2248,
+            46
+          ],
+          [
+            57,
+            75,
+            54,
+            2289
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9266281945589447,
+            "recall": 0.9082828282828282,
+            "f1-score": 0.9173638033054479,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8711059190031153,
+            "recall": 0.9038383838383839,
+            "f1-score": 0.8871703351179854,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.9101214574898785,
+            "recall": 0.9082828282828282,
+            "f1-score": 0.9092012133468149,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9396551724137931,
+            "recall": 0.9248484848484848,
+            "f1-score": 0.9321930360415394,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9118776858664329,
+            "recall": 0.9113131313131313,
+            "f1-score": 0.9114820969529469,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9118776858664328,
+            "recall": 0.9113131313131313,
+            "f1-score": 0.911482096952947,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T075315Z_cv_0edce7a8_c8143a",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T07:53:15.905667+00:00",
+        "git": {
+          "available": null,
+          "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+          "dirty": true,
+          "branch": "feat/task1-reproducible-pipeline"
+        },
+        "source_tree_sha256": "9c8cc7f510da78dd6e09d763ee5f23c761b250de7073b1cf081314c656428ad5"
+      },
+      "source_summary_sha256": "fab095b5d84a3f2b7e366c7f6bdedb75228fbf5cf5471836a0abf4940ff0f2ef",
+      "source_fold_metrics_sha256": "6d8a2d923f6a81aada70eebd27d6d2bdea522976d770700ebd037e899c24c756",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "numpy_cart_d8": {
+      "config": {
+        "name": "numpy_cart_d8",
+        "model_id": "numpy_cart",
+        "model_params": {
+          "max_depth": 8,
+          "min_samples_leaf": 5
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "7b647f8c4986e3caae0176a5ee2b20a81d1d31afef25cdab04b326bbc73e4a81",
+      "oof_metrics": {
+        "macro_f1": 0.9076166517300062,
+        "accuracy": 0.9073737373737374,
+        "confusion_matrix": [
+          [
+            2236,
+            133,
+            59,
+            47
+          ],
+          [
+            65,
+            2238,
+            124,
+            48
+          ],
+          [
+            57,
+            133,
+            2232,
+            53
+          ],
+          [
+            52,
+            97,
+            49,
+            2277
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9278008298755187,
+            "recall": 0.9034343434343435,
+            "f1-score": 0.9154554759467759,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8604382929642446,
+            "recall": 0.9042424242424243,
+            "f1-score": 0.8817966903073287,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.9058441558441559,
+            "recall": 0.9018181818181819,
+            "f1-score": 0.9038266855638794,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9389690721649484,
+            "recall": 0.92,
+            "f1-score": 0.9293877551020409,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9082630877122169,
+            "recall": 0.9073737373737374,
+            "f1-score": 0.9076166517300062,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.908263087712217,
+            "recall": 0.9073737373737374,
+            "f1-score": 0.9076166517300062,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T075315Z_cv_0edce7a8_c8143a",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T07:53:15.905667+00:00",
+        "git": {
+          "available": null,
+          "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+          "dirty": true,
+          "branch": "feat/task1-reproducible-pipeline"
+        },
+        "source_tree_sha256": "9c8cc7f510da78dd6e09d763ee5f23c761b250de7073b1cf081314c656428ad5"
+      },
+      "source_summary_sha256": "e3d0fd1d0e4f46f2780e6cfa9d3f9472bd4987efedad9d8070fb5eb6b8b64afc",
+      "source_fold_metrics_sha256": "03a7bd6a0ac0689ad6522b872b5df6eaae45fb31ff845c4d45e797daa878989c",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "numpy_forest100": {
+      "config": {
+        "name": "numpy_forest100",
+        "model_id": "numpy_forest",
+        "model_params": {
+          "n_estimators": 100,
+          "min_samples_leaf": 2,
+          "max_features": "sqrt"
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "e9ebccd18426616000b9c0cbf298f615c125ac424ed9af09893cd1fe41104755",
+      "oof_metrics": {
+        "macro_f1": 0.9143831884831561,
+        "accuracy": 0.9141414141414141,
+        "confusion_matrix": [
+          [
+            2257,
+            127,
+            50,
+            41
+          ],
+          [
+            61,
+            2244,
+            125,
+            45
+          ],
+          [
+            38,
+            133,
+            2264,
+            40
+          ],
+          [
+            55,
+            75,
+            60,
+            2285
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9361260887598507,
+            "recall": 0.9119191919191919,
+            "f1-score": 0.9238641015145314,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8701046917409849,
+            "recall": 0.9066666666666666,
+            "f1-score": 0.88800949742778,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.9059623849539816,
+            "recall": 0.9147474747474748,
+            "f1-score": 0.9103337354242059,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9477395271671506,
+            "recall": 0.9232323232323232,
+            "f1-score": 0.9353254195661073,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.914983173155492,
+            "recall": 0.9141414141414141,
+            "f1-score": 0.9143831884831561,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9149831731554919,
+            "recall": 0.9141414141414141,
+            "f1-score": 0.9143831884831561,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T075315Z_cv_0edce7a8_c8143a",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T07:53:15.905667+00:00",
+        "git": {
+          "available": null,
+          "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+          "dirty": true,
+          "branch": "feat/task1-reproducible-pipeline"
+        },
+        "source_tree_sha256": "9c8cc7f510da78dd6e09d763ee5f23c761b250de7073b1cf081314c656428ad5"
+      },
+      "source_summary_sha256": "8e251d4d4e5a1450a47a68b0451cd23fc3ccea27385b227280b7caf4624995fe",
+      "source_fold_metrics_sha256": "409141d4607ea16e6ba62a24a1b30fbfd0ba346958d5a709e6e9c912e12559f5",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "numpy_forest300": {
+      "config": {
+        "name": "numpy_forest300",
+        "model_id": "numpy_forest",
+        "model_params": {
+          "n_estimators": 300,
+          "min_samples_leaf": 2,
+          "max_features": "sqrt"
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "ab680937ee96b459e09fadbfbc9c425182cbdf8a8af466a1239d3745e4f85eec",
+      "oof_metrics": {
+        "macro_f1": 0.9135684265652788,
+        "accuracy": 0.9132323232323233,
+        "confusion_matrix": [
+          [
+            2253,
+            140,
+            47,
+            35
+          ],
+          [
+            52,
+            2246,
+            131,
+            46
+          ],
+          [
+            37,
+            139,
+            2262,
+            37
+          ],
+          [
+            59,
+            86,
+            50,
+            2280
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9383590170762183,
+            "recall": 0.9103030303030303,
+            "f1-score": 0.9241181296144381,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8602068173113749,
+            "recall": 0.9074747474747474,
+            "f1-score": 0.8832088084939048,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.908433734939759,
+            "recall": 0.9139393939393939,
+            "f1-score": 0.911178247734139,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.950792326939116,
+            "recall": 0.9212121212121213,
+            "f1-score": 0.9357685204186332,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.914447974066617,
+            "recall": 0.9132323232323233,
+            "f1-score": 0.9135684265652788,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.914447974066617,
+            "recall": 0.9132323232323233,
+            "f1-score": 0.9135684265652787,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T075315Z_cv_0edce7a8_c8143a",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T07:53:15.905667+00:00",
+        "git": {
+          "available": null,
+          "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+          "dirty": true,
+          "branch": "feat/task1-reproducible-pipeline"
+        },
+        "source_tree_sha256": "9c8cc7f510da78dd6e09d763ee5f23c761b250de7073b1cf081314c656428ad5"
+      },
+      "source_summary_sha256": "668e1cd5756d1b9ed5332f1eaf3ad520b1d9fddb7fa5ba04ad9a25ea96a92a72",
+      "source_fold_metrics_sha256": "237fa0515be240ff47fcfbf6d3a6a7dc4827744e568afe4beec3abb949a9d284",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "numpy_group300": {
+      "config": {
+        "name": "numpy_group300",
+        "model_id": "numpy_forest",
+        "model_params": {
+          "n_estimators": 300,
+          "min_samples_leaf": 2,
+          "max_features": 0.7
+        },
+        "group_features": true,
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        }
+      },
+      "config_sha256": "53d4d17197e5ec84e44ddf05195cd4434591e74ff56d0f160af868be4c0283a1",
+      "oof_metrics": {
+        "macro_f1": 0.9140104439632865,
+        "accuracy": 0.9138383838383838,
+        "confusion_matrix": [
+          [
+            2252,
+            119,
+            53,
+            51
+          ],
+          [
+            59,
+            2239,
+            127,
+            50
+          ],
+          [
+            46,
+            127,
+            2260,
+            42
+          ],
+          [
+            52,
+            74,
+            53,
+            2296
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9348277293482773,
+            "recall": 0.9098989898989899,
+            "f1-score": 0.9221949221949222,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8749511527940602,
+            "recall": 0.9046464646464647,
+            "f1-score": 0.8895510528406834,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.9065383072603289,
+            "recall": 0.9131313131313131,
+            "f1-score": 0.9098228663446055,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.941369413694137,
+            "recall": 0.9276767676767677,
+            "f1-score": 0.9344729344729344,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9144216507742009,
+            "recall": 0.9138383838383839,
+            "f1-score": 0.9140104439632865,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9144216507742009,
+            "recall": 0.9138383838383838,
+            "f1-score": 0.9140104439632863,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T075315Z_cv_0edce7a8_c8143a",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T07:53:15.905667+00:00",
+        "git": {
+          "available": null,
+          "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+          "dirty": true,
+          "branch": "feat/task1-reproducible-pipeline"
+        },
+        "source_tree_sha256": "9c8cc7f510da78dd6e09d763ee5f23c761b250de7073b1cf081314c656428ad5"
+      },
+      "source_summary_sha256": "4e81ad5321a646934a647c56e8f17f4ca04d9b34c03e1fe95ea0cfcd1366a71c",
+      "source_fold_metrics_sha256": "1039815eef1b11cf7f61abeb71fd78144fbd88c11c4f78dccaf095dce729c3b3",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "numpy_group_smooth300": {
+      "config": {
+        "name": "numpy_group_smooth300",
+        "model_id": "numpy_forest",
+        "model_params": {
+          "n_estimators": 300,
+          "min_samples_leaf": 4,
+          "max_features": 0.7,
+          "leaf_smoothing": 0.5
+        },
+        "group_features": true,
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        }
+      },
+      "config_sha256": "15c8064ce00c5312e3ee564106598465158acb25bf4e4c598e49aceb0531ac42",
+      "oof_metrics": {
+        "macro_f1": 0.914335369761129,
+        "accuracy": 0.9141414141414141,
+        "confusion_matrix": [
+          [
+            2251,
+            122,
+            52,
+            50
+          ],
+          [
+            63,
+            2249,
+            114,
+            49
+          ],
+          [
+            48,
+            130,
+            2257,
+            40
+          ],
+          [
+            52,
+            79,
+            51,
+            2293
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9324772162386081,
+            "recall": 0.9094949494949495,
+            "f1-score": 0.92084270812027,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8717054263565891,
+            "recall": 0.9086868686868687,
+            "f1-score": 0.8898120672601385,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.912287793047696,
+            "recall": 0.9119191919191919,
+            "f1-score": 0.9121034552434836,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9428453947368421,
+            "recall": 0.9264646464646464,
+            "f1-score": 0.9345832484206236,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9148289575949339,
+            "recall": 0.9141414141414141,
+            "f1-score": 0.914335369761129,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9148289575949339,
+            "recall": 0.9141414141414141,
+            "f1-score": 0.914335369761129,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T075315Z_cv_0edce7a8_c8143a",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T07:53:15.905667+00:00",
+        "git": {
+          "available": null,
+          "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+          "dirty": true,
+          "branch": "feat/task1-reproducible-pipeline"
+        },
+        "source_tree_sha256": "9c8cc7f510da78dd6e09d763ee5f23c761b250de7073b1cf081314c656428ad5"
+      },
+      "source_summary_sha256": "f41676507af1d8447805f1c86b70ac6c4e291ccc905a4af98685f9a4f47bd7e2",
+      "source_fold_metrics_sha256": "879eded4edefda2028c5f03b0a05d8a5864184be7c3026cf1ae00c03bdea8af7",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "sklearn_forest400": {
+      "config": {
+        "name": "sklearn_forest400",
+        "model_id": "sklearn_forest",
+        "model_params": {
+          "n_estimators": 400,
+          "min_samples_leaf": 2,
+          "max_features": 0.7
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "80c1d07630eb35c4da6058a56d8869ef5acf637eff904875d4ea60ae0d4e979c",
+      "oof_metrics": {
+        "macro_f1": 0.9138291304075795,
+        "accuracy": 0.9136363636363637,
+        "confusion_matrix": [
+          [
+            2248,
+            119,
+            60,
+            48
+          ],
+          [
+            71,
+            2242,
+            114,
+            48
+          ],
+          [
+            46,
+            127,
+            2263,
+            39
+          ],
+          [
+            51,
+            84,
+            48,
+            2292
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9304635761589404,
+            "recall": 0.9082828282828282,
+            "f1-score": 0.9192394193416479,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8716951788491446,
+            "recall": 0.9058585858585858,
+            "f1-score": 0.8884485833168219,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.9106639839034205,
+            "recall": 0.9143434343434343,
+            "f1-score": 0.9125,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9443757725587144,
+            "recall": 0.926060606060606,
+            "f1-score": 0.9351285189718482,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9142996278675549,
+            "recall": 0.9136363636363636,
+            "f1-score": 0.9138291304075795,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.914299627867555,
+            "recall": 0.9136363636363637,
+            "f1-score": 0.9138291304075796,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T075315Z_cv_0edce7a8_c8143a",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T07:53:15.905667+00:00",
+        "git": {
+          "available": null,
+          "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+          "dirty": true,
+          "branch": "feat/task1-reproducible-pipeline"
+        },
+        "source_tree_sha256": "9c8cc7f510da78dd6e09d763ee5f23c761b250de7073b1cf081314c656428ad5"
+      },
+      "source_summary_sha256": "336faf998b9e790be4862396468a6d7017e9adc32fa162324abaa8f60f44ce31",
+      "source_fold_metrics_sha256": "7b64adc993421d37310c8413660aa750418c0876bdc00396ed9583160733412f",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "catboost_d4": {
+      "config": {
+        "name": "catboost_d4",
+        "model_id": "catboost",
+        "model_params": {
+          "iterations": 1000,
+          "depth": 4,
+          "learning_rate": 0.035,
+          "l2_leaf_reg": 5.0
+        },
+        "early_stopping_rounds": 100,
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "4be9105b01d830a59d2c3823afb8f067d910f3eada616c0dec381f68682afb61",
+      "oof_metrics": {
+        "macro_f1": 0.9117029700245172,
+        "accuracy": 0.9116161616161617,
+        "confusion_matrix": [
+          [
+            2258,
+            103,
+            56,
+            58
+          ],
+          [
+            54,
+            2209,
+            147,
+            65
+          ],
+          [
+            38,
+            117,
+            2265,
+            55
+          ],
+          [
+            57,
+            64,
+            61,
+            2293
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9380972164520149,
+            "recall": 0.9123232323232323,
+            "f1-score": 0.9250307251126587,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8860810268752507,
+            "recall": 0.8925252525252525,
+            "f1-score": 0.8892914653784219,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.8956109134045077,
+            "recall": 0.9151515151515152,
+            "f1-score": 0.9052757793764988,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9279643868878996,
+            "recall": 0.9264646464646464,
+            "f1-score": 0.9272139102304893,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9119383859049183,
+            "recall": 0.9116161616161615,
+            "f1-score": 0.9117029700245172,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.911938385904918,
+            "recall": 0.9116161616161617,
+            "f1-score": 0.9117029700245171,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T080116Z_cv_44bb9668_162043",
+        "status": "stopped_after_first_candidate",
+        "run_complete": false,
+        "timestamp_utc": "2026-11-06T08:01:16.313556+00:00",
+        "git": {
+          "available": true,
+          "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+          "dirty": true,
+          "branch": "feat/task1-reproducible-pipeline"
+        },
+        "source_tree_sha256": "606c917f66131806c78740abdef8dee2e178f9e027bcd99fd646f7d5ab730dc9"
+      },
+      "source_summary_sha256": "b54512b2c4d5644ade34c319866d55adc2a87c3c5de43ef1a3a50c1eb81f50e1",
+      "source_fold_metrics_sha256": "8dd03a98e8558f05874c338a4913c2fb78f1ee78a64e28adf4efa1778cf6c3d0",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "catboost_onehot_d4": {
+      "config": {
+        "name": "catboost_onehot_d4",
+        "model_id": "catboost",
+        "model_params": {
+          "iterations": 1000,
+          "depth": 4,
+          "learning_rate": 0.035,
+          "l2_leaf_reg": 5.0,
+          "one_hot_max_size": 10
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "f02ead128acb0f15157d1fedac10655d37a40e25ab211e43825f61cd518fd98a",
+      "oof_metrics": {
+        "macro_f1": 0.9121768650411891,
+        "accuracy": 0.9121212121212121,
+        "confusion_matrix": [
+          [
+            2265,
+            94,
+            56,
+            60
+          ],
+          [
+            64,
+            2210,
+            142,
+            59
+          ],
+          [
+            40,
+            113,
+            2263,
+            59
+          ],
+          [
+            57,
+            63,
+            63,
+            2292
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9336356141797197,
+            "recall": 0.9151515151515152,
+            "f1-score": 0.9243011630279535,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8911290322580645,
+            "recall": 0.8929292929292929,
+            "f1-score": 0.8920282542885973,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.8965927099841522,
+            "recall": 0.9143434343434343,
+            "f1-score": 0.905381076215243,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9279352226720647,
+            "recall": 0.926060606060606,
+            "f1-score": 0.9269969666329626,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9123231447735003,
+            "recall": 0.9121212121212121,
+            "f1-score": 0.9121768650411891,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9123231447735002,
+            "recall": 0.9121212121212121,
+            "f1-score": 0.9121768650411891,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T081019Z_cv_59d0760d_92a354",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T08:10:19.283056+00:00",
+        "git": {
+          "available": true,
+          "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+          "dirty": true,
+          "branch": "feat/task1-reproducible-pipeline"
+        },
+        "source_tree_sha256": "6ff8df83d8a995ef0afaed5cb6fd930333f23c2abdc66abc202bcd0753915118"
+      },
+      "source_summary_sha256": "802eec2446fcc71c901e00f965967ab07bdbdd2a7c2fe29adb555e15b3d92b8a",
+      "source_fold_metrics_sha256": "b07d5aec3561134c8b4b1ec7f0fab92e08ed951a9bb3ce9a665841c950a892e6",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "catboost_onehot_d6": {
+      "config": {
+        "name": "catboost_onehot_d6",
+        "model_id": "catboost",
+        "model_params": {
+          "iterations": 600,
+          "depth": 6,
+          "learning_rate": 0.05,
+          "l2_leaf_reg": 5.0,
+          "one_hot_max_size": 10
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "8bcadc0b95dadaf8c9e7ff2266ec79856044264a9ff287b15054625ecd112672",
+      "oof_metrics": {
+        "macro_f1": 0.9142018833592619,
+        "accuracy": 0.9141414141414141,
+        "confusion_matrix": [
+          [
+            2266,
+            94,
+            60,
+            55
+          ],
+          [
+            62,
+            2228,
+            126,
+            59
+          ],
+          [
+            45,
+            114,
+            2255,
+            61
+          ],
+          [
+            53,
+            69,
+            52,
+            2301
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9340478153338829,
+            "recall": 0.9155555555555556,
+            "f1-score": 0.9247092430116303,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8894211576846307,
+            "recall": 0.9002020202020202,
+            "f1-score": 0.8947791164658635,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.9045326915363017,
+            "recall": 0.9111111111111111,
+            "f1-score": 0.9078099838969405,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9293214862681745,
+            "recall": 0.9296969696969697,
+            "f1-score": 0.9295091900626136,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9143307877057475,
+            "recall": 0.9141414141414141,
+            "f1-score": 0.9142018833592619,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9143307877057474,
+            "recall": 0.9141414141414141,
+            "f1-score": 0.9142018833592619,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T081019Z_cv_59d0760d_92a354",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T08:10:19.283056+00:00",
+        "git": {
+          "available": true,
+          "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+          "dirty": true,
+          "branch": "feat/task1-reproducible-pipeline"
+        },
+        "source_tree_sha256": "6ff8df83d8a995ef0afaed5cb6fd930333f23c2abdc66abc202bcd0753915118"
+      },
+      "source_summary_sha256": "7804a34351ad67db28c85593056ab295fb8d1d5873427f975e1c62900666b15c",
+      "source_fold_metrics_sha256": "6faea201be44326d831bf6570ce0e23e21237317f51b5485637cf17278c9eab9",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "catboost_onehot_d8": {
+      "config": {
+        "name": "catboost_onehot_d8",
+        "model_id": "catboost",
+        "model_params": {
+          "iterations": 1000,
+          "depth": 8,
+          "learning_rate": 0.035,
+          "l2_leaf_reg": 8.0,
+          "one_hot_max_size": 10
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "68c4e50c32d28b671dce6f5621346ede729c1e5d278662d2b610688e8fd723b2",
+      "oof_metrics": {
+        "macro_f1": 0.914435826390914,
+        "accuracy": 0.9143434343434343,
+        "confusion_matrix": [
+          [
+            2268,
+            102,
+            59,
+            46
+          ],
+          [
+            69,
+            2227,
+            126,
+            53
+          ],
+          [
+            44,
+            121,
+            2259,
+            51
+          ],
+          [
+            60,
+            67,
+            50,
+            2298
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9291274068004916,
+            "recall": 0.9163636363636364,
+            "f1-score": 0.9227013832384052,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8847834723877632,
+            "recall": 0.8997979797979798,
+            "f1-score": 0.8922275641025641,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.9057738572574178,
+            "recall": 0.9127272727272727,
+            "f1-score": 0.9092372710807003,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9387254901960784,
+            "recall": 0.9284848484848485,
+            "f1-score": 0.9335770871419866,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9146025566604377,
+            "recall": 0.9143434343434342,
+            "f1-score": 0.914435826390914,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9146025566604379,
+            "recall": 0.9143434343434343,
+            "f1-score": 0.914435826390914,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T081019Z_cv_59d0760d_92a354",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T08:10:19.283056+00:00",
+        "git": {
+          "available": true,
+          "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+          "dirty": true,
+          "branch": "feat/task1-reproducible-pipeline"
+        },
+        "source_tree_sha256": "6ff8df83d8a995ef0afaed5cb6fd930333f23c2abdc66abc202bcd0753915118"
+      },
+      "source_summary_sha256": "8db73fa1880383795e1dd2730fbacb6a3a1158a39f0033266a471043c9befe60",
+      "source_fold_metrics_sha256": "8fbad5ee44121c19937abec144be18473b7db693ebfb65299b9c22c11fbdda69",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "hgb_clip": {
+      "config": {
+        "name": "hgb_clip",
+        "model_id": "hgb",
+        "model_params": {
+          "max_iter": 700,
+          "learning_rate": 0.03,
+          "max_leaf_nodes": 15,
+          "min_samples_leaf": 30,
+          "l2_regularization": 10.0
+        },
+        "features": {
+          "percentage_policy": "clip",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "b4bacefa0056e59470038339aa4d17aceaf69abc52b951acf5a309c733f926c0",
+      "oof_metrics": {
+        "macro_f1": 0.9152954405668926,
+        "accuracy": 0.9152525252525252,
+        "confusion_matrix": [
+          [
+            2273,
+            92,
+            56,
+            54
+          ],
+          [
+            76,
+            2223,
+            119,
+            57
+          ],
+          [
+            58,
+            117,
+            2257,
+            43
+          ],
+          [
+            55,
+            67,
+            45,
+            2308
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9232331437855402,
+            "recall": 0.9183838383838384,
+            "f1-score": 0.9208021065424347,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8895558223289316,
+            "recall": 0.8981818181818182,
+            "f1-score": 0.893848009650181,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.9111828825191765,
+            "recall": 0.9119191919191919,
+            "f1-score": 0.9115508885298869,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9374492282696995,
+            "recall": 0.9325252525252525,
+            "f1-score": 0.9349807575450678,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.915355269225837,
+            "recall": 0.9152525252525252,
+            "f1-score": 0.9152954405668926,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9153552692258369,
+            "recall": 0.9152525252525252,
+            "f1-score": 0.9152954405668926,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T081633Z_cv_848a5546_f8372b",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T08:16:33.889225+00:00",
+        "git": {
+          "available": true,
+          "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+          "dirty": true,
+          "branch": "feat/task1-reproducible-pipeline"
+        },
+        "source_tree_sha256": "fbad5dbee1e42ce10aa8ff8957b514276a48fab4e1cfcb8d6b6179724f455315"
+      },
+      "source_summary_sha256": "4209c42c598fb10ecffd0cc5a61c53de60f8e6924255334050612d5ab70163f3",
+      "source_fold_metrics_sha256": "f5fedb15ec42038d027ce2a4ce9ffffc68337be958b790997cf5cf3493ddedc2",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "hgb_clip_flags": {
+      "config": {
+        "name": "hgb_clip_flags",
+        "model_id": "hgb",
+        "model_params": {
+          "max_iter": 700,
+          "learning_rate": 0.03,
+          "max_leaf_nodes": 15,
+          "min_samples_leaf": 30,
+          "l2_regularization": 10.0
+        },
+        "features": {
+          "percentage_policy": "clip",
+          "out_of_range_flags": true,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "2543cc3f0e96fffeb041d2ad41b9b3f91e09c8bf4b90ed890fc90f72809daf84",
+      "oof_metrics": {
+        "macro_f1": 0.915088008030358,
+        "accuracy": 0.915050505050505,
+        "confusion_matrix": [
+          [
+            2275,
+            92,
+            56,
+            52
+          ],
+          [
+            78,
+            2221,
+            116,
+            60
+          ],
+          [
+            56,
+            121,
+            2254,
+            44
+          ],
+          [
+            59,
+            65,
+            42,
+            2309
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9217990275526742,
+            "recall": 0.9191919191919192,
+            "f1-score": 0.9204936273518106,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8887555022008804,
+            "recall": 0.8973737373737374,
+            "f1-score": 0.8930438279051065,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.913290113452188,
+            "recall": 0.9107070707070707,
+            "f1-score": 0.9119967630993324,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9367139959432048,
+            "recall": 0.9329292929292929,
+            "f1-score": 0.9348178137651821,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9151396597872369,
+            "recall": 0.9150505050505051,
+            "f1-score": 0.915088008030358,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9151396597872368,
+            "recall": 0.915050505050505,
+            "f1-score": 0.9150880080303578,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T081633Z_cv_848a5546_f8372b",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T08:16:33.889225+00:00",
+        "git": {
+          "available": true,
+          "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+          "dirty": true,
+          "branch": "feat/task1-reproducible-pipeline"
+        },
+        "source_tree_sha256": "fbad5dbee1e42ce10aa8ff8957b514276a48fab4e1cfcb8d6b6179724f455315"
+      },
+      "source_summary_sha256": "5d39e833454a62435651226f3d39334a1fee17b0619c7aae59395926168eade7",
+      "source_fold_metrics_sha256": "0c3743e79c91ff58277da9f3c81a835f9f87c582d8d5a2d532d643190b6d87bd",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "hgb_flags": {
+      "config": {
+        "name": "hgb_flags",
+        "model_id": "hgb",
+        "model_params": {
+          "max_iter": 700,
+          "learning_rate": 0.03,
+          "max_leaf_nodes": 15,
+          "min_samples_leaf": 30,
+          "l2_regularization": 10.0
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": true,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "e98567f8e1b748173716fef26a5b3b845d8a4d48558315ae684444bb986cbbcf",
+      "oof_metrics": {
+        "macro_f1": 0.9159908502400317,
+        "accuracy": 0.915959595959596,
+        "confusion_matrix": [
+          [
+            2278,
+            95,
+            51,
+            51
+          ],
+          [
+            75,
+            2220,
+            114,
+            66
+          ],
+          [
+            58,
+            115,
+            2260,
+            42
+          ],
+          [
+            57,
+            66,
+            42,
+            2310
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9230145867098866,
+            "recall": 0.9204040404040404,
+            "f1-score": 0.9217074651021647,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8894230769230769,
+            "recall": 0.896969696969697,
+            "f1-score": 0.8931804465902233,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.9160924199432509,
+            "recall": 0.9131313131313131,
+            "f1-score": 0.914609469850263,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9356014580801945,
+            "recall": 0.9333333333333333,
+            "f1-score": 0.9344660194174758,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9160328854141021,
+            "recall": 0.9159595959595961,
+            "f1-score": 0.9159908502400317,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9160328854141021,
+            "recall": 0.915959595959596,
+            "f1-score": 0.9159908502400318,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T081633Z_cv_848a5546_f8372b",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T08:16:33.889225+00:00",
+        "git": {
+          "available": true,
+          "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+          "dirty": true,
+          "branch": "feat/task1-reproducible-pipeline"
+        },
+        "source_tree_sha256": "fbad5dbee1e42ce10aa8ff8957b514276a48fab4e1cfcb8d6b6179724f455315"
+      },
+      "source_summary_sha256": "47233518fa419d9d655fd18b871a96e20e0dab93d5b073c1ff57ef703b0f2b3e",
+      "source_fold_metrics_sha256": "5a2829a2ceb3d5e1a7072a7956bfd7375c4b08566384ef9b9bb66bc6f40c2efd",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "hgb_interactions": {
+      "config": {
+        "name": "hgb_interactions",
+        "model_id": "hgb",
+        "model_params": {
+          "max_iter": 700,
+          "learning_rate": 0.03,
+          "max_leaf_nodes": 15,
+          "min_samples_leaf": 30,
+          "l2_regularization": 10.0
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": true
+        },
+        "group_features": false
+      },
+      "config_sha256": "6791d2d27abbdb3f31384a69c960f90663180df112a509c412876ebcb78438d8",
+      "oof_metrics": {
+        "macro_f1": 0.9141084084989574,
+        "accuracy": 0.914040404040404,
+        "confusion_matrix": [
+          [
+            2271,
+            98,
+            55,
+            51
+          ],
+          [
+            80,
+            2219,
+            119,
+            57
+          ],
+          [
+            46,
+            126,
+            2260,
+            43
+          ],
+          [
+            63,
+            64,
+            49,
+            2299
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9231707317073171,
+            "recall": 0.9175757575757576,
+            "f1-score": 0.9203647416413374,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8851216593538094,
+            "recall": 0.8965656565656566,
+            "f1-score": 0.8908069048574869,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.9101892871526379,
+            "recall": 0.9131313131313131,
+            "f1-score": 0.9116579265832997,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9383673469387755,
+            "recall": 0.9288888888888889,
+            "f1-score": 0.9336040609137056,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.914212256288135,
+            "recall": 0.9140404040404041,
+            "f1-score": 0.9141084084989574,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.914212256288135,
+            "recall": 0.914040404040404,
+            "f1-score": 0.9141084084989574,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T081633Z_cv_848a5546_f8372b",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T08:16:33.889225+00:00",
+        "git": {
+          "available": true,
+          "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+          "dirty": true,
+          "branch": "feat/task1-reproducible-pipeline"
+        },
+        "source_tree_sha256": "fbad5dbee1e42ce10aa8ff8957b514276a48fab4e1cfcb8d6b6179724f455315"
+      },
+      "source_summary_sha256": "af7281174d27902fd662a71b4d0daafe009cb10946e26516864f4ffcbd13f972",
+      "source_fold_metrics_sha256": "7af4b89145b1008ead75ff3e78a1070ca12303dc3537d9809fdd5d18886bc375",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "hgb_native_reference": {
+      "config": {
+        "name": "hgb_native_reference",
+        "model_id": "hgb_native",
+        "model_params": {
+          "max_iter": 400,
+          "learning_rate": 0.05,
+          "max_leaf_nodes": 15,
+          "min_samples_leaf": 20,
+          "l2_regularization": 5.0
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "9ef122c0911d07ebcd2bf274fcef9e1129a48d1683392962a982cf66adf8673b",
+      "oof_metrics": {
+        "macro_f1": 0.9154003490676438,
+        "accuracy": 0.9153535353535354,
+        "confusion_matrix": [
+          [
+            2273,
+            98,
+            53,
+            51
+          ],
+          [
+            77,
+            2220,
+            116,
+            62
+          ],
+          [
+            55,
+            116,
+            2262,
+            42
+          ],
+          [
+            54,
+            66,
+            48,
+            2307
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9243594957299716,
+            "recall": 0.9183838383838384,
+            "f1-score": 0.9213619781110661,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.888,
+            "recall": 0.896969696969697,
+            "f1-score": 0.892462311557789,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.9124647035094796,
+            "recall": 0.9139393939393939,
+            "f1-score": 0.9132014533710133,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9370430544272949,
+            "recall": 0.9321212121212121,
+            "f1-score": 0.9345756532307069,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9154668134166865,
+            "recall": 0.9153535353535354,
+            "f1-score": 0.9154003490676438,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9154668134166866,
+            "recall": 0.9153535353535354,
+            "f1-score": 0.9154003490676438,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T081633Z_cv_848a5546_f8372b",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T08:16:33.889225+00:00",
+        "git": {
+          "available": true,
+          "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+          "dirty": true,
+          "branch": "feat/task1-reproducible-pipeline"
+        },
+        "source_tree_sha256": "fbad5dbee1e42ce10aa8ff8957b514276a48fab4e1cfcb8d6b6179724f455315"
+      },
+      "source_summary_sha256": "7cb9f75de83e221621f1c7d7c4ddcea5ee454cd425dabc0593dfc8fe7f4f4a0b",
+      "source_fold_metrics_sha256": "6e8a4dc3baee8086a19ba35c573dbf483e57e47069fafd07c8184a01fd8b8744",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "hgb_native_regularized": {
+      "config": {
+        "name": "hgb_native_regularized",
+        "model_id": "hgb_native",
+        "model_params": {
+          "max_iter": 700,
+          "learning_rate": 0.03,
+          "max_leaf_nodes": 15,
+          "min_samples_leaf": 30,
+          "l2_regularization": 10.0
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "ec850376347012723e653a81a535eb4bb34b7807729ff6b35968ec07d53ec97f",
+      "oof_metrics": {
+        "macro_f1": 0.9142749253597722,
+        "accuracy": 0.9142424242424242,
+        "confusion_matrix": [
+          [
+            2273,
+            91,
+            58,
+            53
+          ],
+          [
+            84,
+            2213,
+            117,
+            61
+          ],
+          [
+            57,
+            115,
+            2260,
+            43
+          ],
+          [
+            52,
+            70,
+            48,
+            2305
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.921735604217356,
+            "recall": 0.9183838383838384,
+            "f1-score": 0.9200566686905485,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8891120932101245,
+            "recall": 0.8941414141414141,
+            "f1-score": 0.8916196615632555,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.9101892871526379,
+            "recall": 0.9131313131313131,
+            "f1-score": 0.9116579265832997,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9362307067424858,
+            "recall": 0.9313131313131313,
+            "f1-score": 0.933765444601985,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9143169228306511,
+            "recall": 0.9142424242424243,
+            "f1-score": 0.9142749253597722,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.914316922830651,
+            "recall": 0.9142424242424242,
+            "f1-score": 0.9142749253597722,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T081633Z_cv_848a5546_f8372b",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T08:16:33.889225+00:00",
+        "git": {
+          "available": true,
+          "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+          "dirty": true,
+          "branch": "feat/task1-reproducible-pipeline"
+        },
+        "source_tree_sha256": "fbad5dbee1e42ce10aa8ff8957b514276a48fab4e1cfcb8d6b6179724f455315"
+      },
+      "source_summary_sha256": "443ebf84251a67cd73aec225a51d6d6ca0252aba3ee33e2991004c6169acf36a",
+      "source_fold_metrics_sha256": "e3455d841dac2cad6e1eebbbe97fbbcff8b1ae0370661e9114cc4464c27dc0b4",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "histogram_nb_mixture": {
+      "config": {
+        "name": "histogram_nb_mixture",
+        "model_id": "histogram_nb",
+        "model_params": {
+          "n_bins": 40,
+          "alpha": 0.5,
+          "contamination": 0.1,
+          "max_iter": 30
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "534e61c0b7c40e1db91601833a970302979798920b69f4647bbe436658bd7e4f",
+      "oof_metrics": {
+        "macro_f1": 0.876650687147921,
+        "accuracy": 0.8757575757575757,
+        "confusion_matrix": [
+          [
+            2105,
+            63,
+            275,
+            32
+          ],
+          [
+            101,
+            1967,
+            380,
+            27
+          ],
+          [
+            68,
+            57,
+            2322,
+            28
+          ],
+          [
+            75,
+            62,
+            62,
+            2276
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.8961260110685398,
+            "recall": 0.8505050505050505,
+            "f1-score": 0.8727197346600332,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.9153094462540716,
+            "recall": 0.7947474747474748,
+            "f1-score": 0.8507785467128027,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.7640671273445212,
+            "recall": 0.9381818181818182,
+            "f1-score": 0.8422198041349293,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9631823952602624,
+            "recall": 0.9195959595959596,
+            "f1-score": 0.9408846630839189,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.8846712449818488,
+            "recall": 0.8757575757575758,
+            "f1-score": 0.876650687147921,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.8846712449818487,
+            "recall": 0.8757575757575757,
+            "f1-score": 0.876650687147921,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T081633Z_cv_848a5546_f8372b",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T08:16:33.889225+00:00",
+        "git": {
+          "available": true,
+          "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+          "dirty": true,
+          "branch": "feat/task1-reproducible-pipeline"
+        },
+        "source_tree_sha256": "fbad5dbee1e42ce10aa8ff8957b514276a48fab4e1cfcb8d6b6179724f455315"
+      },
+      "source_summary_sha256": "90a6e66c6bb3cb31fcedb75868127aa4526e2ee6c5fc766ea96d9648c4c7c4c6",
+      "source_fold_metrics_sha256": "89ad2948a8d9c6e716e75abfabdc41e0e57a335fccadc5ce913f234b6f51fd50",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "histogram_nb_plain": {
+      "config": {
+        "name": "histogram_nb_plain",
+        "model_id": "histogram_nb",
+        "model_params": {
+          "n_bins": 24,
+          "alpha": 0.1,
+          "contamination": 0.0
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "9b97909011bb83e7ccf05ab5257cfbef2e08b5af629c61bec5df8b56cab79933",
+      "oof_metrics": {
+        "macro_f1": 0.9000825600668361,
+        "accuracy": 0.9,
+        "confusion_matrix": [
+          [
+            2280,
+            93,
+            70,
+            32
+          ],
+          [
+            105,
+            2104,
+            239,
+            27
+          ],
+          [
+            60,
+            112,
+            2254,
+            49
+          ],
+          [
+            72,
+            93,
+            38,
+            2272
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9058402860548271,
+            "recall": 0.9212121212121213,
+            "f1-score": 0.9134615384615384,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8759367194004996,
+            "recall": 0.8501010101010101,
+            "f1-score": 0.8628255074841091,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.8665897731641676,
+            "recall": 0.9107070707070707,
+            "f1-score": 0.888100866824271,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9546218487394958,
+            "recall": 0.917979797979798,
+            "f1-score": 0.9359423274974253,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9007471568397476,
+            "recall": 0.9,
+            "f1-score": 0.9000825600668361,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9007471568397475,
+            "recall": 0.9,
+            "f1-score": 0.9000825600668361,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T081633Z_cv_848a5546_f8372b",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T08:16:33.889225+00:00",
+        "git": {
+          "available": true,
+          "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+          "dirty": true,
+          "branch": "feat/task1-reproducible-pipeline"
+        },
+        "source_tree_sha256": "fbad5dbee1e42ce10aa8ff8957b514276a48fab4e1cfcb8d6b6179724f455315"
+      },
+      "source_summary_sha256": "f28a8f013e5e1367a6e2b111adf57336311cb16c55882e7461e71992e22ecbdc",
+      "source_fold_metrics_sha256": "2c6f7a62e26c5b6032b70c73687c4d8a53a35a9c14e1f57058f99ef352e35e6e",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "hgb_noise_floor0": {
+      "config": {
+        "name": "hgb_noise_floor0",
+        "model_id": "hgb",
+        "model_params": {
+          "max_iter": 700,
+          "learning_rate": 0.03,
+          "max_leaf_nodes": 15,
+          "min_samples_leaf": 30,
+          "l2_regularization": 10.0
+        },
+        "noise_weighting": {
+          "floor": 0.0
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "63b63a93dbf5bd0a1134010d06f54050790492e06770471cd868d8dda886062e",
+      "oof_metrics": {
+        "macro_f1": 0.8789650853556318,
+        "accuracy": 0.8787878787878788,
+        "confusion_matrix": [
+          [
+            2138,
+            109,
+            198,
+            30
+          ],
+          [
+            147,
+            1996,
+            294,
+            38
+          ],
+          [
+            99,
+            61,
+            2291,
+            24
+          ],
+          [
+            109,
+            63,
+            28,
+            2275
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.8576012835940634,
+            "recall": 0.8638383838383838,
+            "f1-score": 0.8607085346215781,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.895468820098699,
+            "recall": 0.8064646464646464,
+            "f1-score": 0.8486394557823129,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.8150124510850231,
+            "recall": 0.9256565656565656,
+            "f1-score": 0.8668180098373061,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9611322348964935,
+            "recall": 0.9191919191919192,
+            "f1-score": 0.93969434118133,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.8823036974185697,
+            "recall": 0.8787878787878788,
+            "f1-score": 0.8789650853556318,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.8823036974185695,
+            "recall": 0.8787878787878788,
+            "f1-score": 0.8789650853556317,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T082242Z_cv_397c348c_246968",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T08:22:42.006589+00:00",
+        "git": {
+          "available": true,
+          "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+          "dirty": true,
+          "branch": "feat/task1-reproducible-pipeline"
+        },
+        "source_tree_sha256": "d4d9f06270903ba2c6ffa4ca51b8ded3a9472cb7aba8d8fdca9155d92c0bf6ad"
+      },
+      "source_summary_sha256": "63907d84bb4866cab1998a59ef9da1d997a43700ca108a0db3eafd92faa7e339",
+      "source_fold_metrics_sha256": "29e9059d4f267744e36d4d12af4289299d881d53dd5a88bce09fdcb18a4e3596",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "hgb_noise_floor20": {
+      "config": {
+        "name": "hgb_noise_floor20",
+        "model_id": "hgb",
+        "model_params": {
+          "max_iter": 700,
+          "learning_rate": 0.03,
+          "max_leaf_nodes": 15,
+          "min_samples_leaf": 30,
+          "l2_regularization": 10.0
+        },
+        "noise_weighting": {
+          "floor": 0.2
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "5a9e232ab9a465f2bc1a032b0df3cb08626b9ab2dc75b1890966f7295f84c924",
+      "oof_metrics": {
+        "macro_f1": 0.9162005633531267,
+        "accuracy": 0.9161616161616162,
+        "confusion_matrix": [
+          [
+            2269,
+            94,
+            61,
+            51
+          ],
+          [
+            64,
+            2215,
+            137,
+            59
+          ],
+          [
+            57,
+            101,
+            2276,
+            41
+          ],
+          [
+            52,
+            68,
+            45,
+            2310
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9291564291564292,
+            "recall": 0.9167676767676768,
+            "f1-score": 0.9229204799674599,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.893866020984665,
+            "recall": 0.8949494949494949,
+            "f1-score": 0.8944074298405007,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.9035331480746328,
+            "recall": 0.9195959595959596,
+            "f1-score": 0.9114937925510612,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.938642828118651,
+            "recall": 0.9333333333333333,
+            "f1-score": 0.9359805510534847,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9162996065835944,
+            "recall": 0.9161616161616162,
+            "f1-score": 0.9162005633531267,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9162996065835944,
+            "recall": 0.9161616161616162,
+            "f1-score": 0.9162005633531266,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T082242Z_cv_397c348c_246968",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T08:22:42.006589+00:00",
+        "git": {
+          "available": true,
+          "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+          "dirty": true,
+          "branch": "feat/task1-reproducible-pipeline"
+        },
+        "source_tree_sha256": "d4d9f06270903ba2c6ffa4ca51b8ded3a9472cb7aba8d8fdca9155d92c0bf6ad"
+      },
+      "source_summary_sha256": "9ff8e7d0abdb1705cfaf49dc29cc67d5309ce5e5b7ecf9fa7ef3a7cf9263df8c",
+      "source_fold_metrics_sha256": "7122edddb3fc6649d098eefa2ca3736f5f3b1e82b846593da513aea880ab466b",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "hgb_noise_floor50": {
+      "config": {
+        "name": "hgb_noise_floor50",
+        "model_id": "hgb",
+        "model_params": {
+          "max_iter": 700,
+          "learning_rate": 0.03,
+          "max_leaf_nodes": 15,
+          "min_samples_leaf": 30,
+          "l2_regularization": 10.0
+        },
+        "noise_weighting": {
+          "floor": 0.5
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "34674d800d5499ab9c612d9521de63c8ef8e9bfa228f822d1c936b201fc02453",
+      "oof_metrics": {
+        "macro_f1": 0.9150694373622862,
+        "accuracy": 0.915050505050505,
+        "confusion_matrix": [
+          [
+            2276,
+            90,
+            58,
+            51
+          ],
+          [
+            73,
+            2220,
+            118,
+            64
+          ],
+          [
+            60,
+            107,
+            2260,
+            48
+          ],
+          [
+            57,
+            64,
+            51,
+            2303
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9229521492295215,
+            "recall": 0.9195959595959596,
+            "f1-score": 0.92127099777373,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8948004836759371,
+            "recall": 0.896969696969697,
+            "f1-score": 0.8958837772397095,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.9087253719340571,
+            "recall": 0.9131313131313131,
+            "f1-score": 0.9109230149133414,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9339010543390105,
+            "recall": 0.9305050505050505,
+            "f1-score": 0.9321999595223639,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9150947647946315,
+            "recall": 0.9150505050505051,
+            "f1-score": 0.9150694373622862,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9150947647946316,
+            "recall": 0.915050505050505,
+            "f1-score": 0.9150694373622862,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T082242Z_cv_397c348c_246968",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T08:22:42.006589+00:00",
+        "git": {
+          "available": true,
+          "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+          "dirty": true,
+          "branch": "feat/task1-reproducible-pipeline"
+        },
+        "source_tree_sha256": "d4d9f06270903ba2c6ffa4ca51b8ded3a9472cb7aba8d8fdca9155d92c0bf6ad"
+      },
+      "source_summary_sha256": "bc841c1cb84d62642ecdf1546313aa43e7d1e1b996bf227adcc8509d0b6b00e0",
+      "source_fold_metrics_sha256": "33c31c71ba82b4a9a7c91d759b9da48e58b5c7ca5e66a3086779fd81acf6080c",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    }
+  },
+  "runs": [
+    {
+      "run_id": "20261106T075315Z_cv_0edce7a8_c8143a",
+      "status": "complete",
+      "run_complete": true,
+      "timestamp_utc": "2026-11-06T07:53:15.905667+00:00",
+      "git": {
+        "available": null,
+        "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+        "dirty": true,
+        "branch": "feat/task1-reproducible-pipeline"
+      },
+      "source_tree_sha256": "9c8cc7f510da78dd6e09d763ee5f23c761b250de7073b1cf081314c656428ad5"
+    },
+    {
+      "run_id": "20261106T080116Z_cv_44bb9668_162043",
+      "status": "stopped_after_first_candidate",
+      "run_complete": false,
+      "timestamp_utc": "2026-11-06T08:01:16.313556+00:00",
+      "git": {
+        "available": true,
+        "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+        "dirty": true,
+        "branch": "feat/task1-reproducible-pipeline"
+      },
+      "source_tree_sha256": "606c917f66131806c78740abdef8dee2e178f9e027bcd99fd646f7d5ab730dc9"
+    },
+    {
+      "run_id": "20261106T081019Z_cv_59d0760d_92a354",
+      "status": "complete",
+      "run_complete": true,
+      "timestamp_utc": "2026-11-06T08:10:19.283056+00:00",
+      "git": {
+        "available": true,
+        "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+        "dirty": true,
+        "branch": "feat/task1-reproducible-pipeline"
+      },
+      "source_tree_sha256": "6ff8df83d8a995ef0afaed5cb6fd930333f23c2abdc66abc202bcd0753915118"
+    },
+    {
+      "run_id": "20261106T081633Z_cv_848a5546_f8372b",
+      "status": "complete",
+      "run_complete": true,
+      "timestamp_utc": "2026-11-06T08:16:33.889225+00:00",
+      "git": {
+        "available": true,
+        "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+        "dirty": true,
+        "branch": "feat/task1-reproducible-pipeline"
+      },
+      "source_tree_sha256": "fbad5dbee1e42ce10aa8ff8957b514276a48fab4e1cfcb8d6b6179724f455315"
+    },
+    {
+      "run_id": "20261106T082242Z_cv_397c348c_246968",
+      "status": "complete",
+      "run_complete": true,
+      "timestamp_utc": "2026-11-06T08:22:42.006589+00:00",
+      "git": {
+        "available": true,
+        "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+        "dirty": true,
+        "branch": "feat/task1-reproducible-pipeline"
+      },
+      "source_tree_sha256": "d4d9f06270903ba2c6ffa4ca51b8ded3a9472cb7aba8d8fdca9155d92c0bf6ad"
+    },
+    {
+      "run_id": "20261106T082753Z_nested_81a47e6a_de44f7",
+      "status": "complete",
+      "run_complete": true,
+      "timestamp_utc": "2026-11-06T08:27:53.891058+00:00",
+      "git": {
+        "available": true,
+        "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+        "dirty": true,
+        "branch": "feat/task1-reproducible-pipeline"
+      },
+      "source_tree_sha256": "87620ae29cba636b38341ba5a6ad736d364d6b922a0df5352dfe9c81b4240b54"
+    },
+    {
+      "run_id": "20261106T083032Z_nested_442297e6_f909ec",
+      "status": "complete",
+      "run_complete": true,
+      "timestamp_utc": "2026-11-06T08:30:32.059742+00:00",
+      "git": {
+        "available": true,
+        "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+        "dirty": true,
+        "branch": "feat/task1-reproducible-pipeline"
+      },
+      "source_tree_sha256": "87620ae29cba636b38341ba5a6ad736d364d6b922a0df5352dfe9c81b4240b54"
+    }
+  ],
+  "nested_evaluations": [
+    {
+      "source": {
+        "run_id": "20261106T082753Z_nested_81a47e6a_de44f7",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T08:27:53.891058+00:00",
+        "git": {
+          "available": true,
+          "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+          "dirty": true,
+          "branch": "feat/task1-reproducible-pipeline"
+        },
+        "source_tree_sha256": "87620ae29cba636b38341ba5a6ad736d364d6b922a0df5352dfe9c81b4240b54"
+      },
+      "inner_splits": 3,
+      "config": {
+        "schema_version": 1,
+        "validation": {
+          "n_splits": 5,
+          "split_seed": 5434,
+          "model_seed": 5434
+        },
+        "inner_splits": 3,
+        "finalization": {
+          "method": "full_refit"
+        },
+        "description": "Frozen candidate recipe after exploratory same-fold comparisons; nested evaluation isolates blending, not the earlier global candidate search.",
+        "models": [
+          {
+            "name": "hgb_reference",
+            "model_id": "hgb",
+            "model_params": {
+              "max_iter": 250,
+              "learning_rate": 0.07,
+              "max_leaf_nodes": 15,
+              "l2_regularization": 1.0
+            },
+            "features": {
+              "percentage_policy": "retain",
+              "out_of_range_flags": false,
+              "interactions": false
+            },
+            "group_features": false
+          },
+          {
+            "name": "hgb_regularized",
+            "model_id": "hgb",
+            "model_params": {
+              "max_iter": 700,
+              "learning_rate": 0.03,
+              "max_leaf_nodes": 15,
+              "min_samples_leaf": 30,
+              "l2_regularization": 10.0
+            },
+            "features": {
+              "percentage_policy": "retain",
+              "out_of_range_flags": false,
+              "interactions": false
+            },
+            "group_features": false
+          },
+          {
+            "name": "numpy_forest100",
+            "model_id": "numpy_forest",
+            "model_params": {
+              "n_estimators": 100,
+              "min_samples_leaf": 2,
+              "max_features": "sqrt"
+            },
+            "features": {
+              "percentage_policy": "retain",
+              "out_of_range_flags": false,
+              "interactions": false
+            },
+            "group_features": false
+          }
+        ],
+        "blend": {
+          "n_trials": 256,
+          "allow_class_multipliers": false
+        }
+      },
+      "outer_fold_macro_f1_mean": 0.9138753429476856,
+      "outer_fold_macro_f1_std": 0.006457089716898567,
+      "oof_metrics": {
+        "macro_f1": 0.9138524936982626,
+        "accuracy": 0.9136363636363637,
+        "confusion_matrix": [
+          [
+            2253,
+            127,
+            56,
+            39
+          ],
+          [
+            62,
+            2238,
+            125,
+            50
+          ],
+          [
+            43,
+            127,
+            2265,
+            40
+          ],
+          [
+            56,
+            77,
+            53,
+            2289
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9333057166528583,
+            "recall": 0.9103030303030303,
+            "f1-score": 0.9216608713438331,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8711560918645387,
+            "recall": 0.9042424242424243,
+            "f1-score": 0.887390959555908,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.9063625450180072,
+            "recall": 0.9151515151515152,
+            "f1-score": 0.9107358262967431,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9466501240694789,
+            "recall": 0.9248484848484848,
+            "f1-score": 0.9356223175965666,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9143686194012208,
+            "recall": 0.9136363636363636,
+            "f1-score": 0.9138524936982626,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9143686194012208,
+            "recall": 0.9136363636363637,
+            "f1-score": 0.9138524936982626,
+            "support": 9900.0
+          }
+        }
+      },
+      "ablations": {
+        "hgb_reference": {
+          "macro_f1": 0.9155978565360945,
+          "accuracy": 0.9155555555555556,
+          "confusion_matrix": [
+            [
+              2272,
+              100,
+              54,
+              49
+            ],
+            [
+              77,
+              2220,
+              115,
+              63
+            ],
+            [
+              52,
+              115,
+              2266,
+              42
+            ],
+            [
+              58,
+              60,
+              51,
+              2306
+            ]
+          ],
+          "classification_report": {
+            "Sunny": {
+              "precision": 0.9239528263521757,
+              "recall": 0.917979797979798,
+              "f1-score": 0.9209566274827726,
+              "support": 2475.0
+            },
+            "Cloudy": {
+              "precision": 0.8897795591182365,
+              "recall": 0.896969696969697,
+              "f1-score": 0.8933601609657947,
+              "support": 2475.0
+            },
+            "Rainy": {
+              "precision": 0.911504424778761,
+              "recall": 0.9155555555555556,
+              "f1-score": 0.9135254988913526,
+              "support": 2475.0
+            },
+            "Snowy": {
+              "precision": 0.9373983739837398,
+              "recall": 0.9317171717171717,
+              "f1-score": 0.934549138804458,
+              "support": 2475.0
+            },
+            "macro avg": {
+              "precision": 0.9156587960582283,
+              "recall": 0.9155555555555557,
+              "f1-score": 0.9155978565360945,
+              "support": 9900.0
+            },
+            "weighted avg": {
+              "precision": 0.9156587960582282,
+              "recall": 0.9155555555555556,
+              "f1-score": 0.9155978565360945,
+              "support": 9900.0
+            }
+          }
+        },
+        "hgb_regularized": {
+          "macro_f1": 0.9159908502400317,
+          "accuracy": 0.915959595959596,
+          "confusion_matrix": [
+            [
+              2278,
+              95,
+              51,
+              51
+            ],
+            [
+              75,
+              2220,
+              114,
+              66
+            ],
+            [
+              58,
+              115,
+              2260,
+              42
+            ],
+            [
+              57,
+              66,
+              42,
+              2310
+            ]
+          ],
+          "classification_report": {
+            "Sunny": {
+              "precision": 0.9230145867098866,
+              "recall": 0.9204040404040404,
+              "f1-score": 0.9217074651021647,
+              "support": 2475.0
+            },
+            "Cloudy": {
+              "precision": 0.8894230769230769,
+              "recall": 0.896969696969697,
+              "f1-score": 0.8931804465902233,
+              "support": 2475.0
+            },
+            "Rainy": {
+              "precision": 0.9160924199432509,
+              "recall": 0.9131313131313131,
+              "f1-score": 0.914609469850263,
+              "support": 2475.0
+            },
+            "Snowy": {
+              "precision": 0.9356014580801945,
+              "recall": 0.9333333333333333,
+              "f1-score": 0.9344660194174758,
+              "support": 2475.0
+            },
+            "macro avg": {
+              "precision": 0.9160328854141021,
+              "recall": 0.9159595959595961,
+              "f1-score": 0.9159908502400317,
+              "support": 9900.0
+            },
+            "weighted avg": {
+              "precision": 0.9160328854141021,
+              "recall": 0.915959595959596,
+              "f1-score": 0.9159908502400318,
+              "support": 9900.0
+            }
+          }
+        },
+        "numpy_forest100": {
+          "macro_f1": 0.9143831884831561,
+          "accuracy": 0.9141414141414141,
+          "confusion_matrix": [
+            [
+              2257,
+              127,
+              50,
+              41
+            ],
+            [
+              61,
+              2244,
+              125,
+              45
+            ],
+            [
+              38,
+              133,
+              2264,
+              40
+            ],
+            [
+              55,
+              75,
+              60,
+              2285
+            ]
+          ],
+          "classification_report": {
+            "Sunny": {
+              "precision": 0.9361260887598507,
+              "recall": 0.9119191919191919,
+              "f1-score": 0.9238641015145314,
+              "support": 2475.0
+            },
+            "Cloudy": {
+              "precision": 0.8701046917409849,
+              "recall": 0.9066666666666666,
+              "f1-score": 0.88800949742778,
+              "support": 2475.0
+            },
+            "Rainy": {
+              "precision": 0.9059623849539816,
+              "recall": 0.9147474747474748,
+              "f1-score": 0.9103337354242059,
+              "support": 2475.0
+            },
+            "Snowy": {
+              "precision": 0.9477395271671506,
+              "recall": 0.9232323232323232,
+              "f1-score": 0.9353254195661073,
+              "support": 2475.0
+            },
+            "macro avg": {
+              "precision": 0.914983173155492,
+              "recall": 0.9141414141414141,
+              "f1-score": 0.9143831884831561,
+              "support": 9900.0
+            },
+            "weighted avg": {
+              "precision": 0.9149831731554919,
+              "recall": 0.9141414141414141,
+              "f1-score": 0.9143831884831561,
+              "support": 9900.0
+            }
+          }
+        },
+        "equal_probability_average": {
+          "macro_f1": 0.91563329422699,
+          "accuracy": 0.9155555555555556,
+          "confusion_matrix": [
+            [
+              2272,
+              100,
+              54,
+              49
+            ],
+            [
+              73,
+              2227,
+              118,
+              57
+            ],
+            [
+              55,
+              118,
+              2265,
+              37
+            ],
+            [
+              60,
+              66,
+              49,
+              2300
+            ]
+          ],
+          "classification_report": {
+            "Sunny": {
+              "precision": 0.9235772357723577,
+              "recall": 0.917979797979798,
+              "f1-score": 0.9207700101317122,
+              "support": 2475.0
+            },
+            "Cloudy": {
+              "precision": 0.8868976503385105,
+              "recall": 0.8997979797979798,
+              "f1-score": 0.8933012434817489,
+              "support": 2475.0
+            },
+            "Rainy": {
+              "precision": 0.911102172164119,
+              "recall": 0.9151515151515152,
+              "f1-score": 0.9131223543640395,
+              "support": 2475.0
+            },
+            "Snowy": {
+              "precision": 0.9414654113794515,
+              "recall": 0.9292929292929293,
+              "f1-score": 0.9353395689304596,
+              "support": 2475.0
+            },
+            "macro avg": {
+              "precision": 0.9157606174136097,
+              "recall": 0.9155555555555555,
+              "f1-score": 0.91563329422699,
+              "support": 9900.0
+            },
+            "weighted avg": {
+              "precision": 0.9157606174136098,
+              "recall": 0.9155555555555556,
+              "f1-score": 0.91563329422699,
+              "support": 9900.0
+            }
+          }
+        },
+        "inner_selected_blend": {
+          "macro_f1": 0.9138524936982626,
+          "accuracy": 0.9136363636363637,
+          "confusion_matrix": [
+            [
+              2253,
+              127,
+              56,
+              39
+            ],
+            [
+              62,
+              2238,
+              125,
+              50
+            ],
+            [
+              43,
+              127,
+              2265,
+              40
+            ],
+            [
+              56,
+              77,
+              53,
+              2289
+            ]
+          ],
+          "classification_report": {
+            "Sunny": {
+              "precision": 0.9333057166528583,
+              "recall": 0.9103030303030303,
+              "f1-score": 0.9216608713438331,
+              "support": 2475.0
+            },
+            "Cloudy": {
+              "precision": 0.8711560918645387,
+              "recall": 0.9042424242424243,
+              "f1-score": 0.887390959555908,
+              "support": 2475.0
+            },
+            "Rainy": {
+              "precision": 0.9063625450180072,
+              "recall": 0.9151515151515152,
+              "f1-score": 0.9107358262967431,
+              "support": 2475.0
+            },
+            "Snowy": {
+              "precision": 0.9466501240694789,
+              "recall": 0.9248484848484848,
+              "f1-score": 0.9356223175965666,
+              "support": 2475.0
+            },
+            "macro avg": {
+              "precision": 0.9143686194012208,
+              "recall": 0.9136363636363636,
+              "f1-score": 0.9138524936982626,
+              "support": 9900.0
+            },
+            "weighted avg": {
+              "precision": 0.9143686194012208,
+              "recall": 0.9136363636363637,
+              "f1-score": 0.9138524936982626,
+              "support": 9900.0
+            }
+          }
+        }
+      },
+      "outer_folds": [
+        {
+          "fold": 0,
+          "metrics": {
+            "macro_f1": 0.9203048192972368,
+            "accuracy": 0.9202020202020202,
+            "confusion_matrix": [
+              [
+                449,
+                19,
+                15,
+                12
+              ],
+              [
+                7,
+                450,
+                28,
+                10
+              ],
+              [
+                10,
+                21,
+                457,
+                7
+              ],
+              [
+                8,
+                14,
+                7,
+                466
+              ]
+            ],
+            "classification_report": {
+              "Sunny": {
+                "precision": 0.9472573839662447,
+                "recall": 0.907070707070707,
+                "f1-score": 0.9267285861713106,
+                "support": 495.0
+              },
+              "Cloudy": {
+                "precision": 0.8928571428571429,
+                "recall": 0.9090909090909091,
+                "f1-score": 0.9009009009009009,
+                "support": 495.0
+              },
+              "Rainy": {
+                "precision": 0.9013806706114399,
+                "recall": 0.9232323232323232,
+                "f1-score": 0.9121756487025948,
+                "support": 495.0
+              },
+              "Snowy": {
+                "precision": 0.9414141414141414,
+                "recall": 0.9414141414141414,
+                "f1-score": 0.9414141414141414,
+                "support": 495.0
+              },
+              "macro avg": {
+                "precision": 0.9207273347122422,
+                "recall": 0.9202020202020201,
+                "f1-score": 0.9203048192972368,
+                "support": 1980.0
+              },
+              "weighted avg": {
+                "precision": 0.9207273347122422,
+                "recall": 0.9202020202020202,
+                "f1-score": 0.920304819297237,
+                "support": 1980.0
+              }
+            }
+          },
+          "recipe": {
+            "schema_version": 1,
+            "labels": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "model_ids": [
+              "hgb_reference",
+              "hgb_regularized",
+              "numpy_forest100"
+            ],
+            "weights": [
+              0.27755035919154464,
+              0.1033205266750823,
+              0.619129114133373
+            ],
+            "class_multipliers": [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "selection_macro_f1": 0.9161478626752072,
+            "selection_baseline_macro_f1": 0.9141130935560067,
+            "selection_delta": 0.00203476911920053,
+            "selected_candidate": "seeded_simplex",
+            "evaluation_scope": "Selection score on the supplied labels; OOF used to tune weights is not independent evaluation. Evaluate the frozen recipe on separate outer-fold predictions before claiming an improvement.",
+            "search": {
+              "seed": 5434,
+              "random_simplex_trials": 256,
+              "allow_class_multipliers": false,
+              "evaluated_candidates": 269
+            }
+          }
+        },
+        {
+          "fold": 1,
+          "metrics": {
+            "macro_f1": 0.9141713790734705,
+            "accuracy": 0.9141414141414141,
+            "confusion_matrix": [
+              [
+                458,
+                19,
+                10,
+                8
+              ],
+              [
+                19,
+                437,
+                25,
+                14
+              ],
+              [
+                11,
+                25,
+                455,
+                4
+              ],
+              [
+                13,
+                12,
+                10,
+                460
+              ]
+            ],
+            "classification_report": {
+              "Sunny": {
+                "precision": 0.9141716566866267,
+                "recall": 0.9252525252525252,
+                "f1-score": 0.9196787148594378,
+                "support": 495.0
+              },
+              "Cloudy": {
+                "precision": 0.8864097363083164,
+                "recall": 0.8828282828282829,
+                "f1-score": 0.8846153846153846,
+                "support": 495.0
+              },
+              "Rainy": {
+                "precision": 0.91,
+                "recall": 0.9191919191919192,
+                "f1-score": 0.914572864321608,
+                "support": 495.0
+              },
+              "Snowy": {
+                "precision": 0.9465020576131687,
+                "recall": 0.9292929292929293,
+                "f1-score": 0.9378185524974516,
+                "support": 495.0
+              },
+              "macro avg": {
+                "precision": 0.914270862652028,
+                "recall": 0.9141414141414141,
+                "f1-score": 0.9141713790734705,
+                "support": 1980.0
+              },
+              "weighted avg": {
+                "precision": 0.914270862652028,
+                "recall": 0.9141414141414141,
+                "f1-score": 0.9141713790734705,
+                "support": 1980.0
+              }
+            }
+          },
+          "recipe": {
+            "schema_version": 1,
+            "labels": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "model_ids": [
+              "hgb_reference",
+              "hgb_regularized",
+              "numpy_forest100"
+            ],
+            "weights": [
+              0.03811266777218365,
+              0.3673937595805409,
+              0.5944935726472755
+            ],
+            "class_multipliers": [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "selection_macro_f1": 0.9124910206844667,
+            "selection_baseline_macro_f1": 0.9104296410158531,
+            "selection_delta": 0.0020613796686136387,
+            "selected_candidate": "seeded_simplex",
+            "evaluation_scope": "Selection score on the supplied labels; OOF used to tune weights is not independent evaluation. Evaluate the frozen recipe on separate outer-fold predictions before claiming an improvement.",
+            "search": {
+              "seed": 5435,
+              "random_simplex_trials": 256,
+              "allow_class_multipliers": false,
+              "evaluated_candidates": 269
+            }
+          }
+        },
+        {
+          "fold": 2,
+          "metrics": {
+            "macro_f1": 0.9030749228008375,
+            "accuracy": 0.9025252525252525,
+            "confusion_matrix": [
+              [
+                443,
+                39,
+                10,
+                3
+              ],
+              [
+                12,
+                450,
+                27,
+                6
+              ],
+              [
+                10,
+                26,
+                447,
+                12
+              ],
+              [
+                11,
+                22,
+                15,
+                447
+              ]
+            ],
+            "classification_report": {
+              "Sunny": {
+                "precision": 0.930672268907563,
+                "recall": 0.8949494949494949,
+                "f1-score": 0.9124613800205973,
+                "support": 495.0
+              },
+              "Cloudy": {
+                "precision": 0.8379888268156425,
+                "recall": 0.9090909090909091,
+                "f1-score": 0.872093023255814,
+                "support": 495.0
+              },
+              "Rainy": {
+                "precision": 0.8957915831663327,
+                "recall": 0.9030303030303031,
+                "f1-score": 0.8993963782696177,
+                "support": 495.0
+              },
+              "Snowy": {
+                "precision": 0.9551282051282052,
+                "recall": 0.9030303030303031,
+                "f1-score": 0.9283489096573209,
+                "support": 495.0
+              },
+              "macro avg": {
+                "precision": 0.9048952210044359,
+                "recall": 0.9025252525252525,
+                "f1-score": 0.9030749228008375,
+                "support": 1980.0
+              },
+              "weighted avg": {
+                "precision": 0.9048952210044359,
+                "recall": 0.9025252525252525,
+                "f1-score": 0.9030749228008373,
+                "support": 1980.0
+              }
+            }
+          },
+          "recipe": {
+            "schema_version": 1,
+            "labels": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "model_ids": [
+              "hgb_reference",
+              "hgb_regularized",
+              "numpy_forest100"
+            ],
+            "weights": [
+              0.005625739984868889,
+              3.08310610095627e-05,
+              0.9943434289541215
+            ],
+            "class_multipliers": [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "selection_macro_f1": 0.9161656047316652,
+            "selection_baseline_macro_f1": 0.9142126147958601,
+            "selection_delta": 0.0019529899358050606,
+            "selected_candidate": "seeded_simplex",
+            "evaluation_scope": "Selection score on the supplied labels; OOF used to tune weights is not independent evaluation. Evaluate the frozen recipe on separate outer-fold predictions before claiming an improvement.",
+            "search": {
+              "seed": 5436,
+              "random_simplex_trials": 256,
+              "allow_class_multipliers": false,
+              "evaluated_candidates": 269
+            }
+          }
+        },
+        {
+          "fold": 3,
+          "metrics": {
+            "macro_f1": 0.9163592916417457,
+            "accuracy": 0.9161616161616162,
+            "confusion_matrix": [
+              [
+                455,
+                25,
+                8,
+                7
+              ],
+              [
+                14,
+                451,
+                23,
+                7
+              ],
+              [
+                9,
+                25,
+                453,
+                8
+              ],
+              [
+                17,
+                13,
+                10,
+                455
+              ]
+            ],
+            "classification_report": {
+              "Sunny": {
+                "precision": 0.9191919191919192,
+                "recall": 0.9191919191919192,
+                "f1-score": 0.9191919191919192,
+                "support": 495.0
+              },
+              "Cloudy": {
+                "precision": 0.877431906614786,
+                "recall": 0.9111111111111111,
+                "f1-score": 0.8939544103072349,
+                "support": 495.0
+              },
+              "Rainy": {
+                "precision": 0.917004048582996,
+                "recall": 0.9151515151515152,
+                "f1-score": 0.916076845298281,
+                "support": 495.0
+              },
+              "Snowy": {
+                "precision": 0.9538784067085954,
+                "recall": 0.9191919191919192,
+                "f1-score": 0.9362139917695473,
+                "support": 495.0
+              },
+              "macro avg": {
+                "precision": 0.916876570274574,
+                "recall": 0.9161616161616162,
+                "f1-score": 0.9163592916417457,
+                "support": 1980.0
+              },
+              "weighted avg": {
+                "precision": 0.9168765702745741,
+                "recall": 0.9161616161616162,
+                "f1-score": 0.9163592916417455,
+                "support": 1980.0
+              }
+            }
+          },
+          "recipe": {
+            "schema_version": 1,
+            "labels": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "model_ids": [
+              "hgb_reference",
+              "hgb_regularized",
+              "numpy_forest100"
+            ],
+            "weights": [
+              0.07607892993881482,
+              0.04286874379225728,
+              0.8810523262689279
+            ],
+            "class_multipliers": [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "selection_macro_f1": 0.9143456701809197,
+            "selection_baseline_macro_f1": 0.9126865877015488,
+            "selection_delta": 0.0016590824793709658,
+            "selected_candidate": "seeded_simplex",
+            "evaluation_scope": "Selection score on the supplied labels; OOF used to tune weights is not independent evaluation. Evaluate the frozen recipe on separate outer-fold predictions before claiming an improvement.",
+            "search": {
+              "seed": 5437,
+              "random_simplex_trials": 256,
+              "allow_class_multipliers": false,
+              "evaluated_candidates": 269
+            }
+          }
+        },
+        {
+          "fold": 4,
+          "metrics": {
+            "macro_f1": 0.9154663019251373,
+            "accuracy": 0.9151515151515152,
+            "confusion_matrix": [
+              [
+                448,
+                25,
+                13,
+                9
+              ],
+              [
+                10,
+                450,
+                22,
+                13
+              ],
+              [
+                3,
+                30,
+                453,
+                9
+              ],
+              [
+                7,
+                16,
+                11,
+                461
+              ]
+            ],
+            "classification_report": {
+              "Sunny": {
+                "precision": 0.9572649572649573,
+                "recall": 0.9050505050505051,
+                "f1-score": 0.9304257528556594,
+                "support": 495.0
+              },
+              "Cloudy": {
+                "precision": 0.8637236084452975,
+                "recall": 0.9090909090909091,
+                "f1-score": 0.8858267716535433,
+                "support": 495.0
+              },
+              "Rainy": {
+                "precision": 0.9078156312625251,
+                "recall": 0.9151515151515152,
+                "f1-score": 0.9114688128772636,
+                "support": 495.0
+              },
+              "Snowy": {
+                "precision": 0.9369918699186992,
+                "recall": 0.9313131313131313,
+                "f1-score": 0.9341438703140831,
+                "support": 495.0
+              },
+              "macro avg": {
+                "precision": 0.9164490167228698,
+                "recall": 0.9151515151515152,
+                "f1-score": 0.9154663019251373,
+                "support": 1980.0
+              },
+              "weighted avg": {
+                "precision": 0.9164490167228697,
+                "recall": 0.9151515151515152,
+                "f1-score": 0.9154663019251373,
+                "support": 1980.0
+              }
+            }
+          },
+          "recipe": {
+            "schema_version": 1,
+            "labels": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "model_ids": [
+              "hgb_reference",
+              "hgb_regularized",
+              "numpy_forest100"
+            ],
+            "weights": [
+              0.08628608411792438,
+              1.0027858504462818e-05,
+              0.9137038880235712
+            ],
+            "class_multipliers": [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "selection_macro_f1": 0.9159812757050441,
+            "selection_baseline_macro_f1": 0.9124167285362996,
+            "selection_delta": 0.0035645471687444363,
+            "selected_candidate": "seeded_simplex",
+            "evaluation_scope": "Selection score on the supplied labels; OOF used to tune weights is not independent evaluation. Evaluate the frozen recipe on separate outer-fold predictions before claiming an improvement.",
+            "search": {
+              "seed": 5438,
+              "random_simplex_trials": 256,
+              "allow_class_multipliers": false,
+              "evaluated_candidates": 269
+            }
+          }
+        }
+      ],
+      "evaluation_scope": "Outer-fold evaluation of fixed candidate configs with inner-only blend selection. Candidate configs were previously explored on these data; not an independent test of the entire search."
+    },
+    {
+      "source": {
+        "run_id": "20261106T083032Z_nested_442297e6_f909ec",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T08:30:32.059742+00:00",
+        "git": {
+          "available": true,
+          "commit": "6a216538195db2042ebfdf1307bb1d456c42607f",
+          "dirty": true,
+          "branch": "feat/task1-reproducible-pipeline"
+        },
+        "source_tree_sha256": "87620ae29cba636b38341ba5a6ad736d364d6b922a0df5352dfe9c81b4240b54"
+      },
+      "inner_splits": 3,
+      "config": {
+        "schema_version": 1,
+        "validation": {
+          "n_splits": 5,
+          "split_seed": 5434,
+          "model_seed": 5434
+        },
+        "inner_splits": 3,
+        "finalization": {
+          "method": "full_refit"
+        },
+        "description": "Frozen candidate recipe after exploratory same-fold comparisons; nested evaluation isolates blending, not the earlier global candidate search.",
+        "models": [
+          {
+            "name": "hgb_regularized",
+            "model_id": "hgb",
+            "model_params": {
+              "max_iter": 700,
+              "learning_rate": 0.03,
+              "max_leaf_nodes": 15,
+              "min_samples_leaf": 30,
+              "l2_regularization": 10.0
+            },
+            "features": {
+              "percentage_policy": "retain",
+              "out_of_range_flags": false,
+              "interactions": false
+            },
+            "group_features": false
+          },
+          {
+            "name": "hgb_noise_floor20",
+            "model_id": "hgb",
+            "model_params": {
+              "max_iter": 700,
+              "learning_rate": 0.03,
+              "max_leaf_nodes": 15,
+              "min_samples_leaf": 30,
+              "l2_regularization": 10.0
+            },
+            "noise_weighting": {
+              "floor": 0.2
+            },
+            "features": {
+              "percentage_policy": "retain",
+              "out_of_range_flags": false,
+              "interactions": false
+            },
+            "group_features": false
+          },
+          {
+            "name": "catboost_onehot_d8",
+            "model_id": "catboost",
+            "model_params": {
+              "iterations": 1000,
+              "depth": 8,
+              "learning_rate": 0.035,
+              "l2_leaf_reg": 8.0,
+              "one_hot_max_size": 10
+            },
+            "features": {
+              "percentage_policy": "retain",
+              "out_of_range_flags": false,
+              "interactions": false
+            },
+            "group_features": false
+          }
+        ],
+        "blend": {
+          "n_trials": 256,
+          "allow_class_multipliers": true
+        }
+      },
+      "outer_fold_macro_f1_mean": 0.9144440801568139,
+      "outer_fold_macro_f1_std": 0.004685817502569213,
+      "oof_metrics": {
+        "macro_f1": 0.9144297338793106,
+        "accuracy": 0.9143434343434343,
+        "confusion_matrix": [
+          [
+            2265,
+            105,
+            56,
+            49
+          ],
+          [
+            69,
+            2221,
+            129,
+            56
+          ],
+          [
+            48,
+            115,
+            2263,
+            49
+          ],
+          [
+            53,
+            74,
+            45,
+            2303
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9301848049281314,
+            "recall": 0.9151515151515152,
+            "f1-score": 0.9226069246435845,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8831013916500994,
+            "recall": 0.8973737373737374,
+            "f1-score": 0.8901803607214429,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.9077416766947453,
+            "recall": 0.9143434343434343,
+            "f1-score": 0.9110305958132046,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9373219373219374,
+            "recall": 0.9305050505050505,
+            "f1-score": 0.9339010543390105,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9145874526487283,
+            "recall": 0.9143434343434343,
+            "f1-score": 0.9144297338793106,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9145874526487284,
+            "recall": 0.9143434343434343,
+            "f1-score": 0.9144297338793107,
+            "support": 9900.0
+          }
+        }
+      },
+      "ablations": {
+        "hgb_regularized": {
+          "macro_f1": 0.9159908502400317,
+          "accuracy": 0.915959595959596,
+          "confusion_matrix": [
+            [
+              2278,
+              95,
+              51,
+              51
+            ],
+            [
+              75,
+              2220,
+              114,
+              66
+            ],
+            [
+              58,
+              115,
+              2260,
+              42
+            ],
+            [
+              57,
+              66,
+              42,
+              2310
+            ]
+          ],
+          "classification_report": {
+            "Sunny": {
+              "precision": 0.9230145867098866,
+              "recall": 0.9204040404040404,
+              "f1-score": 0.9217074651021647,
+              "support": 2475.0
+            },
+            "Cloudy": {
+              "precision": 0.8894230769230769,
+              "recall": 0.896969696969697,
+              "f1-score": 0.8931804465902233,
+              "support": 2475.0
+            },
+            "Rainy": {
+              "precision": 0.9160924199432509,
+              "recall": 0.9131313131313131,
+              "f1-score": 0.914609469850263,
+              "support": 2475.0
+            },
+            "Snowy": {
+              "precision": 0.9356014580801945,
+              "recall": 0.9333333333333333,
+              "f1-score": 0.9344660194174758,
+              "support": 2475.0
+            },
+            "macro avg": {
+              "precision": 0.9160328854141021,
+              "recall": 0.9159595959595961,
+              "f1-score": 0.9159908502400317,
+              "support": 9900.0
+            },
+            "weighted avg": {
+              "precision": 0.9160328854141021,
+              "recall": 0.915959595959596,
+              "f1-score": 0.9159908502400318,
+              "support": 9900.0
+            }
+          }
+        },
+        "hgb_noise_floor20": {
+          "macro_f1": 0.9162005633531267,
+          "accuracy": 0.9161616161616162,
+          "confusion_matrix": [
+            [
+              2269,
+              94,
+              61,
+              51
+            ],
+            [
+              64,
+              2215,
+              137,
+              59
+            ],
+            [
+              57,
+              101,
+              2276,
+              41
+            ],
+            [
+              52,
+              68,
+              45,
+              2310
+            ]
+          ],
+          "classification_report": {
+            "Sunny": {
+              "precision": 0.9291564291564292,
+              "recall": 0.9167676767676768,
+              "f1-score": 0.9229204799674599,
+              "support": 2475.0
+            },
+            "Cloudy": {
+              "precision": 0.893866020984665,
+              "recall": 0.8949494949494949,
+              "f1-score": 0.8944074298405007,
+              "support": 2475.0
+            },
+            "Rainy": {
+              "precision": 0.9035331480746328,
+              "recall": 0.9195959595959596,
+              "f1-score": 0.9114937925510612,
+              "support": 2475.0
+            },
+            "Snowy": {
+              "precision": 0.938642828118651,
+              "recall": 0.9333333333333333,
+              "f1-score": 0.9359805510534847,
+              "support": 2475.0
+            },
+            "macro avg": {
+              "precision": 0.9162996065835944,
+              "recall": 0.9161616161616162,
+              "f1-score": 0.9162005633531267,
+              "support": 9900.0
+            },
+            "weighted avg": {
+              "precision": 0.9162996065835944,
+              "recall": 0.9161616161616162,
+              "f1-score": 0.9162005633531266,
+              "support": 9900.0
+            }
+          }
+        },
+        "catboost_onehot_d8": {
+          "macro_f1": 0.914435826390914,
+          "accuracy": 0.9143434343434343,
+          "confusion_matrix": [
+            [
+              2268,
+              102,
+              59,
+              46
+            ],
+            [
+              69,
+              2227,
+              126,
+              53
+            ],
+            [
+              44,
+              121,
+              2259,
+              51
+            ],
+            [
+              60,
+              67,
+              50,
+              2298
+            ]
+          ],
+          "classification_report": {
+            "Sunny": {
+              "precision": 0.9291274068004916,
+              "recall": 0.9163636363636364,
+              "f1-score": 0.9227013832384052,
+              "support": 2475.0
+            },
+            "Cloudy": {
+              "precision": 0.8847834723877632,
+              "recall": 0.8997979797979798,
+              "f1-score": 0.8922275641025641,
+              "support": 2475.0
+            },
+            "Rainy": {
+              "precision": 0.9057738572574178,
+              "recall": 0.9127272727272727,
+              "f1-score": 0.9092372710807003,
+              "support": 2475.0
+            },
+            "Snowy": {
+              "precision": 0.9387254901960784,
+              "recall": 0.9284848484848485,
+              "f1-score": 0.9335770871419866,
+              "support": 2475.0
+            },
+            "macro avg": {
+              "precision": 0.9146025566604377,
+              "recall": 0.9143434343434342,
+              "f1-score": 0.914435826390914,
+              "support": 9900.0
+            },
+            "weighted avg": {
+              "precision": 0.9146025566604379,
+              "recall": 0.9143434343434343,
+              "f1-score": 0.914435826390914,
+              "support": 9900.0
+            }
+          }
+        },
+        "equal_probability_average": {
+          "macro_f1": 0.9155235467290406,
+          "accuracy": 0.9154545454545454,
+          "confusion_matrix": [
+            [
+              2269,
+              97,
+              57,
+              52
+            ],
+            [
+              68,
+              2228,
+              124,
+              55
+            ],
+            [
+              55,
+              113,
+              2263,
+              44
+            ],
+            [
+              54,
+              70,
+              48,
+              2303
+            ]
+          ],
+          "classification_report": {
+            "Sunny": {
+              "precision": 0.9276369582992641,
+              "recall": 0.9167676767676768,
+              "f1-score": 0.9221702905913433,
+              "support": 2475.0
+            },
+            "Cloudy": {
+              "precision": 0.8883572567783095,
+              "recall": 0.9002020202020202,
+              "f1-score": 0.8942404174192253,
+              "support": 2475.0
+            },
+            "Rainy": {
+              "precision": 0.9081059390048154,
+              "recall": 0.9143434343434343,
+              "f1-score": 0.9112140124823838,
+              "support": 2475.0
+            },
+            "Snowy": {
+              "precision": 0.9384678076609617,
+              "recall": 0.9305050505050505,
+              "f1-score": 0.9344694664232096,
+              "support": 2475.0
+            },
+            "macro avg": {
+              "precision": 0.9156419904358376,
+              "recall": 0.9154545454545454,
+              "f1-score": 0.9155235467290406,
+              "support": 9900.0
+            },
+            "weighted avg": {
+              "precision": 0.9156419904358376,
+              "recall": 0.9154545454545454,
+              "f1-score": 0.9155235467290405,
+              "support": 9900.0
+            }
+          }
+        },
+        "inner_selected_blend": {
+          "macro_f1": 0.9144297338793106,
+          "accuracy": 0.9143434343434343,
+          "confusion_matrix": [
+            [
+              2265,
+              105,
+              56,
+              49
+            ],
+            [
+              69,
+              2221,
+              129,
+              56
+            ],
+            [
+              48,
+              115,
+              2263,
+              49
+            ],
+            [
+              53,
+              74,
+              45,
+              2303
+            ]
+          ],
+          "classification_report": {
+            "Sunny": {
+              "precision": 0.9301848049281314,
+              "recall": 0.9151515151515152,
+              "f1-score": 0.9226069246435845,
+              "support": 2475.0
+            },
+            "Cloudy": {
+              "precision": 0.8831013916500994,
+              "recall": 0.8973737373737374,
+              "f1-score": 0.8901803607214429,
+              "support": 2475.0
+            },
+            "Rainy": {
+              "precision": 0.9077416766947453,
+              "recall": 0.9143434343434343,
+              "f1-score": 0.9110305958132046,
+              "support": 2475.0
+            },
+            "Snowy": {
+              "precision": 0.9373219373219374,
+              "recall": 0.9305050505050505,
+              "f1-score": 0.9339010543390105,
+              "support": 2475.0
+            },
+            "macro avg": {
+              "precision": 0.9145874526487283,
+              "recall": 0.9143434343434343,
+              "f1-score": 0.9144297338793106,
+              "support": 9900.0
+            },
+            "weighted avg": {
+              "precision": 0.9145874526487284,
+              "recall": 0.9143434343434343,
+              "f1-score": 0.9144297338793107,
+              "support": 9900.0
+            }
+          }
+        }
+      },
+      "outer_folds": [
+        {
+          "fold": 0,
+          "metrics": {
+            "macro_f1": 0.9146060452747986,
+            "accuracy": 0.9146464646464646,
+            "confusion_matrix": [
+              [
+                450,
+                17,
+                13,
+                15
+              ],
+              [
+                11,
+                438,
+                34,
+                12
+              ],
+              [
+                9,
+                17,
+                459,
+                10
+              ],
+              [
+                13,
+                9,
+                9,
+                464
+              ]
+            ],
+            "classification_report": {
+              "Sunny": {
+                "precision": 0.9316770186335404,
+                "recall": 0.9090909090909091,
+                "f1-score": 0.9202453987730062,
+                "support": 495.0
+              },
+              "Cloudy": {
+                "precision": 0.9106029106029107,
+                "recall": 0.8848484848484849,
+                "f1-score": 0.8975409836065574,
+                "support": 495.0
+              },
+              "Rainy": {
+                "precision": 0.8912621359223301,
+                "recall": 0.9272727272727272,
+                "f1-score": 0.9089108910891089,
+                "support": 495.0
+              },
+              "Snowy": {
+                "precision": 0.9261477045908184,
+                "recall": 0.9373737373737374,
+                "f1-score": 0.9317269076305221,
+                "support": 495.0
+              },
+              "macro avg": {
+                "precision": 0.9149224424373998,
+                "recall": 0.9146464646464647,
+                "f1-score": 0.9146060452747986,
+                "support": 1980.0
+              },
+              "weighted avg": {
+                "precision": 0.9149224424373998,
+                "recall": 0.9146464646464646,
+                "f1-score": 0.9146060452747987,
+                "support": 1980.0
+              }
+            }
+          },
+          "recipe": {
+            "schema_version": 1,
+            "labels": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "model_ids": [
+              "catboost_onehot_d8",
+              "hgb_noise_floor20",
+              "hgb_regularized"
+            ],
+            "weights": [
+              0.5,
+              0.5,
+              0.0
+            ],
+            "class_multipliers": [
+              0.9,
+              1.0,
+              1.1,
+              1.0
+            ],
+            "selection_macro_f1": 0.9179225562805566,
+            "selection_baseline_macro_f1": 0.9160968918020815,
+            "selection_delta": 0.0018256644784750975,
+            "selected_candidate": "class_multiplier_coordinate_search",
+            "evaluation_scope": "Selection score on the supplied labels; OOF used to tune weights is not independent evaluation. Evaluate the frozen recipe on separate outer-fold predictions before claiming an improvement.",
+            "search": {
+              "seed": 5434,
+              "random_simplex_trials": 256,
+              "allow_class_multipliers": true,
+              "evaluated_candidates": 309
+            }
+          }
+        },
+        {
+          "fold": 1,
+          "metrics": {
+            "macro_f1": 0.9181655877857309,
+            "accuracy": 0.9181818181818182,
+            "confusion_matrix": [
+              [
+                460,
+                17,
+                10,
+                8
+              ],
+              [
+                14,
+                436,
+                31,
+                14
+              ],
+              [
+                13,
+                20,
+                459,
+                3
+              ],
+              [
+                10,
+                12,
+                10,
+                463
+              ]
+            ],
+            "classification_report": {
+              "Sunny": {
+                "precision": 0.9255533199195171,
+                "recall": 0.9292929292929293,
+                "f1-score": 0.9274193548387096,
+                "support": 495.0
+              },
+              "Cloudy": {
+                "precision": 0.8989690721649485,
+                "recall": 0.8808080808080808,
+                "f1-score": 0.889795918367347,
+                "support": 495.0
+              },
+              "Rainy": {
+                "precision": 0.9,
+                "recall": 0.9272727272727272,
+                "f1-score": 0.9134328358208955,
+                "support": 495.0
+              },
+              "Snowy": {
+                "precision": 0.9487704918032787,
+                "recall": 0.9353535353535354,
+                "f1-score": 0.9420142421159715,
+                "support": 495.0
+              },
+              "macro avg": {
+                "precision": 0.9183232209719361,
+                "recall": 0.9181818181818182,
+                "f1-score": 0.9181655877857309,
+                "support": 1980.0
+              },
+              "weighted avg": {
+                "precision": 0.9183232209719361,
+                "recall": 0.9181818181818182,
+                "f1-score": 0.9181655877857311,
+                "support": 1980.0
+              }
+            }
+          },
+          "recipe": {
+            "schema_version": 1,
+            "labels": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "model_ids": [
+              "catboost_onehot_d8",
+              "hgb_noise_floor20",
+              "hgb_regularized"
+            ],
+            "weights": [
+              0.01944054662718605,
+              0.9805238470798872,
+              3.5606292926650625e-05
+            ],
+            "class_multipliers": [
+              1.0,
+              1.1,
+              1.05,
+              0.9
+            ],
+            "selection_macro_f1": 0.9134663535234975,
+            "selection_baseline_macro_f1": 0.9112603778760429,
+            "selection_delta": 0.0022059756474546166,
+            "selected_candidate": "class_multiplier_coordinate_search",
+            "evaluation_scope": "Selection score on the supplied labels; OOF used to tune weights is not independent evaluation. Evaluate the frozen recipe on separate outer-fold predictions before claiming an improvement.",
+            "search": {
+              "seed": 5435,
+              "random_simplex_trials": 256,
+              "allow_class_multipliers": true,
+              "evaluated_candidates": 309
+            }
+          }
+        },
+        {
+          "fold": 2,
+          "metrics": {
+            "macro_f1": 0.9063849351908535,
+            "accuracy": 0.906060606060606,
+            "confusion_matrix": [
+              [
+                445,
+                33,
+                9,
+                8
+              ],
+              [
+                15,
+                450,
+                22,
+                8
+              ],
+              [
+                9,
+                24,
+                451,
+                11
+              ],
+              [
+                13,
+                21,
+                13,
+                448
+              ]
+            ],
+            "classification_report": {
+              "Sunny": {
+                "precision": 0.9232365145228216,
+                "recall": 0.898989898989899,
+                "f1-score": 0.9109518935516888,
+                "support": 495.0
+              },
+              "Cloudy": {
+                "precision": 0.8522727272727273,
+                "recall": 0.9090909090909091,
+                "f1-score": 0.8797653958944281,
+                "support": 495.0
+              },
+              "Rainy": {
+                "precision": 0.9111111111111111,
+                "recall": 0.9111111111111111,
+                "f1-score": 0.9111111111111111,
+                "support": 495.0
+              },
+              "Snowy": {
+                "precision": 0.9431578947368421,
+                "recall": 0.9050505050505051,
+                "f1-score": 0.9237113402061856,
+                "support": 495.0
+              },
+              "macro avg": {
+                "precision": 0.9074445619108755,
+                "recall": 0.906060606060606,
+                "f1-score": 0.9063849351908535,
+                "support": 1980.0
+              },
+              "weighted avg": {
+                "precision": 0.9074445619108755,
+                "recall": 0.906060606060606,
+                "f1-score": 0.9063849351908534,
+                "support": 1980.0
+              }
+            }
+          },
+          "recipe": {
+            "schema_version": 1,
+            "labels": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "model_ids": [
+              "catboost_onehot_d8",
+              "hgb_noise_floor20",
+              "hgb_regularized"
+            ],
+            "weights": [
+              0.6702976607538563,
+              0.22282149326298736,
+              0.10688084598315649
+            ],
+            "class_multipliers": [
+              0.9,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "selection_macro_f1": 0.9165030799002958,
+            "selection_baseline_macro_f1": 0.9151876684594887,
+            "selection_delta": 0.001315411440807046,
+            "selected_candidate": "class_multiplier_coordinate_search",
+            "evaluation_scope": "Selection score on the supplied labels; OOF used to tune weights is not independent evaluation. Evaluate the frozen recipe on separate outer-fold predictions before claiming an improvement.",
+            "search": {
+              "seed": 5436,
+              "random_simplex_trials": 256,
+              "allow_class_multipliers": true,
+              "evaluated_candidates": 309
+            }
+          }
+        },
+        {
+          "fold": 3,
+          "metrics": {
+            "macro_f1": 0.91615525055571,
+            "accuracy": 0.9161616161616162,
+            "confusion_matrix": [
+              [
+                458,
+                17,
+                11,
+                9
+              ],
+              [
+                17,
+                442,
+                24,
+                12
+              ],
+              [
+                13,
+                21,
+                451,
+                10
+              ],
+              [
+                10,
+                14,
+                8,
+                463
+              ]
+            ],
+            "classification_report": {
+              "Sunny": {
+                "precision": 0.9196787148594378,
+                "recall": 0.9252525252525252,
+                "f1-score": 0.9224572004028198,
+                "support": 495.0
+              },
+              "Cloudy": {
+                "precision": 0.8947368421052632,
+                "recall": 0.8929292929292929,
+                "f1-score": 0.8938321536905965,
+                "support": 495.0
+              },
+              "Rainy": {
+                "precision": 0.9129554655870445,
+                "recall": 0.9111111111111111,
+                "f1-score": 0.9120323559150657,
+                "support": 495.0
+              },
+              "Snowy": {
+                "precision": 0.937246963562753,
+                "recall": 0.9353535353535354,
+                "f1-score": 0.9362992922143579,
+                "support": 495.0
+              },
+              "macro avg": {
+                "precision": 0.9161544965286247,
+                "recall": 0.9161616161616162,
+                "f1-score": 0.91615525055571,
+                "support": 1980.0
+              },
+              "weighted avg": {
+                "precision": 0.9161544965286247,
+                "recall": 0.9161616161616162,
+                "f1-score": 0.9161552505557099,
+                "support": 1980.0
+              }
+            }
+          },
+          "recipe": {
+            "schema_version": 1,
+            "labels": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "model_ids": [
+              "catboost_onehot_d8",
+              "hgb_noise_floor20",
+              "hgb_regularized"
+            ],
+            "weights": [
+              0.22400164331708014,
+              0.2970754990348288,
+              0.47892285764809106
+            ],
+            "class_multipliers": [
+              1.1,
+              1.0,
+              1.0,
+              1.05
+            ],
+            "selection_macro_f1": 0.9150195039350445,
+            "selection_baseline_macro_f1": 0.9130476670371057,
+            "selection_delta": 0.0019718368979387835,
+            "selected_candidate": "class_multiplier_coordinate_search",
+            "evaluation_scope": "Selection score on the supplied labels; OOF used to tune weights is not independent evaluation. Evaluate the frozen recipe on separate outer-fold predictions before claiming an improvement.",
+            "search": {
+              "seed": 5437,
+              "random_simplex_trials": 256,
+              "allow_class_multipliers": true,
+              "evaluated_candidates": 309
+            }
+          }
+        },
+        {
+          "fold": 4,
+          "metrics": {
+            "macro_f1": 0.9169085819769759,
+            "accuracy": 0.9166666666666666,
+            "confusion_matrix": [
+              [
+                452,
+                21,
+                13,
+                9
+              ],
+              [
+                12,
+                455,
+                18,
+                10
+              ],
+              [
+                4,
+                33,
+                443,
+                15
+              ],
+              [
+                7,
+                18,
+                5,
+                465
+              ]
+            ],
+            "classification_report": {
+              "Sunny": {
+                "precision": 0.9515789473684211,
+                "recall": 0.9131313131313131,
+                "f1-score": 0.931958762886598,
+                "support": 495.0
+              },
+              "Cloudy": {
+                "precision": 0.8633776091081594,
+                "recall": 0.9191919191919192,
+                "f1-score": 0.8904109589041096,
+                "support": 495.0
+              },
+              "Rainy": {
+                "precision": 0.9248434237995825,
+                "recall": 0.8949494949494949,
+                "f1-score": 0.9096509240246407,
+                "support": 495.0
+              },
+              "Snowy": {
+                "precision": 0.9318637274549099,
+                "recall": 0.9393939393939394,
+                "f1-score": 0.9356136820925554,
+                "support": 495.0
+              },
+              "macro avg": {
+                "precision": 0.9179159269327682,
+                "recall": 0.9166666666666667,
+                "f1-score": 0.9169085819769759,
+                "support": 1980.0
+              },
+              "weighted avg": {
+                "precision": 0.9179159269327681,
+                "recall": 0.9166666666666666,
+                "f1-score": 0.9169085819769759,
+                "support": 1980.0
+              }
+            }
+          },
+          "recipe": {
+            "schema_version": 1,
+            "labels": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "model_ids": [
+              "catboost_onehot_d8",
+              "hgb_noise_floor20",
+              "hgb_regularized"
+            ],
+            "weights": [
+              0.5399575106346002,
+              0.12406094371704066,
+              0.3359815456483593
+            ],
+            "class_multipliers": [
+              1.05,
+              1.1,
+              0.9,
+              1.05
+            ],
+            "selection_macro_f1": 0.9158640832401918,
+            "selection_baseline_macro_f1": 0.9127696625374588,
+            "selection_delta": 0.003094420702732914,
+            "selected_candidate": "class_multiplier_coordinate_search",
+            "evaluation_scope": "Selection score on the supplied labels; OOF used to tune weights is not independent evaluation. Evaluate the frozen recipe on separate outer-fold predictions before claiming an improvement.",
+            "search": {
+              "seed": 5438,
+              "random_simplex_trials": 256,
+              "allow_class_multipliers": true,
+              "evaluated_candidates": 309
+            }
+          }
+        }
+      ],
+      "evaluation_scope": "Outer-fold evaluation of fixed candidate configs with inner-only blend selection. Candidate configs were previously explored on these data; not an independent test of the entire search."
+    }
+  ],
+  "export_notes": [],
+  "development_scope": "CV used for model selection, not an independent test or Kaggle result.",
+  "timing_scope": "Per-fold final model fit excludes preprocessing and inner iteration selection; total CV includes workflow costs. Cross-run speed comparisons require matching hardware."
+}

@@ -10,8 +10,14 @@ __pycache__/
 
 # Obtain competition inputs separately; do not publish course materials.
 Project.pdf
+Project-BIG DATA.pdf
 comp-5434-20261-project-task-1/
 data/
+/Dataset/
+/dataset/
+/local_artifacts/
+/local_notes/
+/tmp/
 *.zip
 
 # Track aggregate results only. Recreate record-level outputs locally.

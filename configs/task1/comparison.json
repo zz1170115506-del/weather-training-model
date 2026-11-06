@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "description": "Development CV: fixed common folds; candidate selection scores, not independent test.",
+  "validation": {
+    "n_splits": 5,
+    "split_seed": 5434,
+    "model_seed": 5434
+  },
+  "models": [
+    {
+      "name": "numpy_cart_d8",
+      "model_id": "numpy_cart",
+      "model_params": {
+        "max_depth": 8,
+        "min_samples_leaf": 5
+      }
+    },
+    {
+      "name": "numpy_bagging100",
+      "model_id": "numpy_forest",
+      "model_params": {
+        "n_estimators": 100,
+        "min_samples_leaf": 2,
+        "max_features": null
+      }
+    },
+    {
+      "name": "numpy_forest100",
+      "model_id": "numpy_forest",
+      "model_params": {
+        "n_estimators": 100,
+        "min_samples_leaf": 2,
+        "max_features": "sqrt"
+      }
+    },
+    {
+      "name": "numpy_forest300",
+      "model_id": "numpy_forest",
+      "model_params": {
+        "n_estimators": 300,
+        "min_samples_leaf": 2,
+        "max_features": "sqrt"
+      }
+    },
+    {
+      "name": "numpy_group300",
+      "model_id": "numpy_forest",
+      "model_params": {
+        "n_estimators": 300,
+        "min_samples_leaf": 2,
+        "max_features": 0.7
+      },
+      "group_features": true
+    },
+    {
+      "name": "numpy_group_smooth300",
+      "model_id": "numpy_forest",
+      "model_params": {
+        "n_estimators": 300,
+        "min_samples_leaf": 4,
+        "max_features": 0.7,
+        "leaf_smoothing": 0.5
+      },
+      "group_features": true
+    },
+    {
+      "name": "sklearn_forest400",
+      "model_id": "sklearn_forest",
+      "model_params": {
+        "n_estimators": 400,
+        "min_samples_leaf": 2,
+        "max_features": 0.7
+      }
+    },
+    {
+      "name": "extra_trees400",
+      "model_id": "extra_trees",
+      "model_params": {
+        "n_estimators": 400,
+        "min_samples_leaf": 2,
+        "max_features": 0.7
+      }
+    },
+    {
+      "name": "hgb_reference",
+      "model_id": "hgb",
+      "model_params": {
+        "max_iter": 250,
+        "learning_rate": 0.07,
+        "max_leaf_nodes": 15,
+        "l2_regularization": 1.0
+      }
+    },
+    {
+      "name": "hgb_regularized",
+      "model_id": "hgb",
+      "model_params": {
+        "max_iter": 700,
+        "learning_rate": 0.03,
+        "max_leaf_nodes": 15,
+        "min_samples_leaf": 30,
+        "l2_regularization": 10.0
+      }
+    },
+    {
+      "name": "hgb_medium",
+      "model_id": "hgb",
+      "model_params": {
+        "max_iter": 500,
+        "learning_rate": 0.05,
+        "max_leaf_nodes": 15,
+        "min_samples_leaf": 20,
+        "l2_regularization": 5.0
+      }
+    },
+    {
+      "name": "hgb_shallow",
+      "model_id": "hgb",
+      "model_params": {
+        "max_iter": 700,
+        "learning_rate": 0.03,
+        "max_leaf_nodes": 7,
+        "min_samples_leaf": 30,
+        "l2_regularization": 10.0
+      }
+    }
+  ]
+}

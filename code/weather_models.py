@@ -2,8 +2,9 @@
 
 Training and prediction in this module do not call scikit-learn. Numeric
 features must already be finite; the experiment runner handles encoding and
-imputation. Leaf probabilities are empirical class proportions. Forests
-average these probabilities rather than taking a hard majority vote.
+imputation. Leaf probabilities can use additive smoothing; its default of
+zero retains empirical class proportions. Forests average probabilities
+rather than taking a hard majority vote.
 """
 
 from __future__ import annotations
@@ -58,30 +59,64 @@ def _feature_array(X, n_features=None):
     return X
 
 
+def _feature_group_columns(feature_groups, n_features):
+    """Return groups in first-occurrence order, retaining encoded column order."""
+    if feature_groups is None:
+        return tuple((column,) for column in range(n_features))
+    groups = np.asarray(feature_groups, dtype=object)
+    if groups.ndim != 1 or len(groups) != n_features:
+        raise ValueError("feature_groups must be a one-dimensional sequence with one ID per feature.")
+    columns_by_group = {}
+    for column, group in enumerate(groups):
+        # Missing identifiers are ambiguous dictionary keys (NaN != NaN).
+        if (group is None or (isinstance(group, (Real, complex)) and not np.isfinite(group))
+                or not np.isscalar(group)):
+            raise ValueError("feature_groups IDs must be nonmissing, finite, hashable scalars.")
+        try:
+            columns_by_group.setdefault(group, []).append(column)
+        except TypeError as exc:
+            raise ValueError("feature_groups IDs must be hashable scalars.") from exc
+    return tuple(tuple(columns) for columns in columns_by_group.values())
+
+
 class CARTClassifier:
     """Greedy binary classification tree minimizing sample-weighted Gini.
 
     At each node, sorted feature values define all distinct candidate
     partitions. Cumulative class counts score those partitions together.
     min_impurity_decrease uses the reduction weighted by node/root size.
-    max_features limits the randomly selected candidate features per node;
-    if none permits a valid split, additional features are inspected until
-    a valid partition is found or all features have been checked.
+    max_features limits randomly selected candidate groups per node when
+    feature_groups supplies one original-attribute ID per encoded column.
+    All columns of each selected group are searched. Without groups, each
+    column is its own group, preserving the original feature sampling.
+    If the sampled groups permit no valid split, additional groups are
+    inspected until a valid partition is found or all have been checked.
+    leaf_smoothing is nonnegative additive smoothing of leaf probabilities;
+    splitting/stopping always uses unsmoothed class frequencies.
     """
 
     def __init__(self, max_depth=None, min_samples_split=2, min_samples_leaf=1,
-                 max_features=None, min_impurity_decrease=0.0, random_state=None):
+                 max_features=None, min_impurity_decrease=0.0, random_state=None,
+                 leaf_smoothing=0.0, feature_groups=None):
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.min_samples_leaf = min_samples_leaf
         self.max_features = max_features
         self.min_impurity_decrease = min_impurity_decrease
         self.random_state = random_state
+        self.leaf_smoothing = leaf_smoothing
+        self.feature_groups = feature_groups
+
+    def __setstate__(self, state):
+        """Allow models saved before the optional extensions to be reused."""
+        self.__dict__.update(state)
+        self.__dict__.setdefault("leaf_smoothing", 0.0)
+        self.__dict__.setdefault("feature_groups", None)
 
     def get_params(self):
         return {name: getattr(self, name) for name in (
             "max_depth", "min_samples_split", "min_samples_leaf", "max_features",
-            "min_impurity_decrease", "random_state",
+            "min_impurity_decrease", "random_state", "leaf_smoothing", "feature_groups",
         )}
 
     def _validate_parameters(self, n_features):
@@ -93,6 +128,10 @@ class CARTClassifier:
                 or not np.isfinite(self.min_impurity_decrease)
                 or self.min_impurity_decrease < 0):
             raise ValueError("min_impurity_decrease must be finite and nonnegative.")
+        if (isinstance(self.leaf_smoothing, bool)
+                or not isinstance(self.leaf_smoothing, Real)
+                or not np.isfinite(self.leaf_smoothing) or self.leaf_smoothing < 0):
+            raise ValueError("leaf_smoothing must be finite and nonnegative.")
         value = self.max_features
         if value is None:
             return n_features
@@ -107,7 +146,7 @@ class CARTClassifier:
         elif isinstance(value, Real) and not isinstance(value, bool):
             if 0 < value <= 1:
                 return max(1, int(value * n_features))
-        raise ValueError("max_features must be None, 'sqrt', 'log2', an integer in [1, p], or a fraction in (0, 1].")
+        raise ValueError("max_features must be None, 'sqrt', 'log2', an integer in [1, number of feature groups], or a fraction in (0, 1].")
 
     def fit(self, X, y):
         X, classes, encoded = _training_arrays(X, y)
@@ -116,7 +155,9 @@ class CARTClassifier:
     def _fit_encoded(self, X, encoded, classes):
         """Internal forest entry point: retain the global class order."""
         self.n_features_in_ = X.shape[1]
-        self.max_features_ = self._validate_parameters(self.n_features_in_)
+        self.feature_group_columns_ = _feature_group_columns(self.feature_groups, self.n_features_in_)
+        self.n_feature_groups_ = len(self.feature_group_columns_)
+        self.max_features_ = self._validate_parameters(self.n_feature_groups_)
         self.classes_ = np.array(classes, copy=True)
         self.n_classes_ = len(classes)
         self.n_samples_fit_ = len(X)
@@ -159,47 +200,56 @@ class CARTClassifier:
 
     def _make_node(self, encoded):
         counts = np.bincount(encoded, minlength=self.n_classes_)
-        probabilities = counts / len(encoded)
-        return TreeNode(probabilities, len(encoded), max(0.0, 1.0 - float(probabilities @ probabilities)))
+        empirical = counts / len(encoded)
+        impurity = max(0.0, 1.0 - float(empirical @ empirical))
+        probabilities = empirical
+        if self.leaf_smoothing > 0:
+            # Equivalent to (counts + alpha)/(n + K*alpha), while avoiding
+            # overflow for a finite alpha near the floating-point limit.
+            scale = max(len(encoded), float(self.leaf_smoothing))
+            alpha = self.leaf_smoothing / scale
+            probabilities = (counts / scale + alpha) / (len(encoded) / scale + self.n_classes_ * alpha)
+        return TreeNode(probabilities, len(encoded), impurity)
 
     def _best_split(self, X, encoded, indices, node):
         n = len(indices)
         local_y = encoded[indices]
         total_counts = np.bincount(local_y, minlength=self.n_classes_)
         best, best_gain = None, -np.inf
-        features = (np.arange(self.n_features_in_) if self.max_features_ == self.n_features_in_
-                    else self._rng.permutation(self.n_features_in_))
-        for inspected, feature in enumerate(features, 1):
-            values = X[indices, feature]
-            order = np.argsort(values, kind="stable")
-            sorted_values = values[order]
-            positions = np.flatnonzero(sorted_values[:-1] < sorted_values[1:])
-            positions = positions[(positions + 1 >= self.min_samples_leaf)
-                                  & (n - positions - 1 >= self.min_samples_leaf)]
-            if len(positions):
-                indicators = np.zeros((n, self.n_classes_), dtype=np.int64)
-                indicators[np.arange(n), local_y[order]] = 1
-                left_counts = np.cumsum(indicators, axis=0)[positions]
-                right_counts = total_counts - left_counts
-                left_n = positions + 1
-                right_n = n - left_n
-                # child_Gini = 1 - (sum(L_k^2)/|L| + sum(R_k^2)/|R|)/n
-                children_impurity = 1.0 - (
-                    np.einsum("ij,ij->i", left_counts, left_counts) / left_n
-                    + np.einsum("ij,ij->i", right_counts, right_counts) / right_n
-                ) / n
-                choice = int(np.argmin(children_impurity))
-                gain = node.impurity - float(children_impurity[choice])
-                if gain > best_gain + 1e-15:
-                    position = positions[choice]
-                    low, high = sorted_values[position], sorted_values[position + 1]
-                    # Halved operands avoid overflow; using low is a safe
-                    # fallback if adjacent floats have no midpoint below high.
-                    threshold = float(low / 2.0 + high / 2.0)
-                    if not low <= threshold < high:
-                        threshold = float(low)
-                    best = (int(feature), threshold, gain)
-                    best_gain = gain
+        groups = (np.arange(self.n_feature_groups_) if self.max_features_ == self.n_feature_groups_
+                  else self._rng.permutation(self.n_feature_groups_))
+        for inspected, group in enumerate(groups, 1):
+            for feature in self.feature_group_columns_[group]:
+                values = X[indices, feature]
+                order = np.argsort(values, kind="stable")
+                sorted_values = values[order]
+                positions = np.flatnonzero(sorted_values[:-1] < sorted_values[1:])
+                positions = positions[(positions + 1 >= self.min_samples_leaf)
+                                      & (n - positions - 1 >= self.min_samples_leaf)]
+                if len(positions):
+                    indicators = np.zeros((n, self.n_classes_), dtype=np.int64)
+                    indicators[np.arange(n), local_y[order]] = 1
+                    left_counts = np.cumsum(indicators, axis=0)[positions]
+                    right_counts = total_counts - left_counts
+                    left_n = positions + 1
+                    right_n = n - left_n
+                    # child_Gini = 1 - (sum(L_k^2)/|L| + sum(R_k^2)/|R|)/n
+                    children_impurity = 1.0 - (
+                        np.einsum("ij,ij->i", left_counts, left_counts) / left_n
+                        + np.einsum("ij,ij->i", right_counts, right_counts) / right_n
+                    ) / n
+                    choice = int(np.argmin(children_impurity))
+                    gain = node.impurity - float(children_impurity[choice])
+                    if gain > best_gain + 1e-15:
+                        position = positions[choice]
+                        low, high = sorted_values[position], sorted_values[position + 1]
+                        # Halved operands avoid overflow; using low is a safe
+                        # fallback if adjacent floats have no midpoint below high.
+                        threshold = float(low / 2.0 + high / 2.0)
+                        if not low <= threshold < high:
+                            threshold = float(low)
+                        best = (int(feature), threshold, gain)
+                        best_gain = gain
             if inspected >= self.max_features_ and best is not None:
                 break
         # Zero-gain partitions can expose useful deeper interactions (e.g. XOR).
@@ -236,11 +286,14 @@ class RandomForestClassifier:
     Each tree has an independent reproducible seed. A global class vocabulary
     is supplied even if a bootstrap sample happens to omit one class. OOB
     probabilities use only trees that did not train on the given record.
+    leaf_smoothing and feature_groups are passed to every CART; max_features
+    counts original-attribute groups when feature_groups is provided.
     """
 
     def __init__(self, n_estimators=100, max_depth=None, min_samples_split=2,
                  min_samples_leaf=1, max_features="sqrt", min_impurity_decrease=0.0,
-                 bootstrap=True, oob_score=False, random_state=None):
+                 bootstrap=True, oob_score=False, random_state=None,
+                 leaf_smoothing=0.0, feature_groups=None):
         self.n_estimators = n_estimators
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
@@ -250,11 +303,20 @@ class RandomForestClassifier:
         self.bootstrap = bootstrap
         self.oob_score = oob_score
         self.random_state = random_state
+        self.leaf_smoothing = leaf_smoothing
+        self.feature_groups = feature_groups
+
+    def __setstate__(self, state):
+        """Restore defaults when loading an earlier serialized forest."""
+        self.__dict__.update(state)
+        self.__dict__.setdefault("leaf_smoothing", 0.0)
+        self.__dict__.setdefault("feature_groups", None)
 
     def get_params(self):
         return {name: getattr(self, name) for name in (
             "n_estimators", "max_depth", "min_samples_split", "min_samples_leaf",
             "max_features", "min_impurity_decrease", "bootstrap", "oob_score", "random_state",
+            "leaf_smoothing", "feature_groups",
         )}
 
     def fit(self, X, y):
@@ -265,6 +327,7 @@ class RandomForestClassifier:
         if self.oob_score and not self.bootstrap:
             raise ValueError("OOB evaluation requires bootstrap=True.")
         self.n_features_in_, self.n_classes_ = X.shape[1], len(self.classes_)
+        self.n_feature_groups_ = len(_feature_group_columns(self.feature_groups, self.n_features_in_))
         self.n_samples_fit_ = len(X)
         rng = np.random.default_rng(self.random_state)
         self.estimators_, self.estimators_samples_ = [], []
@@ -281,6 +344,7 @@ class RandomForestClassifier:
                 min_samples_leaf=self.min_samples_leaf, max_features=self.max_features,
                 min_impurity_decrease=self.min_impurity_decrease,
                 random_state=int(rng.integers(0, np.iinfo(np.int32).max)),
+                leaf_smoothing=self.leaf_smoothing, feature_groups=self.feature_groups,
             )._fit_encoded(X[sample], encoded[sample], self.classes_)
             self.estimators_.append(tree)
             self.estimators_samples_.append(sample)
