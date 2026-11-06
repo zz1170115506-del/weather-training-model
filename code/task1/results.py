@@ -151,6 +151,7 @@ def _config_snapshot(root, manifest, model_names):
         seen.add(name)
         params.append({"name": name, "model_id": model.get("model_id"),
                        "model_params": model.get("model_params", {}),
+                       "early_stopping_rounds": model.get("early_stopping_rounds"),
                        "noise_weighting": model.get("noise_weighting"),
                        "features": model.get("features", {}),
                        "group_features": model.get("group_features", False)})
@@ -238,6 +239,139 @@ def _checked_csv(root, relative, metadata, manifest):
         if actual[key] != metadata.get(key):
             raise ValueError(f"Candidate CSV disagrees with its manifest {key}: {relative}")
     return actual
+
+
+def _blend_recipe(recipe, base_model_names, context):
+    """Validate the frozen JSON recipe without loading estimators or arrays."""
+    if not isinstance(recipe, dict) or recipe.get("schema_version") != 1 or recipe.get("labels") != [1, 2, 3, 4]:
+        raise ValueError(f"{context}: expected schema_version=1 and labels=[1,2,3,4].")
+    names = recipe.get("model_ids")
+    if (not isinstance(names, list) or not names or len(set(names)) != len(names)
+            or any(not isinstance(name, str) or _NAME.fullmatch(name) is None for name in names)
+            or set(names) != set(base_model_names)):
+        raise ValueError(f"{context}: recipe model members must match base_model_names.")
+    weights = recipe.get("weights")
+    if not isinstance(weights, list) or len(weights) != len(names):
+        raise ValueError(f"{context}: expected one weight per model.")
+    weights = [_number(value, f"{context}.weight") for value in weights]
+    if not math.isclose(sum(weights), 1.0, rel_tol=0, abs_tol=1e-10):
+        raise ValueError(f"{context}: recipe weights must sum to one.")
+    multipliers = recipe.get("class_multipliers")
+    if not isinstance(multipliers, list) or len(multipliers) != 4:
+        raise ValueError(f"{context}: expected four class multipliers.")
+    for value in multipliers:
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or not 0.9 <= value <= 1.1:
+            raise ValueError(f"{context}: class multipliers must be finite and in [0.9,1.1].")
+    return recipe
+
+
+def _research_csv(root, candidate, manifest, base_model_names, recipe):
+    """Check only declared CSVs and JSON; binary bundles are never opened."""
+    if not isinstance(candidate, dict) or candidate.get("model_name") != "research_blend":
+        raise ValueError("Research blend export must identify model_name=research_blend.")
+    for field in ("csv", "bundle", "alternative_csv"):
+        if field in candidate:
+            _within(root, candidate[field])
+    exported_recipe = _blend_recipe(candidate.get("recipe"), base_model_names, "Research blend export")
+    if exported_recipe != recipe:
+        raise ValueError("Research blend export recipe differs from the search's frozen recipe.")
+    fit = candidate.get("fit_and_export")
+    if not isinstance(fit, dict) or fit.get("recipe") != recipe:
+        raise ValueError("Research blend fitted recipe differs from the frozen recipe.")
+    primary = _checked_csv(root, candidate.get("csv"), candidate.get("submission"), manifest)
+    if primary["label_format"] != "integer":
+        raise ValueError("Research blend upload CSV must contain integer labels.")
+    if fit.get("submission") != candidate["submission"]:
+        raise ValueError("Research blend submission metadata differs from its full-fit export.")
+    if _count(fit.get("full_test_rows"), "Research blend full test") != primary["rows"]:
+        raise ValueError("Research blend full-test row count differs from its CSV.")
+    verified = {primary["csv_sha256"]}
+    if "alternative_csv" in candidate:
+        alternative = _checked_csv(root, candidate["alternative_csv"], fit.get("alternative_submission"), manifest)
+        if candidate.get("alternative_format") != alternative["label_format"]:
+            raise ValueError("Research blend alternative_format differs from its CSV.")
+        if (alternative["rows"] != primary["rows"]
+                or alternative["canonical_prediction_sha256"] != primary["canonical_prediction_sha256"]):
+            raise ValueError("Research blend primary and alternative predictions differ.")
+        verified.add(alternative["csv_sha256"])
+    return {"model_name": "research_blend", "integer_upload_csv": str(_within(root, candidate["csv"])),
+            "rows": primary["rows"], "label_format": "integer", "csv_sha256": primary["csv_sha256"],
+            "canonical_prediction_sha256": primary["canonical_prediction_sha256"],
+            "verified_csv_sha256": sorted(verified), "platform_scores": None,
+            "base_model_names": list(base_model_names), "recipe": recipe}
+
+
+def _search_results(root, summary, manifest, models, candidates, protocol):
+    report = summary.get("search")
+    exported = summary.get("research_blend_export")
+    if report is None:
+        if exported is not None:
+            raise ValueError("Research blend export requires an explicit checked search report.")
+        return None, None
+    saved = _json(root, "search_summary.json", manifest)
+    if saved != report or not isinstance(report, dict) or report.get("schema_version") != 1:
+        raise ValueError("Search report and training summary disagree.")
+    names = report.get("candidate_model_names")
+    if (not isinstance(names, list) or any(not isinstance(name, str) for name in names)
+            or len(names) != len(set(names)) or set(names) != set(models)):
+        raise ValueError("Search candidates must match all base models in the comparison.")
+    rank = report.get("rank")
+    if not isinstance(rank, list) or len(rank) != len(names):
+        raise ValueError("Search ranking must cover every candidate.")
+    seen = set()
+    for index, item in enumerate(rank, 1):
+        if not isinstance(item, dict) or item.get("name") not in models or item["name"] in seen or item.get("rank") != index:
+            raise ValueError("Invalid search ranking identity/order.")
+        model = models[item["name"]]
+        seen.add(item["name"])
+        for key in _METRICS:
+            if not math.isclose(_number(item.get(key), key), model[key], abs_tol=1e-12, rel_tol=0):
+                raise ValueError("Search ranking metrics disagree with base results.")
+    ordered = sorted(models.values(), key=lambda model: (-model["oof_macro_f1"], model["fold_macro_f1_std"], model["name"]))
+    if [item["name"] for item in rank] != [item["name"] for item in ordered]:
+        raise ValueError("Search ranking violates the frozen deterministic order.")
+    selected = report.get("selected_models")
+    if not isinstance(selected, list) or selected != [value["model_name"] for value in candidates.values()] or selected[0] != rank[0]["name"]:
+        raise ValueError("Search-selected models and actual exports disagree.")
+    bases = report.get("base_model_names")
+    if (not isinstance(bases, list) or not bases or any(not isinstance(name, str) for name in bases)
+            or len(bases) != len(set(bases)) or not set(bases).issubset(models)):
+        raise ValueError("Research blend base names must identify unique checked search candidates.")
+    recipe = _blend_recipe(report.get("full_oof_recipe"), bases, "Search")
+    for key in ("selection_scope", "evaluation_scope"):
+        if not isinstance(report.get(key), str) or not report[key].strip():
+            raise ValueError("Search must explicitly distinguish selection and evaluation scope.")
+    single = _number(report.get("nested_single_metrics", {}).get("macro_f1"), "nested single")
+    blend = _number(report.get("nested_blend_metrics", {}).get("macro_f1"), "nested blend")
+    _number(report.get("full_oof_blend_metrics", {}).get("macro_f1"), "blend selection score")
+    gate = report.get("blend_gate")
+    if not isinstance(gate, dict) or not isinstance(report.get("blend_export_eligible"), bool):
+        raise ValueError("Search must report its explicit blend export gate.")
+    gain = _number(gate.get("minimum_blend_gain"), "minimum blend gain")
+    count = _count(gate.get("outer_fold_count"), "outer fold count")
+    min_wins = _count(gate.get("min_blend_fold_wins"), "minimum fold wins")
+    folds = report.get("outer_folds")
+    if count != protocol["n_splits"] or not isinstance(folds, list) or len(folds) != count or min_wins > count:
+        raise ValueError("Search gate does not match the run's outer folds.")
+    if sorted(item.get("fold") for item in folds) != list(range(count)):
+        raise ValueError("Search outer fold identities are incomplete.")
+    wins = sum(_number(item.get("blend_metrics", {}).get("macro_f1"), "fold blend") >
+               _number(item.get("single_metrics", {}).get("macro_f1"), "fold single") + 1e-12 for item in folds)
+    best = max(model["oof_macro_f1"] for model in models.values())
+    eligible = blend - single + 1e-12 >= gain and blend - best + 1e-12 >= gain and wins >= min_wins
+    if (gate.get("blend_fold_wins") != wins or gate.get("eligible") is not eligible
+            or report["blend_export_eligible"] is not eligible):
+        raise ValueError("Research blend export eligibility disagrees with the checked metrics.")
+    if exported is not None and not eligible:
+        raise ValueError("Research blend export is forbidden when the nested gate fails.")
+    if eligible and exported is None:
+        raise ValueError("A successful blend export gate is missing its declared frozen export.")
+    research = _research_csv(root, exported, manifest, bases, recipe) if exported is not None else None
+    if research is not None:
+        research.update({"selection_metrics": report["full_oof_blend_metrics"],
+                         "nested_procedure_metrics": report["nested_blend_metrics"],
+                         "evaluation_scope": report["evaluation_scope"]})
+    return report, research
 
 
 def _platform_scores(root, candidates, notes):
@@ -341,14 +475,19 @@ def summarize_run(run_dir):
             "verified_csv_sha256": sorted({primary["csv_sha256"], (alternative or integer)["csv_sha256"]}),
             "platform_scores": None,
         }
-    scores = _platform_scores(root, candidates, notes)
-    for key, candidate in candidates.items():
+    search, research = _search_results(root, summary, manifest, by_name, candidates, protocol)
+    all_candidates = dict(candidates)
+    if research is not None:
+        all_candidates["research_blend"] = research
+    scores = _platform_scores(root, all_candidates, notes)
+    for key, candidate in all_candidates.items():
         candidate["platform_scores"] = [entry for entry in scores or [] if entry["candidate"] == key] or None
     return {"run_id": manifest.get("run_id", root.name), "run_dir": str(root),
             "status": "complete", "stage": "train", "evaluation_scope": LOCAL_NOTICE,
             "experiment": experiment, "config_snapshot": config_snapshot,
             "data_sha256": _data_hashes(manifest.get("source_sha256")), "fold_protocol": protocol,
-            "models": models, "candidates": candidates, "platform_scores": scores, "notes": notes}
+            "models": models, "candidates": candidates, "platform_scores": scores, "notes": notes,
+            "search": search, "research_blend": research}
 
 
 def compare_runs(current, previous):
@@ -403,6 +542,8 @@ def print_results(summary):
             parameters = ", ".join(f"{key}={json.dumps(value, ensure_ascii=False)}"
                                    for key, value in sorted(model["model_params"].items()))
             print(f"  {model['name']}: {parameters or '(快照未显式列出分类器参数)'}")
+            if model.get("early_stopping_rounds") is not None:
+                print(f"    训练内部选轮 patience={model['early_stopping_rounds']}；上面的轮数是上限，实际轮数见拟合记录。")
             if model.get("noise_weighting"):
                 weighting = ", ".join(f"{key}={json.dumps(value, ensure_ascii=False)}"
                                       for key, value in sorted(model["noise_weighting"].items()))
@@ -422,6 +563,16 @@ def print_results(summary):
     best_key, best = max(summary["candidates"].items(), key=lambda item: item[1]["metrics"]["oof_macro_f1"])
     print(f"\n已导出候选中，本地 OOF 最高: {best_key} ({best['model_name']}) "
           f"Macro-F1={best['metrics']['oof_macro_f1']:.6f}；仅供手动选型，不保证 Kaggle 更高。")
+    if summary.get("search") is not None:
+        search = summary["search"]
+        print("\n搜索选择分数不等于独立成绩；嵌套值是选模程序的开发诊断，门控本身也有选择偏差。")
+        print(f"  嵌套 single={search['nested_single_metrics']['macro_f1']:.6f}; "
+              f"blend={search['nested_blend_metrics']['macro_f1']:.6f}; "
+              f"融合导出门控={search['blend_export_eligible']}")
+        if summary.get("research_blend") is not None:
+            research = summary["research_blend"]
+            print(f"  research_blend 整数上传CSV: {research['integer_upload_csv']}")
+            print(f"  融合调参分数={research['selection_metrics']['macro_f1']:.6f}，不能当作独立/Kaggle成绩。")
     if summary.get("platform_scores"):
         print("\nKaggle 平台记录（用户填报，未通过网络核验）：")
         for entry in summary["platform_scores"]:

@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "description": "Round 4: fixed-budget nested search with long boosting caps, train-only iteration selection, two searched single candidates and a separately gated research blend. Target 0.92 is unverified; no competition-data training has been run by the assistant.",
+  "experiment": {
+    "round": 4,
+    "label": "round4_nested_boosting_search",
+    "parent_run_id": "20261106T134144Z_train_98bfbc3b_ccc6da",
+    "change_note": "Retain round-2 plain HGB, round-1 autonomous weighted HGB and RF100 controls; compare two regularized HGB, three XGBoost and one CatBoost recipe. Use training-only stopping, full-fold refits, nested candidate selection and a gated blend."
+  },
+  "validation": {"n_splits": 5, "split_seed": 5434, "model_seed": 5434},
+  "finalization": {"method": "full_refit"},
+  "search": {"inner_splits": 3, "blend_pool_size": 3, "minimum_blend_gain": 0.0005, "min_blend_fold_wins": 3},
+  "models": [
+    {
+      "name": "hgb_plain_long1600", "model_id": "hgb",
+      "model_params": {"max_iter": 1600, "learning_rate": 0.015, "max_leaf_nodes": 15, "min_samples_leaf": 40, "l2_regularization": 15.0}
+    },
+    {
+      "name": "hgb_noise_floor20", "model_id": "hgb",
+      "model_params": {"max_iter": 700, "learning_rate": 0.03, "max_leaf_nodes": 15, "min_samples_leaf": 30, "l2_regularization": 10.0},
+      "noise_weighting": {"floor": 0.2}
+    },
+    {
+      "name": "numpy_forest100", "model_id": "numpy_forest",
+      "model_params": {"n_estimators": 100, "min_samples_leaf": 2, "max_features": "sqrt"}
+    },
+    {
+      "name": "hgb_smooth3k", "model_id": "hgb", "early_stopping_rounds": 100,
+      "model_params": {"max_iter": 3000, "learning_rate": 0.01, "max_leaf_nodes": 15, "min_samples_leaf": 60, "l2_regularization": 30.0}
+    },
+    {
+      "name": "hgb_capacity3k", "model_id": "hgb", "early_stopping_rounds": 100,
+      "model_params": {"max_iter": 3000, "learning_rate": 0.015, "max_leaf_nodes": 31, "min_samples_leaf": 40, "l2_regularization": 25.0}
+    },
+    {
+      "name": "xgb_depth3_5k", "model_id": "xgboost", "early_stopping_rounds": 150,
+      "model_params": {"n_estimators": 5000, "learning_rate": 0.02, "max_depth": 3, "min_child_weight": 10.0, "reg_lambda": 15.0, "reg_alpha": 0.1, "subsample": 0.85, "colsample_bytree": 0.9}
+    },
+    {
+      "name": "xgb_depth4_5k", "model_id": "xgboost", "early_stopping_rounds": 150,
+      "model_params": {"n_estimators": 5000, "learning_rate": 0.015, "max_depth": 4, "min_child_weight": 15.0, "reg_lambda": 25.0, "reg_alpha": 0.5, "subsample": 0.8, "colsample_bytree": 0.9}
+    },
+    {
+      "name": "xgb_depth5_4k", "model_id": "xgboost", "early_stopping_rounds": 150,
+      "model_params": {"n_estimators": 4000, "learning_rate": 0.015, "max_depth": 5, "min_child_weight": 20.0, "reg_lambda": 40.0, "reg_alpha": 1.0, "subsample": 0.8, "colsample_bytree": 0.85}
+    },
+    {
+      "name": "catboost_d6_3k", "model_id": "catboost", "early_stopping_rounds": 100,
+      "model_params": {"iterations": 3000, "learning_rate": 0.02, "depth": 6, "l2_leaf_reg": 20.0, "random_strength": 1.0, "bootstrap_type": "Bayesian", "bagging_temperature": 0.5, "one_hot_max_size": 255, "loss_function": "MultiClass", "eval_metric": "MultiClass"}
+    }
+  ],
+  "training": {"export_models": ["hgb_plain_long1600", "hgb_noise_floor20"]},
+  "blend": {"n_trials": 128, "allow_class_multipliers": true}
+}

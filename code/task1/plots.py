@@ -25,6 +25,7 @@ _FOLD_COLUMNS = (
     "inference_seconds_including_preprocessing", "preprocessing_seconds", "fit_seconds",
     "training_seconds_including_inner_selection", "selected_iterations",
     "actual_iterations", "trees_per_iteration", "learning_curve_diagnostics_seconds",
+    "iteration_selection_seconds",
     "preprocessing_fitted_rows", "encoded_feature_count", "early_stopping_uses_evaluation_fold",
 )
 _COMPARISON_COLUMNS = (

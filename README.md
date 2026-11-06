@@ -2,6 +2,35 @@
 
 数据集 1 的天气四分类项目。包含 NumPy 手写 CART/随机森林、自主直方图混合模型、统一交叉验证、对照与消融、可复现预测和 CSV 校验。真实数据训练和 Kaggle 上传由使用者手动启动。
 
+## 当前实验：第四轮长预算嵌套搜索
+
+从仓库根目录的PowerShell执行，前三轮配置和结果保留：
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r code/requirements-boosting.txt
+.\.venv\Scripts\python.exe -X utf8 -B code/run_task1.py check --config configs/task1/fourth_run_search.json
+```
+
+确认检查后，使用者亲自执行才开始真实训练：
+
+```powershell
+.\.venv\Scripts\python.exe -X utf8 -B code/run_task1.py train --config configs/task1/fourth_run_search.json
+```
+
+固定比较9套完整配方：第二轮普通HGB、首轮自主权重HGB、RF100作为控制；另有2套正则化HGB、3套XGBoost和1套CatBoost。新HGB/CatBoost上限3000轮，XGBoost上限4000–5000轮。新提升模型只在允许训练数据内部选最佳轮数，再以该轮数重拟合完整训练部分；不会用外层验证集早停。所有实际轮数、参数和内部划分均留档。XGBoost已适配内部0–3标签与外部天气1–4标签。
+
+显式`search`模式先完成9×5=45次共同折CV，再在每个外层训练部分执行9×3次内部CV，共180次`fit_model`调用；6种启用选轮的配方另需120次内部停止拟合，最后再拟合导出模型。这比前三轮耗时明显增加，没有静默截断或只比较部分完成配方。
+
+`candidate_a`是开发OOF排序最高的单模型，`candidate_b`优先为最佳不同模型家族备选；**字母不再表示以前的“加权/普通”身份**。`training.export_models`仅为旧固定模式的共享字段，第四轮实际导出由明确搜索规则决定，记录在`selection.json`及`selected_config.json`。
+
+自主融合只在外层交叉拟合中同时超过选模程序与最强固定单模型至少0.0005、且至少3/5折胜出时，另行导出`research_blend/submission.csv`；否则不会生成该上传候选。完整OOF学习的权重/类别倍率属于调参，嵌套值属于程序开发评估，门控也使用这些结果选型，不能当作独立测试或Kaggle分数。历史固定候选模式保持原行为。
+
+```powershell
+.\.venv\Scripts\python.exe -X utf8 -B code/run_task1.py results
+```
+
+第四轮所有CSV仍为整数1–4、3300条及表头，并完成读回/哈希/模型重载复现；平台分数须使用实际候选键`candidate_a`、`candidate_b`或已通过门控的`research_blend`手动记录。代码不会自动上传或推送。第三轮实际OOF普通HGB=0.915082，低于第二轮0.916810；第四轮尚未真实训练，0.92仍是目标而非已验证结果。个人说明不随代码上传。
+
 ## 手动启动第一次训练
 
 从 `weather-training-model` 仓库根目录打开 PowerShell。数据放在仓库外的 `../Dataset/`，包含 `train.csv`、`test.csv`、`sample_submission.csv`。
