@@ -23,6 +23,7 @@ class Dataset:
     sample: pd.DataFrame
     audit: dict
     groups: np.ndarray
+    external: object | None = None
 
     @property
     def X(self):

@@ -35,6 +35,18 @@ def resolve_config(raw):
         raise ValueError("Expected schema_version 1.")
     if not isinstance(result.get("models"), list) or not result["models"]:
         raise ValueError("models must be a nonempty list.")
+    if "external_data" in result:
+        external = result["external_data"]
+        if not isinstance(external, dict) or set(external) != {"path", "sha256", "source_url", "policy"}:
+            raise ValueError("external_data requires path, sha256, source_url and explicit policy.")
+        if not isinstance(external["path"], str) or not external["path"].strip():
+            raise ValueError("external_data.path must be a nonempty filename.")
+        if not isinstance(external["sha256"], str) or re.fullmatch(r"[0-9a-f]{64}", external["sha256"]) is None:
+            raise ValueError("external_data.sha256 must be a fixed lowercase SHA256 digest.")
+        if not isinstance(external["source_url"], str) or not external["source_url"].startswith("https://"):
+            raise ValueError("external_data.source_url must identify the public HTTPS source.")
+        if external["policy"] not in ("novel_only", "public_source_training"):
+            raise ValueError("external_data.policy must explicitly choose novel_only or public_source_training.")
     if "experiment" in result:
         result["experiment"] = validate_experiment(result["experiment"])
     if "diagnostics" in result:
@@ -100,6 +112,8 @@ def resolve_config(raw):
         model.setdefault("model_params", {})
         if not isinstance(model["model_params"], dict):
             raise ValueError("model_params must be an object.")
+        if "use_external_data" in model and not isinstance(model["use_external_data"], bool):
+            raise ValueError("use_external_data must be boolean when explicitly configured.")
         if "random_state" in model["model_params"] or "random_seed" in model["model_params"]:
             raise ValueError("Use validation.model_seed, not model_params random_state/random_seed.")
         if "early_stopping_rounds" in model:

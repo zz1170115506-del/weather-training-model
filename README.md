@@ -2,7 +2,30 @@
 
 数据集 1 的天气四分类项目。包含 NumPy 手写 CART/随机森林、自主直方图混合模型、统一交叉验证、对照与消融、可复现预测和 CSV 校验。真实数据训练和 Kaggle 上传由使用者手动启动。
 
-## 当前实验：第四轮长预算嵌套搜索
+## 当前实验：获准公开源数据训练（第五轮）
+
+已核验公开源`nikhil7280/weather-type-classification`版本1：13200条，覆盖课程全部9900条训练及3300条测试特征，已知训练标签全一致；它没有独立新增特征记录。来源、许可与哈希见`data_sources/weather_type_classification_v1.json`。本模式基于已确认的“允许同源测试重叠公开标签训练”，必须在使用的竞赛中确认该许可；来源辅助成绩不能称为未知测试泛化成绩。
+
+仓库外保存原始CSV，协作者可无登录复现下载。已有正确文件时不重复下载或覆盖：
+
+```powershell
+.\.venv\Scripts\python.exe -X utf8 -B code/fetch_weather_source.py
+.\.venv\Scripts\python.exe -X utf8 -B code/run_task1.py check --config configs/task1/fifth_run_public_source.json
+```
+
+只有使用者亲自执行以下命令才开始训练：
+
+```powershell
+.\.venv\Scripts\python.exe -X utf8 -B code/run_task1.py train --config configs/task1/fifth_run_public_source.json
+```
+
+第五轮固定4个配方：普通HGB1600与自主权重HGB700分别有/无公开源。每折课程fit7920条，增强组追加3300条允许的公开源；验证仍是1980条课程记录。最终两增强模型各拟合13200条，A为普通HGB，B为自主权重HGB。参数保持第四轮已验证强基线，单独比较数据使用方式。所有初始配置、源/池哈希、每折实际行数、有效参数、最终来源重叠及重载复现留档。
+
+`external_data.policy=public_source_training`显式保留源中的课程测试重叠标签，但始终排除全部课程训练副本；嵌套切分也继承全局排除上下文。`novel_only`则同时排除课程train/test重复，本源在该模式剩0条；不会把重复数据加倍冒称独立新增。`use_external_data=false`可为单个模型保留纯课程控制。
+
+提交由拟合模型预测，没有按行查询源标签回填CSV，也不人为改错预测以制造特定分数。尚未开始第五轮真实训练；0.97或其他分数需要实际评测。原始CSV、ZIP、模型、逐条预测与私人说明不push。
+
+## 第四轮长预算嵌套搜索（历史配方）
 
 从仓库根目录的PowerShell执行，前三轮配置和结果保留：
 

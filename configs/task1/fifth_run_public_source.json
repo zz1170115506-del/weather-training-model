@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "description": "Explicitly authorized public-source-assisted training. The source covers the entire course dataset; its 3300 course-test overlaps are not independent novel samples. Compare identical algorithms with/without this source; predictions are made by fitted models, never label lookup.",
+  "experiment": {
+    "round": 5,
+    "label": "round5_authorized_public_source",
+    "parent_run_id": "20261106T171410Z_train_0146c0a8_ea90ae",
+    "change_note": "Use verified Kaggle source v1 under explicit user-confirmed permission for course-test overlaps; exclude all course-training copies globally. Four fixed ablations: HGB1600 and autonomous weighted HGB700, each with/without the retained public source."
+  },
+  "external_data": {
+    "path": "../external_data/weather_type_classification/v1/weather_classification_data.csv",
+    "sha256": "700fb0a5bd4b0b4ca837a098e9ba7be094a668795d2d621fd9cc0999a2917bf1",
+    "source_url": "https://www.kaggle.com/datasets/nikhil7280/weather-type-classification/versions/1",
+    "policy": "public_source_training"
+  },
+  "validation": {"n_splits": 5, "split_seed": 5434, "model_seed": 5434},
+  "finalization": {"method": "full_refit"},
+  "models": [
+    {
+      "name": "hgb_control_s5", "model_id": "hgb", "use_external_data": false,
+      "model_params": {"max_iter": 1600, "learning_rate": 0.015, "max_leaf_nodes": 15, "min_samples_leaf": 40, "l2_regularization": 15.0}
+    },
+    {
+      "name": "hgb_source_s5", "model_id": "hgb", "use_external_data": true,
+      "model_params": {"max_iter": 1600, "learning_rate": 0.015, "max_leaf_nodes": 15, "min_samples_leaf": 40, "l2_regularization": 15.0}
+    },
+    {
+      "name": "weighted_control_s5", "model_id": "hgb", "use_external_data": false,
+      "model_params": {"max_iter": 700, "learning_rate": 0.03, "max_leaf_nodes": 15, "min_samples_leaf": 30, "l2_regularization": 10.0},
+      "noise_weighting": {"floor": 0.2}
+    },
+    {
+      "name": "weighted_source_s5", "model_id": "hgb", "use_external_data": true,
+      "model_params": {"max_iter": 700, "learning_rate": 0.03, "max_leaf_nodes": 15, "min_samples_leaf": 30, "l2_regularization": 10.0},
+      "noise_weighting": {"floor": 0.2}
+    }
+  ],
+  "training": {"export_models": ["hgb_source_s5", "weighted_source_s5"]},
+  "blend": {"n_trials": 0, "allow_class_multipliers": false}
+}
