@@ -286,11 +286,15 @@
     }
   },
   "platform_result": {
-    "status": "not_recorded",
+    "status": "candidate_reported_score_missing",
+    "candidate": "candidate_a",
+    "model_name": "hgb_source_s5",
+    "candidate_csv_sha256": "cdb6b83fcf0573f8bd34ea7ef54e78ed84e1fce8d4865af283c1eb709132e8c6",
+    "evidence_source": "User confirmed the uploaded candidate in conversation on 2026-11-10 Asia/Shanghai; not independently verified against Kaggle.",
     "public_macro_f1": null,
     "private_macro_f1": null,
     "submission_id": null,
-    "note": "No candidate-specific Kaggle score record was available at export; local CV is not a platform score."
+    "note": "The user identified candidate_a as the latest uploaded candidate. No numeric Kaggle score or submission ID was provided; local CV is not a platform score."
   },
   "reproduction": {
     "execution": "User starts real-data training manually from the repository root; no training was started during this evidence export.",
