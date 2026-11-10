@@ -26,6 +26,8 @@ _FOLD_COLUMNS = (
     "training_seconds_including_inner_selection", "selected_iterations",
     "actual_iterations", "trees_per_iteration", "learning_curve_diagnostics_seconds",
     "iteration_selection_seconds",
+    "course_fit_rows", "external_fit_rows", "combined_fit_rows",
+    "external_augmentation_seconds",
     "preprocessing_fitted_rows", "encoded_feature_count", "early_stopping_uses_evaluation_fold",
 )
 _COMPARISON_COLUMNS = (
@@ -141,6 +143,7 @@ def _context(run_dir, run, nested=None):
         "git": {key: _public(run.get("git", {}).get(key)) for key in
                 ("available", "commit", "dirty", "branch")},
         "source_tree_sha256": code_hash,
+        "external_data_provenance": _public(audit.get("external_data")),
     }
 
 
@@ -187,6 +190,7 @@ def _candidate(summary_path, protocol, run_context):
            "config_sha256": summary["config_sha256"],
            "run_id": run_context["run_id"], "run_complete": run_context["run_complete"]}
     detail = {"config": _public(config), "config_sha256": summary["config_sha256"],
+              "training_metric_scope": summary.get("training_metric_scope", "Historical run: consult fold metric definitions."),
               "oof_metrics": oof, "source": run_context,
               "source_summary_sha256": _file_hash(summary_path),
               "source_fold_metrics_sha256": _file_hash(csv_path),

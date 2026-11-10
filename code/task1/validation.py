@@ -1,6 +1,7 @@
 """Shared, group-aware folds and honest out-of-fold experiment metrics."""
 from __future__ import annotations
 
+from dataclasses import replace
 from pathlib import Path
 from time import perf_counter
 import numpy as np
@@ -85,7 +86,14 @@ def cross_validate(data, config, folds, model_seed=5434, out=None, verbose=True,
     started = perf_counter()
     for fold in sorted(np.unique(folds)):
         fit, valid = np.flatnonzero(folds != fold), np.flatnonzero(folds == fold)
-        bundle, fit_info = fit_model(X.iloc[fit], y[fit], config, model_seed + int(fold))
+        from .external import augment_training
+        training_context = data if config.get("use_external_data", True) else replace(data, external=None)
+        augmentation_started = perf_counter()
+        fit_X, fit_y, augmentation = augment_training(training_context, X.iloc[fit], y[fit])
+        augmentation_seconds = perf_counter() - augmentation_started
+        bundle, fit_info = fit_model(fit_X, fit_y, config, model_seed + int(fold))
+        fit_info["external_data"] = augmentation
+        fit_info["external_augmentation_seconds"] = augmentation_seconds
         infer_started = perf_counter()
         probability = predict_probabilities(bundle, X.iloc[valid])
         inference_seconds = perf_counter() - infer_started
@@ -106,6 +114,8 @@ def cross_validate(data, config, folds, model_seed=5434, out=None, verbose=True,
                "train_macro_f1": train_result["macro_f1"], "macro_f1": result["macro_f1"],
                "accuracy": result["accuracy"], "inference_seconds_including_preprocessing": inference_seconds,
                "learning_curve_diagnostics_seconds": diagnostics_seconds,
+               "course_fit_rows": len(fit), "external_fit_rows": augmentation["external_fit_rows"],
+               "combined_fit_rows": augmentation["combined_fit_rows"],
                **fit_info}
         records.append(row)
         details.append({**row, "metrics": result,
@@ -126,6 +136,7 @@ def cross_validate(data, config, folds, model_seed=5434, out=None, verbose=True,
                "fold_macro_f1_std": float(np.std(scores, ddof=1)),
                "oof_metrics": metrics(y, oof), "folds": details,
                "total_cv_seconds": perf_counter() - started,
+               "training_metric_scope": "train_macro_f1 and learning-curve training metrics evaluate the original course-fit subset only; preprocessing/model fit may additionally include the audited public-source pool. OOF metrics evaluate only course-validation records.",
                "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."}
     if out is not None:
         out = Path(out)

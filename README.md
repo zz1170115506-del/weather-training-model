@@ -2,7 +2,43 @@
 
 数据集 1 的天气四分类项目。包含 NumPy 手写 CART/随机森林、自主直方图混合模型、统一交叉验证、对照与消融、可复现预测和 CSV 校验。真实数据训练和 Kaggle 上传由使用者手动启动。
 
-## 当前实验：第四轮长预算嵌套搜索
+## 当前实验：获准公开源数据训练（第五轮）
+
+已核验公开源`nikhil7280/weather-type-classification`版本1：13200条，覆盖课程全部9900条训练及3300条测试特征，已知训练标签全一致；它没有独立新增特征记录。来源、许可与哈希见`data_sources/weather_type_classification_v1.json`。本模式基于已确认的“允许同源测试重叠公开标签训练”，必须在使用的竞赛中确认该许可；来源辅助成绩不能称为未知测试泛化成绩。
+
+仓库外保存原始CSV，协作者可无登录复现下载。已有正确文件时不重复下载或覆盖：
+
+```powershell
+.\.venv\Scripts\python.exe -X utf8 -B code/fetch_weather_source.py
+.\.venv\Scripts\python.exe -X utf8 -B code/run_task1.py check --config configs/task1/fifth_run_public_source.json
+```
+
+只有使用者亲自执行以下命令才开始训练：
+
+```powershell
+.\.venv\Scripts\python.exe -X utf8 -B code/run_task1.py train --config configs/task1/fifth_run_public_source.json
+```
+
+第五轮固定4个配方：普通HGB1600与自主权重HGB700分别有/无公开源。每折课程fit7920条，增强组追加3300条允许的公开源；验证仍是1980条课程记录。最终两增强模型各拟合13200条，A为普通HGB，B为自主权重HGB。参数保持第四轮已验证强基线，单独比较数据使用方式。所有初始配置、源/池哈希、每折实际行数、有效参数、最终来源重叠及重载复现留档。
+
+`external_data.policy=public_source_training`显式保留源中的课程测试重叠标签，但始终排除全部课程训练副本；嵌套切分也继承全局排除上下文。`novel_only`则同时排除课程train/test重复，本源在该模式剩0条；不会把重复数据加倍冒称独立新增。`use_external_data=false`可为单个模型保留纯课程控制。
+
+提交由拟合模型预测，没有按行查询源标签回填CSV，也不人为改错预测以制造特定分数。第五轮已由使用者手动训练完成，运行ID为`20261109T153412Z_train_68814986_e92615`，源码提交为`cd7576313e15dec43cf2b2900de279aae65d5e09`。本次归档没有启动新训练或修改模型参数。原始CSV、ZIP、模型、逐条预测与私人说明不push。
+
+第五轮的相同课程五折对照结果如下；数值是本地OOF Macro-F1：
+
+| 模型 | 使用公开源 | OOF Macro-F1 | 导出候选 |
+| --- | --- | ---: | --- |
+| 普通HGB1600对照 | 否 | 0.916810 | — |
+| 普通HGB1600增强 | 是 | 0.914430 | candidate_a |
+| 自主权重HGB700对照 | 否 | 0.916201 | — |
+| 自主权重HGB700增强 | 是 | 0.914487 | candidate_b |
+
+完整参数、各折指标和图表见[`results/task1/round5_20261109/`](results/task1/round5_20261109/)，候选身份、整数CSV哈希、实际拟合轮数及模型重载一致性见[`run_overview.json`](results/task1/round5_20261109/run_overview.json)。两候选均为3300条整数预测，重载模型复现检查通过。协作者使用上方下载及训练命令即可手动复现；复现历史结果时使用归档的源码提交、配置及锁定依赖。
+
+公开源增强没有提高本轮课程验证OOF；平台结果须另外记录。使用者于2026-11-10确认最近上传的是`candidate_a`（普通源增强HGB1600），尚未提供具体Kaggle分数及提交编号，因此归档仅记录候选身份，平台成绩仍留空。该信息来自使用者反馈，未通过平台独立核验。由于获准公开源包含3300条课程测试重叠标签，来源辅助的平台分数与课程验证OOF衡量的范围不同，不能将平台分数称为独立未知测试泛化效果。
+
+## 第四轮长预算嵌套搜索（历史配方）
 
 从仓库根目录的PowerShell执行，前三轮配置和结果保留：
 
@@ -29,7 +65,7 @@
 .\.venv\Scripts\python.exe -X utf8 -B code/run_task1.py results
 ```
 
-第四轮所有CSV仍为整数1–4、3300条及表头，并完成读回/哈希/模型重载复现；平台分数须使用实际候选键`candidate_a`、`candidate_b`或已通过门控的`research_blend`手动记录。代码不会自动上传或推送。第三轮实际OOF普通HGB=0.915082，低于第二轮0.916810；第四轮尚未真实训练，0.92仍是目标而非已验证结果。个人说明不随代码上传。
+第四轮所有CSV仍为整数1–4、3300条及表头，并完成读回/哈希/模型重载复现；平台分数须使用实际候选键`candidate_a`、`candidate_b`或已通过门控的`research_blend`手动记录。代码不会自动上传或推送。第三轮实际OOF普通HGB=0.915082，低于第二轮0.916810；第四轮已训练完成，最强固定单模型仍为普通HGB1600（OOF=0.916810），嵌套融合OOF=0.914234，未通过导出门控。第四轮聚合结果见`results/task1/round4_20261106/`；这些数值均不代表Kaggle成绩。个人说明不随代码上传。
 
 ## 手动启动第一次训练
 
@@ -86,7 +122,7 @@ $taskPublicScore = Read-Host 'Kaggle实际Macro-F1，小数点用英文句点'
 
 `record-score` 只保存本地人工记录，不查询或操作平台。相同配置/seed 重跑主要用于复现，不能保证分数提高。第二轮配置为 `configs/task1/second_run.json`：保持三条模型路线、权重算法、特征与划分不变，两套 HGB 从700增至1600轮，学习率0.03降至0.015，叶样本下限30增至40，L2从10增至15。手写100树森林保留为固定参照；更多树此前未显示稳定收益。
 
-以下保留第二轮的手动复现命令；它增加训练并加强正则化，实际结果见下节。当前新实验使用下一节的`third_run.json`：
+以下保留第二轮的手动复现命令；它增加训练并加强正则化，实际结果见下节。第三轮历史配置见下一节的`third_run.json`；当前第五轮配置见本文件开头：
 
 ```powershell
 .\.venv\Scripts\python.exe -X utf8 -B code/run_task1.py check --config configs/task1/second_run.json

@@ -14,6 +14,8 @@ Project-BIG DATA.pdf
 comp-5434-20261-project-task-1/
 data/
 /Dataset/
+/external_data/
+weather_classification_data.csv
 /dataset/
 /local_artifacts/
 /local_notes/

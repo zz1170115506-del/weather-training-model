@@ -152,6 +152,7 @@ def _config_snapshot(root, manifest, model_names):
         params.append({"name": name, "model_id": model.get("model_id"),
                        "model_params": model.get("model_params", {}),
                        "early_stopping_rounds": model.get("early_stopping_rounds"),
+                       "use_external_data": model.get("use_external_data"),
                        "noise_weighting": model.get("noise_weighting"),
                        "features": model.get("features", {}),
                        "group_features": model.get("group_features", False)})
@@ -482,9 +483,25 @@ def summarize_run(run_dir):
     scores = _platform_scores(root, all_candidates, notes)
     for key, candidate in all_candidates.items():
         candidate["platform_scores"] = [entry for entry in scores or [] if entry["candidate"] == key] or None
+    external = manifest.get("external_data_provenance")
+    if external is not None:
+        audit = _json(root, "audit.json", manifest)
+        if audit.get("external_data") != external:
+            raise ValueError("External-source provenance disagrees with the frozen data audit.")
+        if external.get("policy") not in ("novel_only", "public_source_training"):
+            raise ValueError("External-source provenance requires an explicit overlap policy.")
+        _sha(external.get("source_sha256"), "external source")
+        _sha(external.get("pool_sha256"), "external pool")
+        for key in ("external_pool_rows", "test_overlap_source_rows_used", "independent_new_rows"):
+            value = external.get(key)
+            if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+                raise ValueError("External-source row counts must be nonnegative integers.")
+        if external["test_overlap_source_rows_used"] + external["independent_new_rows"] != external["external_pool_rows"]:
+            raise ValueError("External-source independent/overlap row counts are inconsistent.")
     return {"run_id": manifest.get("run_id", root.name), "run_dir": str(root),
             "status": "complete", "stage": "train", "evaluation_scope": LOCAL_NOTICE,
             "experiment": experiment, "config_snapshot": config_snapshot,
+            "external_data_provenance": external,
             "data_sha256": _data_hashes(manifest.get("source_sha256")), "fold_protocol": protocol,
             "models": models, "candidates": candidates, "platform_scores": scores, "notes": notes,
             "search": search, "research_blend": research}
@@ -521,6 +538,10 @@ def compare_runs(current, previous):
     return {"current_run_id": current["run_id"], "previous_run_id": previous["run_id"],
             "current_experiment": current.get("experiment"), "previous_experiment": previous.get("experiment"),
             "same_data_and_folds": True, "candidates": comparisons,
+            "data_comparison_scope": "Course train/test/sample and folds only; external training sources are listed separately.",
+            "external_training_changed": current.get("external_data_provenance") != previous.get("external_data_provenance"),
+            "current_external_data_provenance": current.get("external_data_provenance"),
+            "previous_external_data_provenance": previous.get("external_data_provenance"),
             "evaluation_scope": "Descriptive same-fold local differences; not independent significance or Kaggle score gains."}
 
 
@@ -544,6 +565,8 @@ def print_results(summary):
             print(f"  {model['name']}: {parameters or '(快照未显式列出分类器参数)'}")
             if model.get("early_stopping_rounds") is not None:
                 print(f"    训练内部选轮 patience={model['early_stopping_rounds']}；上面的轮数是上限，实际轮数见拟合记录。")
+            if model.get("use_external_data") is not None:
+                print(f"    使用审计后的公开源训练池: {model['use_external_data']}")
             if model.get("noise_weighting"):
                 weighting = ", ".join(f"{key}={json.dumps(value, ensure_ascii=False)}"
                                       for key, value in sorted(model["noise_weighting"].items()))
@@ -551,6 +574,12 @@ def print_results(summary):
     if snapshot.get("source_hint"):
         print(snapshot["source_hint"])
     print(LOCAL_NOTICE)
+    if summary.get("external_data_provenance") is not None:
+        source = summary["external_data_provenance"]
+        print(f"公开源策略={source['policy']}，训练池={source['external_pool_rows']}条，"
+              f"独立新增={source['independent_new_rows']}条，课程测试特征重叠={source['test_overlap_source_rows_used']}条。")
+        if source["test_overlap_source_rows_used"]:
+            print("该模式显式使用获准的同源公开标签；平台成绩不可称为独立未知测试的泛化效果。")
     print(f"{'model':28} {'mean':>9} {'std':>9} {'OOF F1':>9} {'accuracy':>9}")
     for model in summary["models"]:
         name = model["name"]
