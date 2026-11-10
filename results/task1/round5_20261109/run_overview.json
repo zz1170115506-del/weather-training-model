@@ -1,0 +1,305 @@
+{
+  "schema_version": 1,
+  "run_id": "20261109T153412Z_train_68814986_e92615",
+  "status": "complete",
+  "experiment": {
+    "round": 5,
+    "label": "round5_authorized_public_source",
+    "parent_run_id": "20261106T171410Z_train_0146c0a8_ea90ae",
+    "change_note": "Use verified Kaggle source v1 under explicit user-confirmed permission for course-test overlaps; exclude all course-training copies globally. Four fixed ablations: HGB1600 and autonomous weighted HGB700, each with/without the retained public source."
+  },
+  "started_at_utc": "2026-11-09T15:34:12.931768+00:00",
+  "workflow_seconds": 252.5859674999956,
+  "timing_scope": "Whole command through evaluation/finalization, including initial data loading and metadata; excludes final manifest hashing.",
+  "source_git": {
+    "available": true,
+    "commit": "cd7576313e15dec43cf2b2900de279aae65d5e09",
+    "dirty": false,
+    "branch": "feat/task1-public-source-data"
+  },
+  "source_tree_sha256": "f0b1d07971d73109ee4505b68c6a9762d1c7769ea391b3e652ed17f409495702",
+  "shared_config": "configs/task1/fifth_run_public_source.json",
+  "resolved_config_sha256": "68814986b915c4dba2838bbb277f94418bba85e47c83c7a606647e38907ab05e",
+  "resolved_config_file_sha256": "17de1312b20451f59d76cd4fd34fd48c869edd3a82639b4e0364016745f7326d",
+  "source_data_sha256": {
+    "train.csv": "4eb4439290751585213f3638bc238bf8a973d8e960b9f05f5d8641c34521bfbb",
+    "test.csv": "c8c036dd75562eef41da3a75edafb3904597a1c5291c97735829f03866c3c080",
+    "sample_submission.csv": "4b7ff8d2c44df622432a6f8d7f87c478e32deba3b976722cf87fe13c3505ee4b"
+  },
+  "fold_protocol": {
+    "method": "StratifiedKFold",
+    "n_splits": 5,
+    "seed": 5434,
+    "canonical_input_order": "ascending record id",
+    "fold_sha256": "baef26daea37bf760b4bb9f971d3cb42ae6185f364538f577b5bb5d041e676ef",
+    "probability_order": [
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  "external_data_provenance": {
+    "policy": "public_source_training",
+    "source_path": "<local path omitted>",
+    "configured_path": "../external_data/weather_type_classification/v1/weather_classification_data.csv",
+    "source_url": "https://www.kaggle.com/datasets/nikhil7280/weather-type-classification/versions/1",
+    "source_sha256": "700fb0a5bd4b0b4ca837a098e9ba7be094a668795d2d621fd9cc0999a2917bf1",
+    "source_rows": 13200,
+    "feature_order": [
+      "Temperature",
+      "Humidity",
+      "Wind Speed",
+      "Precipitation (%)",
+      "Atmospheric Pressure",
+      "UV Index",
+      "Visibility (km)",
+      "Cloud Cover",
+      "Season",
+      "Location"
+    ],
+    "feature_key_version": "weather-features-float64-v1",
+    "label_column": "Weather Type",
+    "course_train_feature_groups": 9900,
+    "course_test_feature_groups": 3300,
+    "course_train_overlap_source_rows": 9900,
+    "course_test_overlap_source_rows": 3300,
+    "excluded_course_train_source_rows": 9900,
+    "excluded_course_test_source_rows": 0,
+    "remaining_before_source_deduplication": 3300,
+    "conflicting_label_groups": 0,
+    "excluded_conflicting_source_rows": 0,
+    "same_label_duplicate_rows_removed": 0,
+    "external_pool_rows": 3300,
+    "test_overlap_source_rows_used": 3300,
+    "independent_new_rows": 0,
+    "augmentation_available": true,
+    "status": "source_assisted_only",
+    "pool_sha256": "8b372043b1a13b98ac8d701ec9a3b43f835c6fe557f55bea95dfba3719fba3dc",
+    "training_pool_sha256": "53064b377e630081980a0f919e9ac50c2583f9b2b8ea7bcbfe844e4aef1bc0a3",
+    "exclude_all_original_course_train_groups": true,
+    "exclude_course_test_groups": false,
+    "test_label_use": "public-source test-overlap labels explicitly retained by configured policy",
+    "independence_scope": "Source-assisted test-overlap rows are not independent new observations; course-training copies are excluded globally, including nested held-out records."
+  },
+  "candidates": {
+    "candidate_a": {
+      "model_name": "hgb_source_s5",
+      "submission": {
+        "rows": 3300,
+        "schema": [
+          "id",
+          "label"
+        ],
+        "id_type": "integer",
+        "label_format": "integer",
+        "class_counts": {
+          "1": 825,
+          "2": 819,
+          "3": 834,
+          "4": 822
+        },
+        "csv_sha256": "cdb6b83fcf0573f8bd34ea7ef54e78ed84e1fce8d4865af283c1eb709132e8c6",
+        "canonical_prediction_sha256": "df7215b8148dd104da4bca68b7b34785109aa125fc3d946a5dbee5db12b9a800",
+        "canonical_prediction_version": "task1-predictions-v1"
+      },
+      "public_source_test_overlap_used": true,
+      "saved_model_reload_exact_match": true,
+      "final_fit": {
+        "preprocessing_seconds": 0.03900279999652412,
+        "fit_seconds": 11.270205000000715,
+        "training_seconds_including_inner_selection": 11.309239599999273,
+        "iteration_selection_seconds": 0.0,
+        "iteration_selection": null,
+        "selected_iterations": null,
+        "actual_iterations": 1600,
+        "trees_per_iteration": 4,
+        "preprocessing_fitted_rows": 13200,
+        "encoded_feature_count": 18,
+        "effective_model_parameters": {
+          "categorical_features": null,
+          "class_weight": null,
+          "early_stopping": false,
+          "interaction_cst": null,
+          "l2_regularization": 15.0,
+          "learning_rate": 0.015,
+          "loss": "log_loss",
+          "max_bins": 255,
+          "max_depth": null,
+          "max_features": 1.0,
+          "max_iter": 1600,
+          "max_leaf_nodes": 15,
+          "min_samples_leaf": 40,
+          "monotonic_cst": null,
+          "n_iter_no_change": 10,
+          "random_state": 5434,
+          "scoring": "loss",
+          "tol": 1e-07,
+          "validation_fraction": 0.1,
+          "verbose": 0,
+          "warm_start": false
+        },
+        "noise_weighting": null,
+        "early_stopping_uses_evaluation_fold": false,
+        "external_data": {
+          "course_fit_rows": 9900,
+          "external_fit_rows": 3300,
+          "combined_fit_rows": 13200,
+          "augmentation_applied": true,
+          "policy": "public_source_training",
+          "pool_sha256": "8b372043b1a13b98ac8d701ec9a3b43f835c6fe557f55bea95dfba3719fba3dc",
+          "used_pool_sha256": "8b372043b1a13b98ac8d701ec9a3b43f835c6fe557f55bea95dfba3719fba3dc",
+          "source_sha256": "700fb0a5bd4b0b4ca837a098e9ba7be094a668795d2d621fd9cc0999a2917bf1",
+          "source_hashes": {
+            "external_source": "700fb0a5bd4b0b4ca837a098e9ba7be094a668795d2d621fd9cc0999a2917bf1"
+          },
+          "test_overlap_source_rows_used": 3300,
+          "independent_new_rows": 0,
+          "excluded_fit_overlap_rows": 0,
+          "excluded_global_course_train_rows": 0,
+          "training_pool_sha256": "53064b377e630081980a0f919e9ac50c2583f9b2b8ea7bcbfe844e4aef1bc0a3",
+          "exclude_all_original_course_train_groups": true,
+          "public_source_test_overlap_declared": true
+        },
+        "external_augmentation_seconds": 0.23949999999604188
+      },
+      "full_test_inference_seconds_including_preprocessing": 2.0478597999972408,
+      "evaluation_scope": "Model trained using an explicitly allowed public source containing course-test feature/label overlaps. These predictions are source-assisted, not an unseen-test generalization estimate; no Kaggle score is inferred."
+    },
+    "candidate_b": {
+      "model_name": "weighted_source_s5",
+      "submission": {
+        "rows": 3300,
+        "schema": [
+          "id",
+          "label"
+        ],
+        "id_type": "integer",
+        "label_format": "integer",
+        "class_counts": {
+          "1": 822,
+          "2": 816,
+          "3": 845,
+          "4": 817
+        },
+        "csv_sha256": "f02688ff1101eef17bcf7211c59beb25e146b7637ac6a7d878d7c044ca69cecc",
+        "canonical_prediction_sha256": "b520950d03d46171d187cb3f530e7d3ecc1069a78434b4658d23dd97648c1c35",
+        "canonical_prediction_version": "task1-predictions-v1"
+      },
+      "public_source_test_overlap_used": true,
+      "saved_model_reload_exact_match": true,
+      "final_fit": {
+        "preprocessing_seconds": 0.02195670000219252,
+        "fit_seconds": 4.8154766999941785,
+        "training_seconds_including_inner_selection": 4.963117400002375,
+        "iteration_selection_seconds": 0.0,
+        "iteration_selection": null,
+        "selected_iterations": null,
+        "actual_iterations": 700,
+        "trees_per_iteration": 4,
+        "preprocessing_fitted_rows": 13200,
+        "encoded_feature_count": 18,
+        "effective_model_parameters": {
+          "categorical_features": null,
+          "class_weight": null,
+          "early_stopping": false,
+          "interaction_cst": null,
+          "l2_regularization": 10.0,
+          "learning_rate": 0.03,
+          "loss": "log_loss",
+          "max_bins": 255,
+          "max_depth": null,
+          "max_features": 1.0,
+          "max_iter": 700,
+          "max_leaf_nodes": 15,
+          "min_samples_leaf": 30,
+          "monotonic_cst": null,
+          "n_iter_no_change": 10,
+          "random_state": 5434,
+          "scoring": "loss",
+          "tol": 1e-07,
+          "validation_fraction": 0.1,
+          "verbose": 0,
+          "warm_start": false
+        },
+        "noise_weighting": {
+          "weight_floor": 0.2,
+          "mean_weight": 0.8639288746592007,
+          "weighter_parameters": {
+            "n_bins": 24,
+            "alpha": 0.5,
+            "contamination": 0.1,
+            "max_iter": 30,
+            "tol": 1e-05,
+            "categorical_features": [
+              "Cloud Cover",
+              "Season",
+              "Location"
+            ],
+            "class_labels": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "min_contamination": 0.01,
+            "max_contamination": 0.4
+          },
+          "weighter_iterations": 10,
+          "weighter_converged": true,
+          "weighting_seconds": 0.1252048999958788,
+          "weight_quantiles": [
+            0.2,
+            0.20000000938318957,
+            0.9999278517554946,
+            0.999999468891049,
+            0.999999966569336
+          ],
+          "estimated_contamination": 0.16972107422679467,
+          "scope": "Training-only generative responsibilities, not known label-error indicators or an estimate of the true noise rate."
+        },
+        "early_stopping_uses_evaluation_fold": false,
+        "external_data": {
+          "course_fit_rows": 9900,
+          "external_fit_rows": 3300,
+          "combined_fit_rows": 13200,
+          "augmentation_applied": true,
+          "policy": "public_source_training",
+          "pool_sha256": "8b372043b1a13b98ac8d701ec9a3b43f835c6fe557f55bea95dfba3719fba3dc",
+          "used_pool_sha256": "8b372043b1a13b98ac8d701ec9a3b43f835c6fe557f55bea95dfba3719fba3dc",
+          "source_sha256": "700fb0a5bd4b0b4ca837a098e9ba7be094a668795d2d621fd9cc0999a2917bf1",
+          "source_hashes": {
+            "external_source": "700fb0a5bd4b0b4ca837a098e9ba7be094a668795d2d621fd9cc0999a2917bf1"
+          },
+          "test_overlap_source_rows_used": 3300,
+          "independent_new_rows": 0,
+          "excluded_fit_overlap_rows": 0,
+          "excluded_global_course_train_rows": 0,
+          "training_pool_sha256": "53064b377e630081980a0f919e9ac50c2583f9b2b8ea7bcbfe844e4aef1bc0a3",
+          "exclude_all_original_course_train_groups": true,
+          "public_source_test_overlap_declared": true
+        },
+        "external_augmentation_seconds": 0.14132819999940693
+      },
+      "full_test_inference_seconds_including_preprocessing": 1.2261608000044362,
+      "evaluation_scope": "Model trained using an explicitly allowed public source containing course-test feature/label overlaps. These predictions are source-assisted, not an unseen-test generalization estimate; no Kaggle score is inferred."
+    }
+  },
+  "platform_result": {
+    "status": "not_recorded",
+    "public_macro_f1": null,
+    "private_macro_f1": null,
+    "submission_id": null,
+    "note": "No candidate-specific Kaggle score record was available at export; local CV is not a platform score."
+  },
+  "reproduction": {
+    "execution": "User starts real-data training manually from the repository root; no training was started during this evidence export.",
+    "source_commit": "cd7576313e15dec43cf2b2900de279aae65d5e09",
+    "dependencies": "code/requirements-lock.txt",
+    "download_command": ".\\.venv\\Scripts\\python.exe -X utf8 -B code/fetch_weather_source.py",
+    "check_command": ".\\.venv\\Scripts\\python.exe -X utf8 -B code/run_task1.py check --config configs/task1/fifth_run_public_source.json",
+    "train_command": ".\\.venv\\Scripts\\python.exe -X utf8 -B code/run_task1.py train --config configs/task1/fifth_run_public_source.json",
+    "results_command": ".\\.venv\\Scripts\\python.exe -X utf8 -B code/run_task1.py results"
+  },
+  "publication_scope": "Only aggregate metrics, figures, parameters and artifact hashes. Raw data, record-level predictions, models, machine paths and personal notes remain local."
+}
