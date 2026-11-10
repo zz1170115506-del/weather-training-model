@@ -1,0 +1,713 @@
+{
+  "schema_version": 1,
+  "labels": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "label_names": [
+    "Sunny",
+    "Cloudy",
+    "Rainy",
+    "Snowy"
+  ],
+  "source_sha256": {
+    "train.csv": "4eb4439290751585213f3638bc238bf8a973d8e960b9f05f5d8641c34521bfbb",
+    "test.csv": "c8c036dd75562eef41da3a75edafb3904597a1c5291c97735829f03866c3c080",
+    "sample_submission.csv": "4b7ff8d2c44df622432a6f8d7f87c478e32deba3b976722cf87fe13c3505ee4b"
+  },
+  "fold_protocol": {
+    "method": "StratifiedKFold",
+    "n_splits": 5,
+    "seed": 5434,
+    "canonical_input_order": "ascending record id",
+    "fold_sha256": "baef26daea37bf760b4bb9f971d3cb42ae6185f364538f577b5bb5d041e676ef",
+    "probability_order": [
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  "models": {
+    "hgb_control_s5": {
+      "config": {
+        "name": "hgb_control_s5",
+        "model_id": "hgb",
+        "use_external_data": false,
+        "model_params": {
+          "max_iter": 1600,
+          "learning_rate": 0.015,
+          "max_leaf_nodes": 15,
+          "min_samples_leaf": 40,
+          "l2_regularization": 15.0
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "6249b785a5240ebf064aea4730789fe158d29df578d4c4fb7dc130681f49232e",
+      "training_metric_scope": "train_macro_f1 and learning-curve training metrics evaluate the original course-fit subset only; preprocessing/model fit may additionally include the audited public-source pool. OOF metrics evaluate only course-validation records.",
+      "oof_metrics": {
+        "macro_f1": 0.9168099696374605,
+        "accuracy": 0.9167676767676768,
+        "confusion_matrix": [
+          [
+            2274,
+            89,
+            64,
+            48
+          ],
+          [
+            81,
+            2223,
+            112,
+            59
+          ],
+          [
+            52,
+            121,
+            2262,
+            40
+          ],
+          [
+            50,
+            63,
+            45,
+            2317
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9255189255189256,
+            "recall": 0.9187878787878788,
+            "f1-score": 0.9221411192214112,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.890625,
+            "recall": 0.8981818181818182,
+            "f1-score": 0.8943874471937237,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.9109947643979057,
+            "recall": 0.9139393939393939,
+            "f1-score": 0.9124647035094796,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9403409090909091,
+            "recall": 0.9361616161616162,
+            "f1-score": 0.9382466086252278,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9168698997519351,
+            "recall": 0.9167676767676768,
+            "f1-score": 0.9168099696374605,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9168698997519351,
+            "recall": 0.9167676767676768,
+            "f1-score": 0.9168099696374604,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261109T153412Z_train_68814986_e92615",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-09T15:34:12.931768+00:00",
+        "git": {
+          "available": true,
+          "commit": "cd7576313e15dec43cf2b2900de279aae65d5e09",
+          "dirty": false,
+          "branch": "feat/task1-public-source-data"
+        },
+        "source_tree_sha256": "f0b1d07971d73109ee4505b68c6a9762d1c7769ea391b3e652ed17f409495702",
+        "external_data_provenance": {
+          "policy": "public_source_training",
+          "source_path": "<local path omitted>",
+          "configured_path": "../external_data/weather_type_classification/v1/weather_classification_data.csv",
+          "source_url": "https://www.kaggle.com/datasets/nikhil7280/weather-type-classification/versions/1",
+          "source_sha256": "700fb0a5bd4b0b4ca837a098e9ba7be094a668795d2d621fd9cc0999a2917bf1",
+          "source_rows": 13200,
+          "feature_order": [
+            "Temperature",
+            "Humidity",
+            "Wind Speed",
+            "Precipitation (%)",
+            "Atmospheric Pressure",
+            "UV Index",
+            "Visibility (km)",
+            "Cloud Cover",
+            "Season",
+            "Location"
+          ],
+          "feature_key_version": "weather-features-float64-v1",
+          "label_column": "Weather Type",
+          "course_train_feature_groups": 9900,
+          "course_test_feature_groups": 3300,
+          "course_train_overlap_source_rows": 9900,
+          "course_test_overlap_source_rows": 3300,
+          "excluded_course_train_source_rows": 9900,
+          "excluded_course_test_source_rows": 0,
+          "remaining_before_source_deduplication": 3300,
+          "conflicting_label_groups": 0,
+          "excluded_conflicting_source_rows": 0,
+          "same_label_duplicate_rows_removed": 0,
+          "external_pool_rows": 3300,
+          "test_overlap_source_rows_used": 3300,
+          "independent_new_rows": 0,
+          "augmentation_available": true,
+          "status": "source_assisted_only",
+          "pool_sha256": "8b372043b1a13b98ac8d701ec9a3b43f835c6fe557f55bea95dfba3719fba3dc",
+          "training_pool_sha256": "53064b377e630081980a0f919e9ac50c2583f9b2b8ea7bcbfe844e4aef1bc0a3",
+          "exclude_all_original_course_train_groups": true,
+          "exclude_course_test_groups": false,
+          "test_label_use": "public-source test-overlap labels explicitly retained by configured policy",
+          "independence_scope": "Source-assisted test-overlap rows are not independent new observations; course-training copies are excluded globally, including nested held-out records."
+        }
+      },
+      "source_summary_sha256": "8880806a44b0fc13b27b8166a2255bb0444bf2f2572615a416443b9178ee8ebb",
+      "source_fold_metrics_sha256": "4254995b2390f5f7d6b6c708a4c5e0a5f84898088476db43e0a709cc7b0d51b6",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "hgb_source_s5": {
+      "config": {
+        "name": "hgb_source_s5",
+        "model_id": "hgb",
+        "use_external_data": true,
+        "model_params": {
+          "max_iter": 1600,
+          "learning_rate": 0.015,
+          "max_leaf_nodes": 15,
+          "min_samples_leaf": 40,
+          "l2_regularization": 15.0
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "e0a284154e82007d77933ed635239ee5e76d4bff5c5f79bd80106f2c56095331",
+      "training_metric_scope": "train_macro_f1 and learning-curve training metrics evaluate the original course-fit subset only; preprocessing/model fit may additionally include the audited public-source pool. OOF metrics evaluate only course-validation records.",
+      "oof_metrics": {
+        "macro_f1": 0.914430287065724,
+        "accuracy": 0.9144444444444444,
+        "confusion_matrix": [
+          [
+            2276,
+            81,
+            58,
+            60
+          ],
+          [
+            73,
+            2203,
+            140,
+            59
+          ],
+          [
+            56,
+            103,
+            2267,
+            49
+          ],
+          [
+            61,
+            53,
+            54,
+            2307
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9229521492295215,
+            "recall": 0.9195959595959596,
+            "f1-score": 0.92127099777373,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.9028688524590164,
+            "recall": 0.8901010101010101,
+            "f1-score": 0.8964394710071211,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.8999603017070266,
+            "recall": 0.915959595959596,
+            "f1-score": 0.907889467360833,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9321212121212121,
+            "recall": 0.9321212121212121,
+            "f1-score": 0.9321212121212121,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9144756288791941,
+            "recall": 0.9144444444444444,
+            "f1-score": 0.914430287065724,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9144756288791942,
+            "recall": 0.9144444444444444,
+            "f1-score": 0.9144302870657239,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261109T153412Z_train_68814986_e92615",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-09T15:34:12.931768+00:00",
+        "git": {
+          "available": true,
+          "commit": "cd7576313e15dec43cf2b2900de279aae65d5e09",
+          "dirty": false,
+          "branch": "feat/task1-public-source-data"
+        },
+        "source_tree_sha256": "f0b1d07971d73109ee4505b68c6a9762d1c7769ea391b3e652ed17f409495702",
+        "external_data_provenance": {
+          "policy": "public_source_training",
+          "source_path": "<local path omitted>",
+          "configured_path": "../external_data/weather_type_classification/v1/weather_classification_data.csv",
+          "source_url": "https://www.kaggle.com/datasets/nikhil7280/weather-type-classification/versions/1",
+          "source_sha256": "700fb0a5bd4b0b4ca837a098e9ba7be094a668795d2d621fd9cc0999a2917bf1",
+          "source_rows": 13200,
+          "feature_order": [
+            "Temperature",
+            "Humidity",
+            "Wind Speed",
+            "Precipitation (%)",
+            "Atmospheric Pressure",
+            "UV Index",
+            "Visibility (km)",
+            "Cloud Cover",
+            "Season",
+            "Location"
+          ],
+          "feature_key_version": "weather-features-float64-v1",
+          "label_column": "Weather Type",
+          "course_train_feature_groups": 9900,
+          "course_test_feature_groups": 3300,
+          "course_train_overlap_source_rows": 9900,
+          "course_test_overlap_source_rows": 3300,
+          "excluded_course_train_source_rows": 9900,
+          "excluded_course_test_source_rows": 0,
+          "remaining_before_source_deduplication": 3300,
+          "conflicting_label_groups": 0,
+          "excluded_conflicting_source_rows": 0,
+          "same_label_duplicate_rows_removed": 0,
+          "external_pool_rows": 3300,
+          "test_overlap_source_rows_used": 3300,
+          "independent_new_rows": 0,
+          "augmentation_available": true,
+          "status": "source_assisted_only",
+          "pool_sha256": "8b372043b1a13b98ac8d701ec9a3b43f835c6fe557f55bea95dfba3719fba3dc",
+          "training_pool_sha256": "53064b377e630081980a0f919e9ac50c2583f9b2b8ea7bcbfe844e4aef1bc0a3",
+          "exclude_all_original_course_train_groups": true,
+          "exclude_course_test_groups": false,
+          "test_label_use": "public-source test-overlap labels explicitly retained by configured policy",
+          "independence_scope": "Source-assisted test-overlap rows are not independent new observations; course-training copies are excluded globally, including nested held-out records."
+        }
+      },
+      "source_summary_sha256": "321e5351df2137ce43c25d0df00a025bf57a8ba9c317654ffdf6ce5a304a539a",
+      "source_fold_metrics_sha256": "693ea4be52bcd64af718d4929b662ae1b308ad49cc88d9df269200bfe16eb997",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "weighted_control_s5": {
+      "config": {
+        "name": "weighted_control_s5",
+        "model_id": "hgb",
+        "use_external_data": false,
+        "model_params": {
+          "max_iter": 700,
+          "learning_rate": 0.03,
+          "max_leaf_nodes": 15,
+          "min_samples_leaf": 30,
+          "l2_regularization": 10.0
+        },
+        "noise_weighting": {
+          "floor": 0.2,
+          "n_bins": 24,
+          "alpha": 0.5,
+          "contamination": 0.1,
+          "max_iter": 30,
+          "tol": 1e-05,
+          "min_contamination": 0.01,
+          "max_contamination": 0.4
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "b43fdd6635a555202554374ad0152e476620f8556ace7a12d452665d44ff6b60",
+      "training_metric_scope": "train_macro_f1 and learning-curve training metrics evaluate the original course-fit subset only; preprocessing/model fit may additionally include the audited public-source pool. OOF metrics evaluate only course-validation records.",
+      "oof_metrics": {
+        "macro_f1": 0.9162005633531267,
+        "accuracy": 0.9161616161616162,
+        "confusion_matrix": [
+          [
+            2269,
+            94,
+            61,
+            51
+          ],
+          [
+            64,
+            2215,
+            137,
+            59
+          ],
+          [
+            57,
+            101,
+            2276,
+            41
+          ],
+          [
+            52,
+            68,
+            45,
+            2310
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9291564291564292,
+            "recall": 0.9167676767676768,
+            "f1-score": 0.9229204799674599,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.893866020984665,
+            "recall": 0.8949494949494949,
+            "f1-score": 0.8944074298405007,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.9035331480746328,
+            "recall": 0.9195959595959596,
+            "f1-score": 0.9114937925510612,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.938642828118651,
+            "recall": 0.9333333333333333,
+            "f1-score": 0.9359805510534847,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9162996065835944,
+            "recall": 0.9161616161616162,
+            "f1-score": 0.9162005633531267,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9162996065835944,
+            "recall": 0.9161616161616162,
+            "f1-score": 0.9162005633531266,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261109T153412Z_train_68814986_e92615",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-09T15:34:12.931768+00:00",
+        "git": {
+          "available": true,
+          "commit": "cd7576313e15dec43cf2b2900de279aae65d5e09",
+          "dirty": false,
+          "branch": "feat/task1-public-source-data"
+        },
+        "source_tree_sha256": "f0b1d07971d73109ee4505b68c6a9762d1c7769ea391b3e652ed17f409495702",
+        "external_data_provenance": {
+          "policy": "public_source_training",
+          "source_path": "<local path omitted>",
+          "configured_path": "../external_data/weather_type_classification/v1/weather_classification_data.csv",
+          "source_url": "https://www.kaggle.com/datasets/nikhil7280/weather-type-classification/versions/1",
+          "source_sha256": "700fb0a5bd4b0b4ca837a098e9ba7be094a668795d2d621fd9cc0999a2917bf1",
+          "source_rows": 13200,
+          "feature_order": [
+            "Temperature",
+            "Humidity",
+            "Wind Speed",
+            "Precipitation (%)",
+            "Atmospheric Pressure",
+            "UV Index",
+            "Visibility (km)",
+            "Cloud Cover",
+            "Season",
+            "Location"
+          ],
+          "feature_key_version": "weather-features-float64-v1",
+          "label_column": "Weather Type",
+          "course_train_feature_groups": 9900,
+          "course_test_feature_groups": 3300,
+          "course_train_overlap_source_rows": 9900,
+          "course_test_overlap_source_rows": 3300,
+          "excluded_course_train_source_rows": 9900,
+          "excluded_course_test_source_rows": 0,
+          "remaining_before_source_deduplication": 3300,
+          "conflicting_label_groups": 0,
+          "excluded_conflicting_source_rows": 0,
+          "same_label_duplicate_rows_removed": 0,
+          "external_pool_rows": 3300,
+          "test_overlap_source_rows_used": 3300,
+          "independent_new_rows": 0,
+          "augmentation_available": true,
+          "status": "source_assisted_only",
+          "pool_sha256": "8b372043b1a13b98ac8d701ec9a3b43f835c6fe557f55bea95dfba3719fba3dc",
+          "training_pool_sha256": "53064b377e630081980a0f919e9ac50c2583f9b2b8ea7bcbfe844e4aef1bc0a3",
+          "exclude_all_original_course_train_groups": true,
+          "exclude_course_test_groups": false,
+          "test_label_use": "public-source test-overlap labels explicitly retained by configured policy",
+          "independence_scope": "Source-assisted test-overlap rows are not independent new observations; course-training copies are excluded globally, including nested held-out records."
+        }
+      },
+      "source_summary_sha256": "5d93896e3360ea7115cb43e1315a8c71b2e399184880fd93531ebd0293ea75f7",
+      "source_fold_metrics_sha256": "50cb4aeae5c61111f02a0eda4fab37f061f66bc890eb008b528d2a7627ae67e1",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "weighted_source_s5": {
+      "config": {
+        "name": "weighted_source_s5",
+        "model_id": "hgb",
+        "use_external_data": true,
+        "model_params": {
+          "max_iter": 700,
+          "learning_rate": 0.03,
+          "max_leaf_nodes": 15,
+          "min_samples_leaf": 30,
+          "l2_regularization": 10.0
+        },
+        "noise_weighting": {
+          "floor": 0.2,
+          "n_bins": 24,
+          "alpha": 0.5,
+          "contamination": 0.1,
+          "max_iter": 30,
+          "tol": 1e-05,
+          "min_contamination": 0.01,
+          "max_contamination": 0.4
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "4f7e2013afadc590540707f21afb38afc41c5747703f59df2c10f6c96e2660e0",
+      "training_metric_scope": "train_macro_f1 and learning-curve training metrics evaluate the original course-fit subset only; preprocessing/model fit may additionally include the audited public-source pool. OOF metrics evaluate only course-validation records.",
+      "oof_metrics": {
+        "macro_f1": 0.9144868239220537,
+        "accuracy": 0.9145454545454546,
+        "confusion_matrix": [
+          [
+            2276,
+            80,
+            57,
+            62
+          ],
+          [
+            67,
+            2184,
+            155,
+            69
+          ],
+          [
+            58,
+            78,
+            2290,
+            49
+          ],
+          [
+            65,
+            53,
+            53,
+            2304
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9229521492295215,
+            "recall": 0.9195959595959596,
+            "f1-score": 0.92127099777373,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.9118997912317328,
+            "recall": 0.8824242424242424,
+            "f1-score": 0.8969199178644763,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.8962818003913894,
+            "recall": 0.9252525252525252,
+            "f1-score": 0.9105367793240556,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.927536231884058,
+            "recall": 0.9309090909090909,
+            "f1-score": 0.9292196007259528,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9146674931841754,
+            "recall": 0.9145454545454546,
+            "f1-score": 0.9144868239220537,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9146674931841754,
+            "recall": 0.9145454545454546,
+            "f1-score": 0.9144868239220537,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261109T153412Z_train_68814986_e92615",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-09T15:34:12.931768+00:00",
+        "git": {
+          "available": true,
+          "commit": "cd7576313e15dec43cf2b2900de279aae65d5e09",
+          "dirty": false,
+          "branch": "feat/task1-public-source-data"
+        },
+        "source_tree_sha256": "f0b1d07971d73109ee4505b68c6a9762d1c7769ea391b3e652ed17f409495702",
+        "external_data_provenance": {
+          "policy": "public_source_training",
+          "source_path": "<local path omitted>",
+          "configured_path": "../external_data/weather_type_classification/v1/weather_classification_data.csv",
+          "source_url": "https://www.kaggle.com/datasets/nikhil7280/weather-type-classification/versions/1",
+          "source_sha256": "700fb0a5bd4b0b4ca837a098e9ba7be094a668795d2d621fd9cc0999a2917bf1",
+          "source_rows": 13200,
+          "feature_order": [
+            "Temperature",
+            "Humidity",
+            "Wind Speed",
+            "Precipitation (%)",
+            "Atmospheric Pressure",
+            "UV Index",
+            "Visibility (km)",
+            "Cloud Cover",
+            "Season",
+            "Location"
+          ],
+          "feature_key_version": "weather-features-float64-v1",
+          "label_column": "Weather Type",
+          "course_train_feature_groups": 9900,
+          "course_test_feature_groups": 3300,
+          "course_train_overlap_source_rows": 9900,
+          "course_test_overlap_source_rows": 3300,
+          "excluded_course_train_source_rows": 9900,
+          "excluded_course_test_source_rows": 0,
+          "remaining_before_source_deduplication": 3300,
+          "conflicting_label_groups": 0,
+          "excluded_conflicting_source_rows": 0,
+          "same_label_duplicate_rows_removed": 0,
+          "external_pool_rows": 3300,
+          "test_overlap_source_rows_used": 3300,
+          "independent_new_rows": 0,
+          "augmentation_available": true,
+          "status": "source_assisted_only",
+          "pool_sha256": "8b372043b1a13b98ac8d701ec9a3b43f835c6fe557f55bea95dfba3719fba3dc",
+          "training_pool_sha256": "53064b377e630081980a0f919e9ac50c2583f9b2b8ea7bcbfe844e4aef1bc0a3",
+          "exclude_all_original_course_train_groups": true,
+          "exclude_course_test_groups": false,
+          "test_label_use": "public-source test-overlap labels explicitly retained by configured policy",
+          "independence_scope": "Source-assisted test-overlap rows are not independent new observations; course-training copies are excluded globally, including nested held-out records."
+        }
+      },
+      "source_summary_sha256": "1402ab40b9fb11c856870abfc8e8e3968d00a81734a77ba79304174d23b9031b",
+      "source_fold_metrics_sha256": "4e1633454692c3db7188951bc211e20b777af3616342e7fde2505c589af59ba9",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    }
+  },
+  "runs": [
+    {
+      "run_id": "20261109T153412Z_train_68814986_e92615",
+      "status": "complete",
+      "run_complete": true,
+      "timestamp_utc": "2026-11-09T15:34:12.931768+00:00",
+      "git": {
+        "available": true,
+        "commit": "cd7576313e15dec43cf2b2900de279aae65d5e09",
+        "dirty": false,
+        "branch": "feat/task1-public-source-data"
+      },
+      "source_tree_sha256": "f0b1d07971d73109ee4505b68c6a9762d1c7769ea391b3e652ed17f409495702",
+      "external_data_provenance": {
+        "policy": "public_source_training",
+        "source_path": "<local path omitted>",
+        "configured_path": "../external_data/weather_type_classification/v1/weather_classification_data.csv",
+        "source_url": "https://www.kaggle.com/datasets/nikhil7280/weather-type-classification/versions/1",
+        "source_sha256": "700fb0a5bd4b0b4ca837a098e9ba7be094a668795d2d621fd9cc0999a2917bf1",
+        "source_rows": 13200,
+        "feature_order": [
+          "Temperature",
+          "Humidity",
+          "Wind Speed",
+          "Precipitation (%)",
+          "Atmospheric Pressure",
+          "UV Index",
+          "Visibility (km)",
+          "Cloud Cover",
+          "Season",
+          "Location"
+        ],
+        "feature_key_version": "weather-features-float64-v1",
+        "label_column": "Weather Type",
+        "course_train_feature_groups": 9900,
+        "course_test_feature_groups": 3300,
+        "course_train_overlap_source_rows": 9900,
+        "course_test_overlap_source_rows": 3300,
+        "excluded_course_train_source_rows": 9900,
+        "excluded_course_test_source_rows": 0,
+        "remaining_before_source_deduplication": 3300,
+        "conflicting_label_groups": 0,
+        "excluded_conflicting_source_rows": 0,
+        "same_label_duplicate_rows_removed": 0,
+        "external_pool_rows": 3300,
+        "test_overlap_source_rows_used": 3300,
+        "independent_new_rows": 0,
+        "augmentation_available": true,
+        "status": "source_assisted_only",
+        "pool_sha256": "8b372043b1a13b98ac8d701ec9a3b43f835c6fe557f55bea95dfba3719fba3dc",
+        "training_pool_sha256": "53064b377e630081980a0f919e9ac50c2583f9b2b8ea7bcbfe844e4aef1bc0a3",
+        "exclude_all_original_course_train_groups": true,
+        "exclude_course_test_groups": false,
+        "test_label_use": "public-source test-overlap labels explicitly retained by configured policy",
+        "independence_scope": "Source-assisted test-overlap rows are not independent new observations; course-training copies are excluded globally, including nested held-out records."
+      }
+    }
+  ],
+  "nested_evaluations": [],
+  "export_notes": [],
+  "development_scope": "CV used for model selection, not an independent test or Kaggle result.",
+  "timing_scope": "Per-fold final model fit excludes preprocessing and inner iteration selection; total CV includes workflow costs. Cross-run speed comparisons require matching hardware."
+}
