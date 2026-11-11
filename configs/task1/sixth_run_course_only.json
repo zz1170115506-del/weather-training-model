@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "description": "Round 6 uses only unchanged original course Dataset1. Compare preserved controls with stratified HGB subagging, internal cross-fitted confidence weighting, RBF SVC and Ordered CatBoost. The 0.92-0.94 Macro-F1 interval is an unverified goal, never an output cap; predictions must not be corrupted to meet it.",
+  "experiment": {
+    "round": 6,
+    "label": "round6_course_only_robust_ensemble",
+    "parent_run_id": "20261106T171410Z_train_0146c0a8_ea90ae",
+    "change_note": "Retire source-assisted round 5. Pin all original course CSV hashes; preserve plain HGB1600, generative-weighted HGB700 and NumPy RF100 controls. Compare five-member 90% subagging, internal OOF confidence weights, RBF SVC and Ordered CatBoost; use nested selection and conservative blend gating."
+  },
+  "expected_source_sha256": {
+    "train.csv": "4eb4439290751585213f3638bc238bf8a973d8e960b9f05f5d8641c34521bfbb",
+    "test.csv": "c8c036dd75562eef41da3a75edafb3904597a1c5291c97735829f03866c3c080",
+    "sample_submission.csv": "4b7ff8d2c44df622432a6f8d7f87c478e32deba3b976722cf87fe13c3505ee4b"
+  },
+  "validation": {"n_splits": 5, "split_seed": 5434, "model_seed": 5434},
+  "finalization": {"method": "full_refit"},
+  "diagnostics": {"learning_curve_every": 100},
+  "search": {"inner_splits": 3, "blend_pool_size": 3, "minimum_blend_gain": 0.0005, "min_blend_fold_wins": 3},
+  "models": [
+    {
+      "name": "r6_hgb_control1600", "model_id": "hgb",
+      "model_params": {"max_iter": 1600, "learning_rate": 0.015, "max_leaf_nodes": 15, "min_samples_leaf": 40, "l2_regularization": 15.0}
+    },
+    {
+      "name": "r6_generative_control700", "model_id": "hgb",
+      "model_params": {"max_iter": 700, "learning_rate": 0.03, "max_leaf_nodes": 15, "min_samples_leaf": 30, "l2_regularization": 10.0},
+      "noise_weighting": {"floor": 0.2}
+    },
+    {
+      "name": "r6_numpy_forest100", "model_id": "numpy_forest",
+      "model_params": {"n_estimators": 100, "min_samples_leaf": 2, "max_features": "sqrt"}
+    },
+    {
+      "name": "r6_hgb_subag5", "model_id": "bagged_hgb",
+      "model_params": {"n_members": 5, "max_samples": 0.9, "bootstrap": false, "max_iter": 1200, "learning_rate": 0.02, "max_leaf_nodes": 15, "min_samples_leaf": 40, "l2_regularization": 15.0, "max_features": 0.9}
+    },
+    {
+      "name": "r6_hgb_crossfit_weighted", "model_id": "hgb",
+      "model_params": {"max_iter": 1600, "learning_rate": 0.015, "max_leaf_nodes": 15, "min_samples_leaf": 40, "l2_regularization": 15.0},
+      "crossfit_weighting": {"n_splits": 3, "threshold": 0.85, "floor": 0.5,
+        "teacher_params": {"max_iter": 600, "learning_rate": 0.03, "max_leaf_nodes": 15, "min_samples_leaf": 40, "l2_regularization": 15.0}}
+    },
+    {
+      "name": "r6_svc_rbf", "model_id": "svc",
+      "model_params": {"C": 4.0, "gamma": 0.05, "kernel": "rbf", "cache_size": 512, "tol": 0.001}
+    },
+    {
+      "name": "r6_catboost_ordered_d4", "model_id": "catboost", "early_stopping_rounds": 150,
+      "model_params": {"iterations": 3000, "learning_rate": 0.02, "depth": 4, "l2_leaf_reg": 15.0, "random_strength": 0.5, "bootstrap_type": "Bayesian", "bagging_temperature": 0.5, "boosting_type": "Ordered", "one_hot_max_size": 2, "max_ctr_complexity": 1, "loss_function": "MultiClass", "eval_metric": "MultiClass"}
+    }
+  ],
+  "training": {"export_models": ["r6_hgb_control1600", "r6_generative_control700"]},
+  "blend": {"n_trials": 32, "allow_class_multipliers": false}
+}

@@ -1,7 +1,6 @@
 """Shared, group-aware folds and honest out-of-fold experiment metrics."""
 from __future__ import annotations
 
-from dataclasses import replace
 from pathlib import Path
 from time import perf_counter
 import numpy as np
@@ -11,7 +10,8 @@ from sklearn.model_selection import StratifiedKFold, StratifiedGroupKFold
 
 from . import LABELS, LABEL_NAMES
 from .artifacts import content_hash, save_json
-from .data import CATEGORICAL
+from .config import require_course_only_config
+from .data import CATEGORICAL, require_course_only_data
 from .models import fit_model, predict_probabilities
 
 
@@ -76,6 +76,8 @@ def group_diagnostics(data, probabilities):
 
 
 def cross_validate(data, config, folds, model_seed=5434, out=None, verbose=True, learning_curve_every=None):
+    require_course_only_config(config)
+    require_course_only_data(data, config)
     X, y = data.X, data.y
     folds = np.asarray(folds)
     if folds.shape != y.shape or len(np.unique(folds)) < 2 or set(np.unique(folds)) != set(range(len(np.unique(folds)))):
@@ -86,14 +88,7 @@ def cross_validate(data, config, folds, model_seed=5434, out=None, verbose=True,
     started = perf_counter()
     for fold in sorted(np.unique(folds)):
         fit, valid = np.flatnonzero(folds != fold), np.flatnonzero(folds == fold)
-        from .external import augment_training
-        training_context = data if config.get("use_external_data", True) else replace(data, external=None)
-        augmentation_started = perf_counter()
-        fit_X, fit_y, augmentation = augment_training(training_context, X.iloc[fit], y[fit])
-        augmentation_seconds = perf_counter() - augmentation_started
-        bundle, fit_info = fit_model(fit_X, fit_y, config, model_seed + int(fold))
-        fit_info["external_data"] = augmentation
-        fit_info["external_augmentation_seconds"] = augmentation_seconds
+        bundle, fit_info = fit_model(X.iloc[fit], y[fit], config, model_seed + int(fold))
         infer_started = perf_counter()
         probability = predict_probabilities(bundle, X.iloc[valid])
         inference_seconds = perf_counter() - infer_started
@@ -114,8 +109,7 @@ def cross_validate(data, config, folds, model_seed=5434, out=None, verbose=True,
                "train_macro_f1": train_result["macro_f1"], "macro_f1": result["macro_f1"],
                "accuracy": result["accuracy"], "inference_seconds_including_preprocessing": inference_seconds,
                "learning_curve_diagnostics_seconds": diagnostics_seconds,
-               "course_fit_rows": len(fit), "external_fit_rows": augmentation["external_fit_rows"],
-               "combined_fit_rows": augmentation["combined_fit_rows"],
+               "course_fit_rows": len(fit),
                **fit_info}
         records.append(row)
         details.append({**row, "metrics": result,
@@ -136,7 +130,8 @@ def cross_validate(data, config, folds, model_seed=5434, out=None, verbose=True,
                "fold_macro_f1_std": float(np.std(scores, ddof=1)),
                "oof_metrics": metrics(y, oof), "folds": details,
                "total_cv_seconds": perf_counter() - started,
-               "training_metric_scope": "train_macro_f1 and learning-curve training metrics evaluate the original course-fit subset only; preprocessing/model fit may additionally include the audited public-source pool. OOF metrics evaluate only course-validation records.",
+               "training_data_policy": "course_train_only",
+               "training_metric_scope": "Preprocessing, sample weighting and model fitting use only the course-fit subset. OOF metrics evaluate only course-validation records; no external or test labels are used.",
                "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."}
     if out is not None:
         out = Path(out)

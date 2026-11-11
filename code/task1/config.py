@@ -9,6 +9,36 @@ import re
 from .models import MODEL_IDS
 
 
+def validate_expected_source_hashes(value):
+    """A pinned course dataset has exactly three immutable input digests."""
+    names = {"train.csv", "test.csv", "sample_submission.csv"}
+    if (not isinstance(value, dict) or set(value) != names
+            or any(not isinstance(digest, str) or re.fullmatch(r"[0-9a-f]{64}", digest) is None
+                   for digest in value.values())):
+        raise ValueError("expected_source_sha256 requires exactly train.csv, test.csv and sample_submission.csv with lowercase 64-character SHA256 digests.")
+    return dict(value)
+
+
+def require_course_only_config(config):
+    """Reject retired source-assisted recipes, including direct API callers."""
+    if "external_data" in config:
+        raise ValueError("External data is disabled. Use only the original course train.csv; source-assisted configurations cannot run.")
+    if "expected_source_sha256" in config:
+        validate_expected_source_hashes(config["expected_source_sha256"])
+    models = config.get("models", [config])
+    if not isinstance(models, list):
+        return  # The full schema validator reports invalid model containers.
+    for model in models:
+        if not isinstance(model, dict):
+            continue
+        if "use_external_data" in model:
+            value = model["use_external_data"]
+            if not isinstance(value, bool):
+                raise ValueError("use_external_data must be boolean; external data is disabled.")
+            if value:
+                raise ValueError("External data is disabled. use_external_data=true is forbidden.")
+
+
 def validate_experiment(value):
     """Validate optional human-authored provenance without inventing rounds."""
     required = {"round", "label", "parent_run_id", "change_note"}
@@ -31,22 +61,11 @@ def validate_experiment(value):
 
 def resolve_config(raw):
     result = deepcopy(raw)
+    require_course_only_config(result)
     if result.get("schema_version") != 1:
         raise ValueError("Expected schema_version 1.")
     if not isinstance(result.get("models"), list) or not result["models"]:
         raise ValueError("models must be a nonempty list.")
-    if "external_data" in result:
-        external = result["external_data"]
-        if not isinstance(external, dict) or set(external) != {"path", "sha256", "source_url", "policy"}:
-            raise ValueError("external_data requires path, sha256, source_url and explicit policy.")
-        if not isinstance(external["path"], str) or not external["path"].strip():
-            raise ValueError("external_data.path must be a nonempty filename.")
-        if not isinstance(external["sha256"], str) or re.fullmatch(r"[0-9a-f]{64}", external["sha256"]) is None:
-            raise ValueError("external_data.sha256 must be a fixed lowercase SHA256 digest.")
-        if not isinstance(external["source_url"], str) or not external["source_url"].startswith("https://"):
-            raise ValueError("external_data.source_url must identify the public HTTPS source.")
-        if external["policy"] not in ("novel_only", "public_source_training"):
-            raise ValueError("external_data.policy must explicitly choose novel_only or public_source_training.")
     if "experiment" in result:
         result["experiment"] = validate_experiment(result["experiment"])
     if "diagnostics" in result:
@@ -112,8 +131,6 @@ def resolve_config(raw):
         model.setdefault("model_params", {})
         if not isinstance(model["model_params"], dict):
             raise ValueError("model_params must be an object.")
-        if "use_external_data" in model and not isinstance(model["use_external_data"], bool):
-            raise ValueError("use_external_data must be boolean when explicitly configured.")
         if "random_state" in model["model_params"] or "random_seed" in model["model_params"]:
             raise ValueError("Use validation.model_seed, not model_params random_state/random_seed.")
         if "early_stopping_rounds" in model:
@@ -134,6 +151,13 @@ def resolve_config(raw):
         model.setdefault("group_features", False)
         if not isinstance(model["group_features"], bool):
             raise ValueError("group_features must be boolean.")
+        if "crossfit_weighting" in model:
+            if "noise_weighting" in model:
+                raise ValueError("Choose noise_weighting or crossfit_weighting, not both.")
+            if model["model_id"] not in ("hgb", "hgb_native", "bagged_hgb", "sklearn_forest", "catboost", "xgboost"):
+                raise ValueError("crossfit_weighting requires a model supporting sample_weight.")
+            from .crossfit_weights import resolve_settings
+            model["crossfit_weighting"] = resolve_settings(model["crossfit_weighting"])
         if "noise_weighting" in model and not isinstance(model["noise_weighting"], dict):
             raise ValueError("noise_weighting must be a parameter object.")
         if model.get("noise_weighting"):

@@ -11,7 +11,7 @@ from . import LABELS
 from .features import Features
 
 MODEL_IDS = ("majority", "logistic", "numpy_cart", "numpy_forest", "sklearn_cart",
-             "sklearn_forest", "extra_trees", "hgb", "hgb_native", "catboost", "xgboost", "svc", "histogram_nb")
+             "sklearn_forest", "extra_trees", "hgb", "hgb_native", "bagged_hgb", "catboost", "xgboost", "svc", "histogram_nb")
 
 
 class WeatherXGBoost:
@@ -95,6 +95,11 @@ def make_model(config, seed, groups=None, iterations=None):
         from generative_weather import ContaminationHistogramNB
         return ContaminationHistogramNB(categorical_features=list(CATEGORICAL_COLUMNS),
                                          class_labels=list(LABELS), **params)
+    if name == "bagged_hgb":
+        from .bagged_hgb import BaggedWeatherHGB
+        if iterations is not None:
+            raise ValueError("Bagged HGB uses fixed member stages, not inner iteration selection.")
+        return BaggedWeatherHGB(random_state=seed, **params)
     if name in ("hgb", "hgb_native"):
         from sklearn.ensemble import HistGradientBoostingClassifier
         # No outer-validation-driven early stopping. Optional selection below
@@ -182,11 +187,21 @@ def _inner_split(X, y, seed):
                        "stopping_rows": len(stop), "duplicate_feature_groups_disjoint": True}
 
 
-def _training_weights(X, y, config):
+def _training_weights(X, y, config, seed=0):
+    if "noise_weighting" in config and "crossfit_weighting" in config:
+        raise ValueError("Choose noise_weighting or crossfit_weighting, not both.")
+    if "crossfit_weighting" in config:
+        if not isinstance(config["crossfit_weighting"], dict):
+            raise ValueError("crossfit_weighting must be an object.")
+        if config["model_id"] not in ("hgb", "hgb_native", "bagged_hgb", "sklearn_forest", "catboost", "xgboost"):
+            raise ValueError("crossfit_weighting requires a model supporting sample_weight.")
+        from .crossfit_weights import training_weights
+        return training_weights(X, y, dict(config["crossfit_weighting"]), seed,
+                                feature_options=config.get("features"))
     if not config.get("noise_weighting"):
         return None, None
     started = perf_counter()
-    if config["model_id"] not in ("hgb", "hgb_native", "sklearn_forest", "catboost", "xgboost"):
+    if config["model_id"] not in ("hgb", "hgb_native", "bagged_hgb", "sklearn_forest", "catboost", "xgboost"):
         raise ValueError("noise_weighting requires a model supporting sample_weight.")
     from generative_weather import ContaminationHistogramNB
     settings = dict(config["noise_weighting"])
@@ -228,7 +243,8 @@ def fit_model(X, y, config, seed):
         inner_X = inner_features.fit_transform(X.iloc[inner_fit])
         stop_X = inner_features.transform(X.iloc[inner_stop])
         selector = make_model(config, seed)
-        inner_weights, _ = _training_weights(X.iloc[inner_fit], np.asarray(y)[inner_fit], config)
+        weight_options = {"seed": seed} if "crossfit_weighting" in config else {}
+        inner_weights, _ = _training_weights(X.iloc[inner_fit], np.asarray(y)[inner_fit], config, **weight_options)
         if name in ("hgb", "hgb_native"):
             selector.set_params(early_stopping=True, validation_fraction=None,
                                 n_iter_no_change=rounds, scoring="loss")
@@ -271,7 +287,8 @@ def fit_model(X, y, config, seed):
     values = features.fit_transform(X)
     preprocessing_seconds = perf_counter() - preprocess_started
     model = make_model(config, seed, features.groups_, iterations)
-    sample_weight, noise_diagnostics = _training_weights(X, y, config)
+    weight_options = {"seed": seed} if "crossfit_weighting" in config else {}
+    sample_weight, weight_diagnostics = _training_weights(X, y, config, **weight_options)
     fit_started = perf_counter()
     if name == "catboost":
         model.fit(values, y, cat_features=list(CATEGORICAL_COLUMNS), sample_weight=sample_weight)
@@ -293,10 +310,13 @@ def fit_model(X, y, config, seed):
                 "preprocessing_fitted_rows": features.fitted_rows_,
                 "encoded_feature_count": len(features.groups_),
                 "effective_model_parameters": (model.get_all_params() if name == "catboost" else model.get_params()),
-                "noise_weighting": noise_diagnostics,
+                "noise_weighting": None if "crossfit_weighting" in config else weight_diagnostics,
+                "crossfit_weighting": weight_diagnostics if "crossfit_weighting" in config else None,
                 "early_stopping_uses_evaluation_fold": False}
     if name == "xgboost":
         metadata["xgboost_booster_configuration"] = model.booster_configuration()
+    if name == "bagged_hgb":
+        metadata["bagging"] = model.training_diagnostics_
     return bundle, metadata
 
 

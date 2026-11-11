@@ -90,12 +90,18 @@ def _rank(summaries):
             for index, item in enumerate(ordered, 1)]
 
 
+def _family(model_id):
+    # Sampling an HGB ensemble does not create an independent model family.
+    # Preserve historical identities for the pre-existing model IDs.
+    return "hgb" if model_id == "bagged_hgb" else model_id
+
+
 def _pool(rank, size):
     chosen, families = [], set()
     for item in rank:
-        if item["model_id"] not in families:
+        if _family(item["model_id"]) not in families:
             chosen.append(item["name"])
-            families.add(item["model_id"])
+            families.add(_family(item["model_id"]))
             if len(chosen) == size:
                 return chosen
     chosen.extend(item["name"] for item in rank if item["name"] not in chosen)
@@ -238,7 +244,7 @@ def evaluate_search(data, config, out):
                         folds=folds, single_probabilities=selected_oof, blend_probabilities=blend_oof)
     rank = _rank(summaries)
     best = rank[0]
-    runner_up = next((item for item in rank[1:] if item["model_id"] != best["model_id"]), rank[1])
+    runner_up = next((item for item in rank[1:] if _family(item["model_id"]) != _family(best["model_id"])), rank[1])
     selected_models = [best["name"], runner_up["name"]]
     pool = _pool(rank, settings["blend_pool_size"])
     final_recipe = fit_blend({name: base_probabilities[name] for name in pool}, data.y,

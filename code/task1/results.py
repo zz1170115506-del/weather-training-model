@@ -154,6 +154,7 @@ def _config_snapshot(root, manifest, model_names):
                        "early_stopping_rounds": model.get("early_stopping_rounds"),
                        "use_external_data": model.get("use_external_data"),
                        "noise_weighting": model.get("noise_weighting"),
+                       "crossfit_weighting": model.get("crossfit_weighting"),
                        "features": model.get("features", {}),
                        "group_features": model.get("group_features", False)})
     if seen != set(model_names):
@@ -162,7 +163,9 @@ def _config_snapshot(root, manifest, model_names):
                         "path": str(path), "resolved_config_sha256": actual_hash,
                         "resolved_config_file_sha256": actual_file_hash,
                         "models": params, "validation": snapshot.get("validation"),
-                        "diagnostics": snapshot.get("diagnostics"), "source_hint": hint}
+                        "diagnostics": snapshot.get("diagnostics"),
+                        "external_data_declared": "external_data" in snapshot,
+                        "source_hint": hint}
 
 
 def _metrics(root, summary, manifest):
@@ -498,10 +501,18 @@ def summarize_run(run_dir):
                 raise ValueError("External-source row counts must be nonnegative integers.")
         if external["test_overlap_source_rows_used"] + external["independent_new_rows"] != external["external_pool_rows"]:
             raise ValueError("External-source independent/overlap row counts are inconsistent.")
+    source_assisted = (external is not None or config_snapshot.get("external_data_declared", False)
+                       or any(model.get("use_external_data") for model in config_snapshot["models"])
+                       or any(candidate.get("fit_and_export", {}).get("public_source_test_overlap_used")
+                              for candidate in declared_candidates.values()))
+    if source_assisted:
+        notes.append("Excluded historical source-assisted run: external data is now forbidden. Its predictions and scores are ineligible for the current course-only experiment.")
     return {"run_id": manifest.get("run_id", root.name), "run_dir": str(root),
             "status": "complete", "stage": "train", "evaluation_scope": LOCAL_NOTICE,
             "experiment": experiment, "config_snapshot": config_snapshot,
             "external_data_provenance": external,
+            "current_policy_eligible": not source_assisted,
+            "current_data_policy": "course_train_only",
             "data_sha256": _data_hashes(manifest.get("source_sha256")), "fold_protocol": protocol,
             "models": models, "candidates": candidates, "platform_scores": scores, "notes": notes,
             "search": search, "research_blend": research}
@@ -517,6 +528,8 @@ def compare_runs(current, previous):
     """
     current = current if isinstance(current, dict) else summarize_run(current)
     previous = previous if isinstance(previous, dict) else summarize_run(previous)
+    if not current.get("current_policy_eligible", True) or not previous.get("current_policy_eligible", True):
+        raise ValueError("Automatic comparison refused: a historical external/source-assisted run is excluded by the current course-only policy.")
     if _data_hashes(current.get("data_sha256")) != _data_hashes(previous.get("data_sha256")):
         raise ValueError("Automatic comparison refused: source data hashes differ.")
     first, second = _protocol(current.get("fold_protocol")), _protocol(previous.get("fold_protocol"))
@@ -571,21 +584,32 @@ def print_results(summary):
                 weighting = ", ".join(f"{key}={json.dumps(value, ensure_ascii=False)}"
                                       for key, value in sorted(model["noise_weighting"].items()))
                 print(f"    自主权重生成器（独立参数）: {weighting}")
+            if model.get("crossfit_weighting"):
+                weighting = ", ".join(f"{key}={json.dumps(value, ensure_ascii=False)}"
+                                      for key, value in sorted(model["crossfit_weighting"].items()))
+                print(f"    训练内部交叉拟合置信权重（不删除或改标签）: {weighting}")
     if snapshot.get("source_hint"):
         print(snapshot["source_hint"])
     print(LOCAL_NOTICE)
+    if not summary.get("current_policy_eligible", True):
+        print("历史外部源辅助运行：当前规则已禁止，以下指标仅作历史审计，不可用作本轮候选或成绩。")
     if summary.get("external_data_provenance") is not None:
         source = summary["external_data_provenance"]
         print(f"公开源策略={source['policy']}，训练池={source['external_pool_rows']}条，"
               f"独立新增={source['independent_new_rows']}条，课程测试特征重叠={source['test_overlap_source_rows_used']}条。")
         if source["test_overlap_source_rows_used"]:
-            print("该模式显式使用获准的同源公开标签；平台成绩不可称为独立未知测试的泛化效果。")
+            print("该历史模式曾使用同源测试重叠标签；现已禁止，相关平台成绩已排除。")
     print(f"{'model':28} {'mean':>9} {'std':>9} {'OOF F1':>9} {'accuracy':>9}")
     for model in summary["models"]:
         name = model["name"]
         short = name if len(name) <= 28 else name[:25] + "..."
         print(f"{short:28} {model['fold_macro_f1_mean']:9.6f} {model['fold_macro_f1_std']:9.6f} "
               f"{model['oof_macro_f1']:9.6f} {model['accuracy']:9.6f}")
+    if not summary.get("current_policy_eligible", True):
+        print("不提供该历史运行的上传文件或最佳候选建议。")
+        for note in summary.get("notes", []):
+            print(f"Note: {note}")
+        return
     for key, candidate in summary["candidates"].items():
         print(f"\n{key} = {candidate['model_name']} | integer | {candidate['rows']} rows")
         print(f"整数上传 CSV: {candidate['integer_upload_csv']}")

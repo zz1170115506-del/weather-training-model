@@ -14,8 +14,8 @@ import pandas as pd
 from . import LABELS
 from .artifacts import (ROOT, DEFAULT_ARTIFACT_ROOT, content_hash, file_hash, finish_run, git_state,
                         new_run, save_json)
-from .config import load_config
-from .data import FEATURES, infer_label_format, load_data
+from .config import load_config, require_course_only_config
+from .data import FEATURES, infer_label_format, load_data, require_course_only_data
 from .ensemble import apply_blend, fit_blend
 from .models import fit_model, make_model, predict_probabilities
 from .submission import validate_submission_file, write_submission
@@ -39,6 +39,8 @@ def _write_folds(out, data, folds):
 
 
 def run_cv(data, config, out):
+    require_course_only_config(config)
+    require_course_only_data(data, config)
     folds, fold_info = _folds(data, config["validation"])
     _write_folds(out, data, folds)
     save_json(out / "fold_protocol.json", fold_info)
@@ -61,6 +63,8 @@ def run_cv(data, config, out):
 
 def run_nested(data, config, out):
     """Fit blend weights inside each outer-train, never on outer validation."""
+    require_course_only_config(config)
+    require_course_only_data(data, config)
     validation = config["validation"]
     outer, protocol = _folds(data, validation)
     _write_folds(out, data, outer)
@@ -83,12 +87,8 @@ def run_nested(data, config, out):
             _, inner_probabilities[name] = cross_validate(
                 inner_data, candidate, inner_folds,
                 validation["model_seed"] + 10000 * (int(fold) + 1), verbose=False)
-            from .external import augment_training
-            training_context = inner_data if candidate.get("use_external_data", True) else replace(inner_data, external=None)
-            fit_X, fit_y, augmentation = augment_training(training_context, inner_data.X, inner_data.y)
-            bundle, fit_info = fit_model(fit_X, fit_y, candidate,
+            bundle, fit_info = fit_model(inner_data.X, inner_data.y, candidate,
                                          validation["model_seed"] + int(fold))
-            fit_info["external_data"] = augmentation
             valid_probabilities[name] = predict_probabilities(bundle, data.X.iloc[valid])
             base_oof[name][valid] = valid_probabilities[name]
             model_times[name] = fit_info
@@ -140,6 +140,8 @@ def _training_recipe(data, config):
 
 
 def run_finalize(data, config, out, label_format, frozen_recipe=None):
+    require_course_only_config(config)
+    require_course_only_data(data, config)
     if len(config["models"]) > 1 and config.get("prediction_strategy") != "learned_blend":
         raise ValueError("Use train for separate fixed candidate exports; multi-model finalize requires explicit prediction_strategy=learned_blend.")
     started = perf_counter()
@@ -155,17 +157,9 @@ def run_finalize(data, config, out, label_format, frozen_recipe=None):
                            "selection_scope": recipe.get("selection_scope", recipe.get("evaluation_scope")),
                            "recipe_sha256": content_hash(recipe)}
     save_json(out / "blend_recipe.json", recipe)
-    bundles, times, external_training = {}, {}, {}
+    bundles, times = {}, {}
     for candidate in config["models"]:
-        from .external import augment_training
-        training_context = data if candidate.get("use_external_data", True) else replace(data, external=None)
-        augmentation_started = perf_counter()
-        fit_X, fit_y, augmentation = augment_training(training_context, data.X, data.y)
-        augmentation_seconds = perf_counter() - augmentation_started
-        bundle, timing = fit_model(fit_X, fit_y, candidate, config["validation"]["model_seed"])
-        timing["external_data"] = augmentation
-        timing["external_augmentation_seconds"] = augmentation_seconds
-        external_training[candidate["name"]] = augmentation
+        bundle, timing = fit_model(data.X, data.y, candidate, config["validation"]["model_seed"])
         bundles[candidate["name"]] = bundle
         times[candidate["name"]] = timing
     infer_started = perf_counter()
@@ -184,7 +178,7 @@ def run_finalize(data, config, out, label_format, frozen_recipe=None):
                         probabilities=blended, **probabilities)
     saved = {"schema_version": 1, "models": bundles, "recipe": recipe, "config": config,
              "source_sha256": data.audit["source_sha256"], "feature_order": FEATURES,
-             "external_data_provenance": {"source_audit": data.audit.get("external_data"), "actual_training": external_training},
+             "training_data_policy": "course_train_only",
              "label_format": resolved_format, "expected_predictions": predictions,
              "expected_prediction_sha256": submission["canonical_prediction_sha256"]}
     joblib.dump(saved, out / "model_bundle.joblib", compress=3)
@@ -193,10 +187,8 @@ def run_finalize(data, config, out, label_format, frozen_recipe=None):
                           for name, bundle in reloaded["models"].items()}, reloaded["recipe"])
     if not np.array_equal(blended, replay):
         raise RuntimeError("Saved model reload did not reproduce exact test probabilities.")
-    test_overlap_used = any(item.get("test_overlap_source_rows_used", 0) > 0 for item in external_training.values())
     result = {"submission": submission, "alternative_submission": alternative_metadata,
-              "external_data_provenance": {"source_audit": data.audit.get("external_data"), "actual_training": external_training},
-              "public_source_test_overlap_used": test_overlap_used,
+              "training_data_policy": "course_train_only",
               "label_format_requested": label_format, "label_format_used": resolved_format,
               "format_basis": "sample_submission.csv" if label_format == "sample" else "explicit CLI selection",
               "platform_acceptance_verified": False,
@@ -207,14 +199,15 @@ def run_finalize(data, config, out, label_format, frozen_recipe=None):
               "saved_model_reload_exact_match": True,
               "prediction_class_counts": {str(k): int((predictions == k).sum()) for k in LABELS},
               "training_epochs": "not applicable to trees; boosting iterations stored per model",
-              "evaluation_scope": ("Model trained using an explicitly allowed public source containing course-test feature/label overlaps. These predictions are source-assisted, not an unseen-test generalization estimate; no Kaggle score is inferred."
-                                   if test_overlap_used else "Full-training model predictions only; these fitted models did not use public-source labels overlapping course test. No Kaggle score is inferred.")}
+              "evaluation_scope": "Full course-training model predictions; no external data or test labels used. No Kaggle score is inferred."}
     save_json(out / "submission_manifest.json", result)
     return result
 
 
 def run_predict(data, bundle_path, output, label_format):
+    require_course_only_data(data)
     saved = joblib.load(bundle_path)
+    require_course_only_bundle(saved)
     if saved["source_sha256"] != data.audit["source_sha256"]:
         raise ValueError("Reproduction data hashes differ from the trained bundle.")
     probabilities = {name: predict_probabilities(bundle, data.test[FEATURES])
@@ -230,6 +223,26 @@ def run_predict(data, bundle_path, output, label_format):
     return result
 
 
+def require_course_only_bundle(saved):
+    """Retired source-assisted artifacts cannot emit new upload files.
+
+    Legacy course-only bundles remain compatible. The zero-row provenance
+    wrapper used by the former pipeline is harmless only when no source audit,
+    source hash or actual external fit rows are present.
+    """
+    require_course_only_config(saved.get("config", {}))
+    provenance = saved.get("external_data_provenance") or {}
+    if saved.get("public_source_test_overlap_used") or provenance.get("source_audit"):
+        raise ValueError("External/source-assisted models are disabled and excluded from current submissions.")
+    for record in provenance.get("actual_training", {}).values():
+        if (record.get("external_fit_rows", 0) or record.get("test_overlap_source_rows_used", 0)
+                or record.get("augmentation_applied") or record.get("source_sha256")
+                or record.get("source_hashes")):
+            raise ValueError("External/source-assisted models are disabled and excluded from current submissions.")
+    for bundle in saved.get("models", {}).values():
+        require_course_only_config(bundle.get("config", {}))
+
+
 def run_train(data, config, out, label_format):
     """User-started full workflow: common CV, fixed candidates, export and replay.
 
@@ -237,6 +250,8 @@ def run_train(data, config, out, label_format):
     deterministic search-selected single models and a separately gated blend.
     All files are local; this function has no Kaggle/GitHub network calls.
     """
+    require_course_only_config(config)
+    require_course_only_data(data, config)
     print("[1/3] Common-fold development validation", flush=True)
     comparison = run_cv(data, config, out)
     search = None
@@ -325,6 +340,8 @@ def record_score(args):
     out = args.run_dir.resolve()
     from .results import summarize_run
     summary = summarize_run(out)
+    if not summary.get("current_policy_eligible", True):
+        raise ValueError("This archived source-assisted run is excluded by the course-only policy; do not record it as a current eligible submission.")
     available = dict(summary["candidates"])
     if summary.get("research_blend") is not None:
         available["research_blend"] = summary["research_blend"]
@@ -366,7 +383,9 @@ def execute(args):
     if args.stage in ("check", "train", "finalize") and args.label_format != "integer":
         raise ValueError("Task1 evaluation requires integer labels 1..4: the evaluator rejected 'Rainy'. Use --label-format integer; sample/name are historical inspection formats.")
     overall_started = perf_counter()
+    config = (load_config(args.config) if args.config else {"schema_version": 1, "stage": "audit"}) if args.stage not in ("validate-submission", "predict") else None
     data = load_data(args.data_dir)
+    require_course_only_data(data, config)
     data_load_seconds = perf_counter() - overall_started
     if args.stage == "validate-submission":
         if args.submission is None:
@@ -379,13 +398,6 @@ def execute(args):
             raise ValueError("--bundle and --output are required.")
         print(json.dumps(run_predict(data, args.bundle, args.output, args.label_format), indent=2))
         return
-    config = load_config(args.config) if args.config else {"schema_version": 1, "stage": "audit"}
-    external_load_seconds = 0.0
-    if "external_data" in config:
-        from .external import attach_external
-        external_started = perf_counter()
-        data = attach_external(data, config["external_data"], ROOT)
-        external_load_seconds = perf_counter() - external_started
     if args.stage != "audit" and args.config is None:
         raise ValueError("--config is required for this stage.")
     if args.stage == "check":
@@ -399,18 +411,27 @@ def execute(args):
         inner = config.get("search", {}).get("inner_splits", 0)
         calls = count * outer * (1 + inner)
         stopping = sum("early_stopping_rounds" in model for model in config["models"])
+        per_candidate = outer * (1 + inner)
+        additional_members = sum(model["model_params"].get("n_members", 5) - 1
+                                 for model in config["models"] if model["model_id"] == "bagged_hgb")
+        confidence_teachers = sum(model["crossfit_weighting"]["n_splits"]
+                                  for model in config["models"] if model.get("crossfit_weighting"))
         print(json.dumps({"status": "ready", "training_started": False,
                           "data_rows": data.audit["rows"], "source_sha256": data.audit["source_sha256"],
                           "models": [model["name"] for model in config["models"]],
                           "export_models": config["training"]["export_models"],
+                          "export_models_scope": ("Fixed-mode fallback only; search selects actual A/B after evaluation."
+                                                  if "search" in config else "Fixed candidate exports."),
                           "experiment": config.get("experiment"),
-                          "external_data": data.audit.get("external_data"),
+                          "training_data_policy": "course_train_only",
                           "search_plan": ({"candidate_recipes": count, "outer_folds": outer, "inner_folds": inner,
                                            "cv_fit_model_calls": calls,
                                            "additional_inner_stopping_fits": stopping * outer * (1 + inner),
+                                           "additional_bagging_member_fits": additional_members * per_candidate,
+                                           "additional_crossfit_teacher_fits": confidence_teachers * per_candidate,
                                            "final_single_fit_model_calls": 2,
                                            "conditional_blend_fit_model_calls": config["search"]["blend_pool_size"],
-                                           "policy": "Complete fixed-budget nested search; fail loudly on errors, no partial-ranking shortcuts. Final refits with stopping may require an additional inner fit."}
+                                           "policy": "Complete fixed-budget nested search. Counts exclude SVC internal calibration and individual forest trees. Final refits may additionally fit members/teachers/stopping models; fail loudly on errors, no partial-ranking shortcuts."}
                                           if "search" in config else None),
                           "config_sha256": content_hash(config),
                           "label_format_from_sample": infer_label_format(data.sample),
@@ -455,10 +476,9 @@ def execute(args):
                     stream.write((out / "submission.csv").read_bytes())
                 result["additional_csv_copy_sha256"] = file_hash(args.output)
         finish_run(out, {"source_sha256": data.audit["source_sha256"],
-                         "external_data_provenance": data.audit.get("external_data"),
+                         "training_data_policy": "course_train_only",
                          "source_tree_sha256": version["source_tree_sha256"],
                          "data_load_and_audit_seconds": data_load_seconds,
-                         "external_load_and_audit_seconds": external_load_seconds,
                          "workflow_seconds": perf_counter() - overall_started,
                          "timing_scope": "Whole command through evaluation/finalization, including initial data loading and metadata; excludes final manifest hashing.",
                          "reproduce_command_template": (
