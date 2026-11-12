@@ -1,0 +1,1028 @@
+{
+  "schema_version": 1,
+  "labels": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "label_names": [
+    "Sunny",
+    "Cloudy",
+    "Rainy",
+    "Snowy"
+  ],
+  "source_sha256": {
+    "train.csv": "4eb4439290751585213f3638bc238bf8a973d8e960b9f05f5d8641c34521bfbb",
+    "test.csv": "c8c036dd75562eef41da3a75edafb3904597a1c5291c97735829f03866c3c080",
+    "sample_submission.csv": "4b7ff8d2c44df622432a6f8d7f87c478e32deba3b976722cf87fe13c3505ee4b"
+  },
+  "fold_protocol": {
+    "method": "StratifiedKFold",
+    "n_splits": 5,
+    "seed": 5434,
+    "canonical_input_order": "ascending record id",
+    "fold_sha256": "baef26daea37bf760b4bb9f971d3cb42ae6185f364538f577b5bb5d041e676ef",
+    "probability_order": [
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  "models": {
+    "catboost_d6_3k": {
+      "config": {
+        "name": "catboost_d6_3k",
+        "model_id": "catboost",
+        "early_stopping_rounds": 100,
+        "model_params": {
+          "iterations": 3000,
+          "learning_rate": 0.02,
+          "depth": 6,
+          "l2_leaf_reg": 20.0,
+          "random_strength": 1.0,
+          "bootstrap_type": "Bayesian",
+          "bagging_temperature": 0.5,
+          "one_hot_max_size": 255,
+          "loss_function": "MultiClass",
+          "eval_metric": "MultiClass"
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "3752363deda6aa6d50100d618e1297f45501e630c53917cf8a1b8b9cf4376636",
+      "oof_metrics": {
+        "macro_f1": 0.9132132120612381,
+        "accuracy": 0.9131313131313131,
+        "confusion_matrix": [
+          [
+            2256,
+            107,
+            57,
+            55
+          ],
+          [
+            67,
+            2229,
+            126,
+            53
+          ],
+          [
+            43,
+            116,
+            2262,
+            54
+          ],
+          [
+            61,
+            64,
+            57,
+            2293
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9295426452410384,
+            "recall": 0.9115151515151515,
+            "f1-score": 0.9204406364749081,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8859300476947536,
+            "recall": 0.9006060606060606,
+            "f1-score": 0.8932077739931877,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.9040767386091128,
+            "recall": 0.9139393939393939,
+            "f1-score": 0.9089813140446051,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9340122199592668,
+            "recall": 0.9264646464646464,
+            "f1-score": 0.9302231237322515,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.913390412876043,
+            "recall": 0.9131313131313131,
+            "f1-score": 0.9132132120612381,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.913390412876043,
+            "recall": 0.9131313131313131,
+            "f1-score": 0.913213212061238,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T171410Z_train_0146c0a8_ea90ae",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T17:14:10.122217+00:00",
+        "git": {
+          "available": true,
+          "commit": "01a3474bf25478b12ba76f8011487505428247ae",
+          "dirty": false,
+          "branch": "feat/task1-round4-search"
+        },
+        "source_tree_sha256": "802f1ec9521637ae06240983382fe3f0bfdb12df2370d5b20f38c435f9ca2d27",
+        "external_data_provenance": null
+      },
+      "source_summary_sha256": "a3b403746a59c8aa12b45bda476598ed5c67b0b18090d94830ab406189dfcdbf",
+      "source_fold_metrics_sha256": "ca68c7ab147f7f89fb9b6c4949d87a88835b363824c40ca9ecb51dc8a01cfbe4",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "hgb_capacity3k": {
+      "config": {
+        "name": "hgb_capacity3k",
+        "model_id": "hgb",
+        "early_stopping_rounds": 100,
+        "model_params": {
+          "max_iter": 3000,
+          "learning_rate": 0.015,
+          "max_leaf_nodes": 31,
+          "min_samples_leaf": 40,
+          "l2_regularization": 25.0
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "e04732411c1725bae8c36517837f71752d2cb2e75e2f02ad6b9e102e1049970d",
+      "oof_metrics": {
+        "macro_f1": 0.9134457981336278,
+        "accuracy": 0.9133333333333333,
+        "confusion_matrix": [
+          [
+            2271,
+            110,
+            47,
+            47
+          ],
+          [
+            69,
+            2225,
+            132,
+            49
+          ],
+          [
+            53,
+            128,
+            2252,
+            42
+          ],
+          [
+            68,
+            62,
+            51,
+            2294
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9227956115400244,
+            "recall": 0.9175757575757576,
+            "f1-score": 0.9201782820097245,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8811881188118812,
+            "recall": 0.898989898989899,
+            "f1-score": 0.89,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.9073327961321515,
+            "recall": 0.9098989898989899,
+            "f1-score": 0.908614081097438,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9432565789473685,
+            "recall": 0.9268686868686868,
+            "f1-score": 0.9349908294273487,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9136432763578565,
+            "recall": 0.9133333333333333,
+            "f1-score": 0.9134457981336278,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9136432763578564,
+            "recall": 0.9133333333333333,
+            "f1-score": 0.9134457981336277,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T171410Z_train_0146c0a8_ea90ae",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T17:14:10.122217+00:00",
+        "git": {
+          "available": true,
+          "commit": "01a3474bf25478b12ba76f8011487505428247ae",
+          "dirty": false,
+          "branch": "feat/task1-round4-search"
+        },
+        "source_tree_sha256": "802f1ec9521637ae06240983382fe3f0bfdb12df2370d5b20f38c435f9ca2d27",
+        "external_data_provenance": null
+      },
+      "source_summary_sha256": "894786126c51ad37583204ac31f62f9be3652c1be72345cbefab5a34c65261af",
+      "source_fold_metrics_sha256": "dc298c40b4c47aeff125b7ca7db38dd5403ee81d9f134f0b7befb74a9933bd64",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "hgb_noise_floor20": {
+      "config": {
+        "name": "hgb_noise_floor20",
+        "model_id": "hgb",
+        "model_params": {
+          "max_iter": 700,
+          "learning_rate": 0.03,
+          "max_leaf_nodes": 15,
+          "min_samples_leaf": 30,
+          "l2_regularization": 10.0
+        },
+        "noise_weighting": {
+          "floor": 0.2,
+          "n_bins": 24,
+          "alpha": 0.5,
+          "contamination": 0.1,
+          "max_iter": 30,
+          "tol": 1e-05,
+          "min_contamination": 0.01,
+          "max_contamination": 0.4
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "b429bced466a4b40a9aed9cf3855ba1696f46fc155e6cf59187529e3a927b4ba",
+      "oof_metrics": {
+        "macro_f1": 0.9162005633531267,
+        "accuracy": 0.9161616161616162,
+        "confusion_matrix": [
+          [
+            2269,
+            94,
+            61,
+            51
+          ],
+          [
+            64,
+            2215,
+            137,
+            59
+          ],
+          [
+            57,
+            101,
+            2276,
+            41
+          ],
+          [
+            52,
+            68,
+            45,
+            2310
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9291564291564292,
+            "recall": 0.9167676767676768,
+            "f1-score": 0.9229204799674599,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.893866020984665,
+            "recall": 0.8949494949494949,
+            "f1-score": 0.8944074298405007,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.9035331480746328,
+            "recall": 0.9195959595959596,
+            "f1-score": 0.9114937925510612,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.938642828118651,
+            "recall": 0.9333333333333333,
+            "f1-score": 0.9359805510534847,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9162996065835944,
+            "recall": 0.9161616161616162,
+            "f1-score": 0.9162005633531267,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9162996065835944,
+            "recall": 0.9161616161616162,
+            "f1-score": 0.9162005633531266,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T171410Z_train_0146c0a8_ea90ae",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T17:14:10.122217+00:00",
+        "git": {
+          "available": true,
+          "commit": "01a3474bf25478b12ba76f8011487505428247ae",
+          "dirty": false,
+          "branch": "feat/task1-round4-search"
+        },
+        "source_tree_sha256": "802f1ec9521637ae06240983382fe3f0bfdb12df2370d5b20f38c435f9ca2d27",
+        "external_data_provenance": null
+      },
+      "source_summary_sha256": "28677a5f75a98f4bf47d8afa8322fc0e7a25c46d5472d95b08026d87fa1ba957",
+      "source_fold_metrics_sha256": "5427465a145b3cbd925e57ed32dc3ad618fdeea8c058fb03de822195d3e60ec4",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "hgb_plain_long1600": {
+      "config": {
+        "name": "hgb_plain_long1600",
+        "model_id": "hgb",
+        "model_params": {
+          "max_iter": 1600,
+          "learning_rate": 0.015,
+          "max_leaf_nodes": 15,
+          "min_samples_leaf": 40,
+          "l2_regularization": 15.0
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "844f356f286aa0d86e4d8129cf18b913777e48a7f15aa05a3422795105fc9f6a",
+      "oof_metrics": {
+        "macro_f1": 0.9168099696374605,
+        "accuracy": 0.9167676767676768,
+        "confusion_matrix": [
+          [
+            2274,
+            89,
+            64,
+            48
+          ],
+          [
+            81,
+            2223,
+            112,
+            59
+          ],
+          [
+            52,
+            121,
+            2262,
+            40
+          ],
+          [
+            50,
+            63,
+            45,
+            2317
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9255189255189256,
+            "recall": 0.9187878787878788,
+            "f1-score": 0.9221411192214112,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.890625,
+            "recall": 0.8981818181818182,
+            "f1-score": 0.8943874471937237,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.9109947643979057,
+            "recall": 0.9139393939393939,
+            "f1-score": 0.9124647035094796,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9403409090909091,
+            "recall": 0.9361616161616162,
+            "f1-score": 0.9382466086252278,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9168698997519351,
+            "recall": 0.9167676767676768,
+            "f1-score": 0.9168099696374605,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9168698997519351,
+            "recall": 0.9167676767676768,
+            "f1-score": 0.9168099696374604,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T171410Z_train_0146c0a8_ea90ae",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T17:14:10.122217+00:00",
+        "git": {
+          "available": true,
+          "commit": "01a3474bf25478b12ba76f8011487505428247ae",
+          "dirty": false,
+          "branch": "feat/task1-round4-search"
+        },
+        "source_tree_sha256": "802f1ec9521637ae06240983382fe3f0bfdb12df2370d5b20f38c435f9ca2d27",
+        "external_data_provenance": null
+      },
+      "source_summary_sha256": "8b4e83af393f75a626082eaee7d2c63a849f0a55909450b30bbb650a504179d3",
+      "source_fold_metrics_sha256": "ba03eea8d4eecd21c48be2fceed8a8a0a4604781e1c741871bda7e67af69db78",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "hgb_smooth3k": {
+      "config": {
+        "name": "hgb_smooth3k",
+        "model_id": "hgb",
+        "early_stopping_rounds": 100,
+        "model_params": {
+          "max_iter": 3000,
+          "learning_rate": 0.01,
+          "max_leaf_nodes": 15,
+          "min_samples_leaf": 60,
+          "l2_regularization": 30.0
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "00bb779a7ecbae84bfb900e4409e1f0271cf86837bce0edbbd0c26b249361bc1",
+      "oof_metrics": {
+        "macro_f1": 0.9145062723758964,
+        "accuracy": 0.9144444444444444,
+        "confusion_matrix": [
+          [
+            2272,
+            99,
+            51,
+            53
+          ],
+          [
+            77,
+            2224,
+            122,
+            52
+          ],
+          [
+            51,
+            122,
+            2257,
+            45
+          ],
+          [
+            67,
+            62,
+            46,
+            2300
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9209566274827726,
+            "recall": 0.917979797979798,
+            "f1-score": 0.9194658033184946,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8871160749900279,
+            "recall": 0.8985858585858586,
+            "f1-score": 0.892814130871136,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.9115508885298869,
+            "recall": 0.9119191919191919,
+            "f1-score": 0.911735003029691,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9387755102040817,
+            "recall": 0.9292929292929293,
+            "f1-score": 0.934010152284264,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9145997753016922,
+            "recall": 0.9144444444444444,
+            "f1-score": 0.9145062723758964,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9145997753016922,
+            "recall": 0.9144444444444444,
+            "f1-score": 0.9145062723758965,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T171410Z_train_0146c0a8_ea90ae",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T17:14:10.122217+00:00",
+        "git": {
+          "available": true,
+          "commit": "01a3474bf25478b12ba76f8011487505428247ae",
+          "dirty": false,
+          "branch": "feat/task1-round4-search"
+        },
+        "source_tree_sha256": "802f1ec9521637ae06240983382fe3f0bfdb12df2370d5b20f38c435f9ca2d27",
+        "external_data_provenance": null
+      },
+      "source_summary_sha256": "19cadad0d987ebedefa02e27acec0d5121964bddba6149aace3ccea62dcdb1bc",
+      "source_fold_metrics_sha256": "ae505e1f3d14dca26261a413005dd84915cdfb98152f3445837b19c6b196a688",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "numpy_forest100": {
+      "config": {
+        "name": "numpy_forest100",
+        "model_id": "numpy_forest",
+        "model_params": {
+          "n_estimators": 100,
+          "min_samples_leaf": 2,
+          "max_features": "sqrt"
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "e9ebccd18426616000b9c0cbf298f615c125ac424ed9af09893cd1fe41104755",
+      "oof_metrics": {
+        "macro_f1": 0.9143831884831561,
+        "accuracy": 0.9141414141414141,
+        "confusion_matrix": [
+          [
+            2257,
+            127,
+            50,
+            41
+          ],
+          [
+            61,
+            2244,
+            125,
+            45
+          ],
+          [
+            38,
+            133,
+            2264,
+            40
+          ],
+          [
+            55,
+            75,
+            60,
+            2285
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9361260887598507,
+            "recall": 0.9119191919191919,
+            "f1-score": 0.9238641015145314,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8701046917409849,
+            "recall": 0.9066666666666666,
+            "f1-score": 0.88800949742778,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.9059623849539816,
+            "recall": 0.9147474747474748,
+            "f1-score": 0.9103337354242059,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9477395271671506,
+            "recall": 0.9232323232323232,
+            "f1-score": 0.9353254195661073,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.914983173155492,
+            "recall": 0.9141414141414141,
+            "f1-score": 0.9143831884831561,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9149831731554919,
+            "recall": 0.9141414141414141,
+            "f1-score": 0.9143831884831561,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T171410Z_train_0146c0a8_ea90ae",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T17:14:10.122217+00:00",
+        "git": {
+          "available": true,
+          "commit": "01a3474bf25478b12ba76f8011487505428247ae",
+          "dirty": false,
+          "branch": "feat/task1-round4-search"
+        },
+        "source_tree_sha256": "802f1ec9521637ae06240983382fe3f0bfdb12df2370d5b20f38c435f9ca2d27",
+        "external_data_provenance": null
+      },
+      "source_summary_sha256": "0fb8f9268376c64a4e1a4b167b951862fd17ee22e8cbe691788e92f24ca91893",
+      "source_fold_metrics_sha256": "8bce1c1ddc62286ba65fb23edf0a57bca81994f7e3de719a45918b0d806150d2",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "xgb_depth3_5k": {
+      "config": {
+        "name": "xgb_depth3_5k",
+        "model_id": "xgboost",
+        "early_stopping_rounds": 150,
+        "model_params": {
+          "n_estimators": 5000,
+          "learning_rate": 0.02,
+          "max_depth": 3,
+          "min_child_weight": 10.0,
+          "reg_lambda": 15.0,
+          "reg_alpha": 0.1,
+          "subsample": 0.85,
+          "colsample_bytree": 0.9
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "bf3f23ec3d66ac13115680eef5dccfd955cb0ba2fa232b294dbf3386731da021",
+      "oof_metrics": {
+        "macro_f1": 0.915161146211489,
+        "accuracy": 0.915050505050505,
+        "confusion_matrix": [
+          [
+            2268,
+            107,
+            49,
+            51
+          ],
+          [
+            59,
+            2228,
+            141,
+            47
+          ],
+          [
+            45,
+            118,
+            2265,
+            47
+          ],
+          [
+            58,
+            62,
+            57,
+            2298
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9333333333333333,
+            "recall": 0.9163636363636364,
+            "f1-score": 0.9247706422018349,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8858846918489066,
+            "recall": 0.9002020202020202,
+            "f1-score": 0.8929859719438877,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.901671974522293,
+            "recall": 0.9151515151515152,
+            "f1-score": 0.908361740525366,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9406467458043389,
+            "recall": 0.9284848484848485,
+            "f1-score": 0.9345262301748678,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.915384186377218,
+            "recall": 0.9150505050505051,
+            "f1-score": 0.915161146211489,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.915384186377218,
+            "recall": 0.915050505050505,
+            "f1-score": 0.915161146211489,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T171410Z_train_0146c0a8_ea90ae",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T17:14:10.122217+00:00",
+        "git": {
+          "available": true,
+          "commit": "01a3474bf25478b12ba76f8011487505428247ae",
+          "dirty": false,
+          "branch": "feat/task1-round4-search"
+        },
+        "source_tree_sha256": "802f1ec9521637ae06240983382fe3f0bfdb12df2370d5b20f38c435f9ca2d27",
+        "external_data_provenance": null
+      },
+      "source_summary_sha256": "6acc6e37778af5a196a6083587bf90c23f0ef2f5bd7df06438c7e9812e600c4e",
+      "source_fold_metrics_sha256": "9a9469e21052c920bcf038ac00d89d3d41727048ca53be3267fb389352c8a6af",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "xgb_depth4_5k": {
+      "config": {
+        "name": "xgb_depth4_5k",
+        "model_id": "xgboost",
+        "early_stopping_rounds": 150,
+        "model_params": {
+          "n_estimators": 5000,
+          "learning_rate": 0.015,
+          "max_depth": 4,
+          "min_child_weight": 15.0,
+          "reg_lambda": 25.0,
+          "reg_alpha": 0.5,
+          "subsample": 0.8,
+          "colsample_bytree": 0.9
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "3d2d8891129c8154dcdd6f49e339c30fd96a0972c569b9fca23f5118c90953e3",
+      "oof_metrics": {
+        "macro_f1": 0.9151446621633703,
+        "accuracy": 0.915050505050505,
+        "confusion_matrix": [
+          [
+            2266,
+            113,
+            50,
+            46
+          ],
+          [
+            71,
+            2233,
+            121,
+            50
+          ],
+          [
+            56,
+            110,
+            2264,
+            45
+          ],
+          [
+            62,
+            66,
+            51,
+            2296
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9230142566191446,
+            "recall": 0.9155555555555556,
+            "f1-score": 0.9192697768762678,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8854084060269627,
+            "recall": 0.9022222222222223,
+            "f1-score": 0.8937362417450471,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.910699919549477,
+            "recall": 0.9147474747474748,
+            "f1-score": 0.9127192098367265,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9421419778416086,
+            "recall": 0.9276767676767677,
+            "f1-score": 0.9348534201954397,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9153161400092982,
+            "recall": 0.9150505050505051,
+            "f1-score": 0.9151446621633703,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9153161400092983,
+            "recall": 0.915050505050505,
+            "f1-score": 0.9151446621633703,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T171410Z_train_0146c0a8_ea90ae",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T17:14:10.122217+00:00",
+        "git": {
+          "available": true,
+          "commit": "01a3474bf25478b12ba76f8011487505428247ae",
+          "dirty": false,
+          "branch": "feat/task1-round4-search"
+        },
+        "source_tree_sha256": "802f1ec9521637ae06240983382fe3f0bfdb12df2370d5b20f38c435f9ca2d27",
+        "external_data_provenance": null
+      },
+      "source_summary_sha256": "cfeef55694d09733426868de82a6fbd3972bebade81f51b3d15f6e0c24693206",
+      "source_fold_metrics_sha256": "86f4c54d715b98fb6baca700cb6d0780834721ca0bcdb61d0a56139a50f39ab9",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    },
+    "xgb_depth5_4k": {
+      "config": {
+        "name": "xgb_depth5_4k",
+        "model_id": "xgboost",
+        "early_stopping_rounds": 150,
+        "model_params": {
+          "n_estimators": 4000,
+          "learning_rate": 0.015,
+          "max_depth": 5,
+          "min_child_weight": 20.0,
+          "reg_lambda": 40.0,
+          "reg_alpha": 1.0,
+          "subsample": 0.8,
+          "colsample_bytree": 0.85
+        },
+        "features": {
+          "percentage_policy": "retain",
+          "out_of_range_flags": false,
+          "interactions": false
+        },
+        "group_features": false
+      },
+      "config_sha256": "f1ecf2500922ff75ed520badc188e719744b09182124368e4be5d2017d4cf0fc",
+      "oof_metrics": {
+        "macro_f1": 0.9151192524071565,
+        "accuracy": 0.915050505050505,
+        "confusion_matrix": [
+          [
+            2266,
+            102,
+            52,
+            55
+          ],
+          [
+            76,
+            2234,
+            112,
+            53
+          ],
+          [
+            57,
+            113,
+            2262,
+            43
+          ],
+          [
+            60,
+            67,
+            51,
+            2297
+          ]
+        ],
+        "classification_report": {
+          "Sunny": {
+            "precision": 0.9215128100854005,
+            "recall": 0.9155555555555556,
+            "f1-score": 0.9185245237130117,
+            "support": 2475.0
+          },
+          "Cloudy": {
+            "precision": 0.8879173290937997,
+            "recall": 0.9026262626262627,
+            "f1-score": 0.8952113804848728,
+            "support": 2475.0
+          },
+          "Rainy": {
+            "precision": 0.9132014533710133,
+            "recall": 0.9139393939393939,
+            "f1-score": 0.9135702746365105,
+            "support": 2475.0
+          },
+          "Snowy": {
+            "precision": 0.9383169934640523,
+            "recall": 0.9280808080808081,
+            "f1-score": 0.9331708307942311,
+            "support": 2475.0
+          },
+          "macro avg": {
+            "precision": 0.9152371465035665,
+            "recall": 0.9150505050505051,
+            "f1-score": 0.9151192524071565,
+            "support": 9900.0
+          },
+          "weighted avg": {
+            "precision": 0.9152371465035665,
+            "recall": 0.915050505050505,
+            "f1-score": 0.9151192524071563,
+            "support": 9900.0
+          }
+        }
+      },
+      "source": {
+        "run_id": "20261106T171410Z_train_0146c0a8_ea90ae",
+        "status": "complete",
+        "run_complete": true,
+        "timestamp_utc": "2026-11-06T17:14:10.122217+00:00",
+        "git": {
+          "available": true,
+          "commit": "01a3474bf25478b12ba76f8011487505428247ae",
+          "dirty": false,
+          "branch": "feat/task1-round4-search"
+        },
+        "source_tree_sha256": "802f1ec9521637ae06240983382fe3f0bfdb12df2370d5b20f38c435f9ca2d27",
+        "external_data_provenance": null
+      },
+      "source_summary_sha256": "bcbb0ec736daae55e1e42e4cae7a8e808f44ecef213d4cd81e9f5737f8c0e854",
+      "source_fold_metrics_sha256": "0f6825df59a4b4494f0aebd54dd8ff7ef7f9d3a433923708e7db044f93ee7b3f",
+      "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."
+    }
+  },
+  "runs": [
+    {
+      "run_id": "20261106T171410Z_train_0146c0a8_ea90ae",
+      "status": "complete",
+      "run_complete": true,
+      "timestamp_utc": "2026-11-06T17:14:10.122217+00:00",
+      "git": {
+        "available": true,
+        "commit": "01a3474bf25478b12ba76f8011487505428247ae",
+        "dirty": false,
+        "branch": "feat/task1-round4-search"
+      },
+      "source_tree_sha256": "802f1ec9521637ae06240983382fe3f0bfdb12df2370d5b20f38c435f9ca2d27",
+      "external_data_provenance": null
+    }
+  ],
+  "nested_evaluations": [],
+  "export_notes": [],
+  "development_scope": "CV used for model selection, not an independent test or Kaggle result.",
+  "timing_scope": "Per-fold final model fit excludes preprocessing and inner iteration selection; total CV includes workflow costs. Cross-run speed comparisons require matching hardware."
+}

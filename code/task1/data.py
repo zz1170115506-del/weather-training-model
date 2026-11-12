@@ -33,6 +33,18 @@ class Dataset:
         return self.train["label"].to_numpy(dtype=int)
 
 
+def require_course_only_data(data, config=None):
+    """Fail closed if a retired augmented Dataset reaches a public API."""
+    if getattr(data, "external", None) is not None or data.audit.get("external_data") is not None:
+        raise ValueError("External data is disabled. Reload the unchanged original course Dataset1 files.")
+    if config is not None and "expected_source_sha256" in config:
+        from .config import validate_expected_source_hashes
+        expected = validate_expected_source_hashes(config["expected_source_sha256"])
+        actual = data.audit.get("source_sha256", {})
+        if actual != expected:
+            raise ValueError("Course dataset SHA256 mismatch: the pinned train.csv/test.csv/sample_submission.csv must remain unchanged. No training was started.")
+
+
 def load_data(data_dir):
     data_dir = Path(data_dir)
     frames = {}
@@ -90,6 +102,7 @@ def load_data(data_dir):
         "sample_label_values": sorted(str(x) for x in sample.label.unique()),
         "sample_ids_same_order_as_test": sample.id.equals(test.id),
         "submission_format_basis": "Competition requires integers 1..4: the evaluator rejected English Rainy. The provided sample's name labels are not authoritative.",
+        "training_data_policy": "course_train_only",
     }
     return Dataset(train, test, sample, audit, groups)
 

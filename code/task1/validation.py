@@ -10,8 +10,10 @@ from sklearn.model_selection import StratifiedKFold, StratifiedGroupKFold
 
 from . import LABELS, LABEL_NAMES
 from .artifacts import content_hash, save_json
-from .data import CATEGORICAL
+from .config import require_course_only_config
+from .data import CATEGORICAL, require_course_only_data
 from .models import fit_model, predict_probabilities
+from .progress import fold_progress
 
 
 def metrics(y, probabilities):
@@ -75,6 +77,8 @@ def group_diagnostics(data, probabilities):
 
 
 def cross_validate(data, config, folds, model_seed=5434, out=None, verbose=True, learning_curve_every=None):
+    require_course_only_config(config)
+    require_course_only_data(data, config)
     X, y = data.X, data.y
     folds = np.asarray(folds)
     if folds.shape != y.shape or len(np.unique(folds)) < 2 or set(np.unique(folds)) != set(range(len(np.unique(folds)))):
@@ -85,38 +89,43 @@ def cross_validate(data, config, folds, model_seed=5434, out=None, verbose=True,
     started = perf_counter()
     for fold in sorted(np.unique(folds)):
         fit, valid = np.flatnonzero(folds != fold), np.flatnonzero(folds == fold)
-        bundle, fit_info = fit_model(X.iloc[fit], y[fit], config, model_seed + int(fold))
-        infer_started = perf_counter()
-        probability = predict_probabilities(bundle, X.iloc[valid])
-        inference_seconds = perf_counter() - infer_started
-        oof[valid] = probability
-        seen[valid] += 1
-        result = metrics(y[valid], probability)
-        train_result = metrics(y[fit], predict_probabilities(bundle, X.iloc[fit]))
-        diagnostics_seconds = 0.0
-        if learning_curve_every is not None and config["model_id"] in ("hgb", "hgb_native"):
-            from .diagnostics import boosting_curve
-            diagnostics_started = perf_counter()
-            curve = boosting_curve(bundle, X.iloc[fit], y[fit], X.iloc[valid], y[valid], learning_curve_every)
-            if not np.isclose(curve[-1]["validation_macro_f1"], result["macro_f1"], atol=1e-12, rtol=0):
-                raise RuntimeError("Final learning-curve stage disagrees with the retained model.")
-            curve_rows.extend({"fold": int(fold), **point} for point in curve)
-            diagnostics_seconds = perf_counter() - diagnostics_started
-        row = {"fold": int(fold), "fit_rows": len(fit), "validation_rows": len(valid),
-               "train_macro_f1": train_result["macro_f1"], "macro_f1": result["macro_f1"],
-               "accuracy": result["accuracy"], "inference_seconds_including_preprocessing": inference_seconds,
-               "learning_curve_diagnostics_seconds": diagnostics_seconds,
-               **fit_info}
-        records.append(row)
-        details.append({**row, "metrics": result,
-                        "fit_ids_sha256": content_hash(data.train.id.iloc[fit].tolist()),
-                        "validation_ids_sha256": content_hash(data.train.id.iloc[valid].tolist())})
-        model = bundle["model"]
-        if hasattr(model, "feature_importances_"):
-            for group, value in zip(bundle["features"].groups_, model.feature_importances_):
-                importance_rows.append({"fold": int(fold), "feature": str(group), "importance": float(value)})
-        if verbose:
-            print(f"{config['name']}: fold {fold+1}/{len(np.unique(folds))} Macro-F1={row['macro_f1']:.6f}", flush=True)
+        # Even nested calls with verbose=False show that work has started.
+        # The reporter observes wall time only; it never enters model logic.
+        with fold_progress(config["name"], int(fold) + 1, len(np.unique(folds)),
+                           len(fit), len(valid)) as progress:
+            bundle, fit_info = fit_model(X.iloc[fit], y[fit], config, model_seed + int(fold))
+            infer_started = perf_counter()
+            probability = predict_probabilities(bundle, X.iloc[valid])
+            inference_seconds = perf_counter() - infer_started
+            oof[valid] = probability
+            seen[valid] += 1
+            result = metrics(y[valid], probability)
+            train_result = metrics(y[fit], predict_probabilities(bundle, X.iloc[fit]))
+            diagnostics_seconds = 0.0
+            if learning_curve_every is not None and config["model_id"] in ("hgb", "hgb_native"):
+                from .diagnostics import boosting_curve
+                diagnostics_started = perf_counter()
+                curve = boosting_curve(bundle, X.iloc[fit], y[fit], X.iloc[valid], y[valid], learning_curve_every)
+                if not np.isclose(curve[-1]["validation_macro_f1"], result["macro_f1"], atol=1e-12, rtol=0):
+                    raise RuntimeError("Final learning-curve stage disagrees with the retained model.")
+                curve_rows.extend({"fold": int(fold), **point} for point in curve)
+                diagnostics_seconds = perf_counter() - diagnostics_started
+            row = {"fold": int(fold), "fit_rows": len(fit), "validation_rows": len(valid),
+                   "train_macro_f1": train_result["macro_f1"], "macro_f1": result["macro_f1"],
+                   "accuracy": result["accuracy"], "inference_seconds_including_preprocessing": inference_seconds,
+                   "learning_curve_diagnostics_seconds": diagnostics_seconds,
+                   "course_fit_rows": len(fit),
+                   **fit_info}
+            records.append(row)
+            details.append({**row, "metrics": result,
+                            "fit_ids_sha256": content_hash(data.train.id.iloc[fit].tolist()),
+                            "validation_ids_sha256": content_hash(data.train.id.iloc[valid].tolist())})
+            model = bundle["model"]
+            if hasattr(model, "feature_importances_"):
+                for group, value in zip(bundle["features"].groups_, model.feature_importances_):
+                    importance_rows.append({"fold": int(fold), "feature": str(group), "importance": float(value)})
+            if verbose:
+                print(f"{config['name']}: fold {fold+1}/{len(np.unique(folds))} Macro-F1={row['macro_f1']:.6f} elapsed={progress.elapsed_seconds():.1f}s", flush=True)
     if not np.all(seen == 1) or not np.isfinite(oof).all():
         raise RuntimeError("Each training record must receive exactly one finite OOF prediction.")
     scores = [r["macro_f1"] for r in records]
@@ -126,6 +135,8 @@ def cross_validate(data, config, folds, model_seed=5434, out=None, verbose=True,
                "fold_macro_f1_std": float(np.std(scores, ddof=1)),
                "oof_metrics": metrics(y, oof), "folds": details,
                "total_cv_seconds": perf_counter() - started,
+               "training_data_policy": "course_train_only",
+               "training_metric_scope": "Preprocessing, sample weighting and model fitting use only the course-fit subset. OOF metrics evaluate only course-validation records; no external or test labels are used.",
                "evaluation_scope": "Development cross-validation used for model selection; not an independent test or Kaggle score."}
     if out is not None:
         out = Path(out)

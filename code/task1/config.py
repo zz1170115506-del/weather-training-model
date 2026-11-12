@@ -9,6 +9,36 @@ import re
 from .models import MODEL_IDS
 
 
+def validate_expected_source_hashes(value):
+    """A pinned course dataset has exactly three immutable input digests."""
+    names = {"train.csv", "test.csv", "sample_submission.csv"}
+    if (not isinstance(value, dict) or set(value) != names
+            or any(not isinstance(digest, str) or re.fullmatch(r"[0-9a-f]{64}", digest) is None
+                   for digest in value.values())):
+        raise ValueError("expected_source_sha256 requires exactly train.csv, test.csv and sample_submission.csv with lowercase 64-character SHA256 digests.")
+    return dict(value)
+
+
+def require_course_only_config(config):
+    """Reject retired source-assisted recipes, including direct API callers."""
+    if "external_data" in config:
+        raise ValueError("External data is disabled. Use only the original course train.csv; source-assisted configurations cannot run.")
+    if "expected_source_sha256" in config:
+        validate_expected_source_hashes(config["expected_source_sha256"])
+    models = config.get("models", [config])
+    if not isinstance(models, list):
+        return  # The full schema validator reports invalid model containers.
+    for model in models:
+        if not isinstance(model, dict):
+            continue
+        if "use_external_data" in model:
+            value = model["use_external_data"]
+            if not isinstance(value, bool):
+                raise ValueError("use_external_data must be boolean; external data is disabled.")
+            if value:
+                raise ValueError("External data is disabled. use_external_data=true is forbidden.")
+
+
 def validate_experiment(value):
     """Validate optional human-authored provenance without inventing rounds."""
     required = {"round", "label", "parent_run_id", "change_note"}
@@ -31,6 +61,7 @@ def validate_experiment(value):
 
 def resolve_config(raw):
     result = deepcopy(raw)
+    require_course_only_config(result)
     if result.get("schema_version") != 1:
         raise ValueError("Expected schema_version 1.")
     if not isinstance(result.get("models"), list) or not result["models"]:
@@ -68,6 +99,33 @@ def resolve_config(raw):
     if not isinstance(blend["allow_class_multipliers"], bool):
         raise ValueError("blend.allow_class_multipliers must be boolean.")
     result["blend"] = blend
+    if "search" in result:
+        search = result["search"]
+        required = {"inner_splits", "blend_pool_size", "minimum_blend_gain", "min_blend_fold_wins"}
+        if not isinstance(search, dict) or set(search) != required:
+            raise ValueError("search requires inner_splits, blend_pool_size, minimum_blend_gain and min_blend_fold_wins.")
+        for key, lower in (("inner_splits", 2), ("blend_pool_size", 2), ("min_blend_fold_wins", 1)):
+            if isinstance(search[key], bool) or not isinstance(search[key], int) or search[key] < lower:
+                raise ValueError(f"search.{key} must be an integer >= {lower}.")
+        if search["min_blend_fold_wins"] > validation["n_splits"]:
+            raise ValueError("search.min_blend_fold_wins exceeds the outer fold count.")
+        gain = search["minimum_blend_gain"]
+        if isinstance(gain, bool) or not isinstance(gain, (int, float)) or not 0 <= gain <= 1:
+            raise ValueError("search.minimum_blend_gain must be finite and in [0,1].")
+        if search["blend_pool_size"] > len(result["models"]):
+            raise ValueError("search.blend_pool_size exceeds the number of candidates.")
+        if not 2 <= len(result["models"]) <= 16:
+            raise ValueError("Nested search requires between 2 and 16 complete candidate recipes.")
+    if "cv_selection" in result:
+        selection = result["cv_selection"]
+        if "search" in result:
+            raise ValueError("cv_selection and nested search are separate evaluation modes.")
+        if (not isinstance(selection, dict) or set(selection) != {"method", "n_exports"}
+                or selection["method"] != "rank_fixed_recipes"
+                or isinstance(selection["n_exports"], bool)
+                or not isinstance(selection["n_exports"], int)
+                or not 1 <= selection["n_exports"] <= len(result["models"])):
+            raise ValueError("cv_selection requires method=rank_fixed_recipes and valid n_exports.")
     if "inner_splits" in result and (isinstance(result["inner_splits"], bool)
                                       or not isinstance(result["inner_splits"], int) or result["inner_splits"] < 2):
         raise ValueError("inner_splits must be an integer >=2.")
@@ -85,6 +143,11 @@ def resolve_config(raw):
             raise ValueError("model_params must be an object.")
         if "random_state" in model["model_params"] or "random_seed" in model["model_params"]:
             raise ValueError("Use validation.model_seed, not model_params random_state/random_seed.")
+        if "early_stopping_rounds" in model:
+            patience = model["early_stopping_rounds"]
+            if (model["model_id"] not in ("hgb", "hgb_native", "catboost", "xgboost")
+                    or isinstance(patience, bool) or not isinstance(patience, int) or patience < 1):
+                raise ValueError("early_stopping_rounds requires a supported boosting model and positive integer patience.")
         features = {"percentage_policy": "retain", "out_of_range_flags": False,
                     "interactions": False} | model.get("features", {})
         if set(features) != {"percentage_policy", "out_of_range_flags", "interactions"}:
@@ -98,6 +161,13 @@ def resolve_config(raw):
         model.setdefault("group_features", False)
         if not isinstance(model["group_features"], bool):
             raise ValueError("group_features must be boolean.")
+        if "crossfit_weighting" in model:
+            if "noise_weighting" in model:
+                raise ValueError("Choose noise_weighting or crossfit_weighting, not both.")
+            if model["model_id"] not in ("hgb", "hgb_native", "bagged_hgb", "sklearn_forest", "catboost", "xgboost"):
+                raise ValueError("crossfit_weighting requires a model supporting sample_weight.")
+            from .crossfit_weights import resolve_settings
+            model["crossfit_weighting"] = resolve_settings(model["crossfit_weighting"])
         if "noise_weighting" in model and not isinstance(model["noise_weighting"], dict):
             raise ValueError("noise_weighting must be a parameter object.")
         if model.get("noise_weighting"):

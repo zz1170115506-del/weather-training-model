@@ -25,6 +25,8 @@ _FOLD_COLUMNS = (
     "inference_seconds_including_preprocessing", "preprocessing_seconds", "fit_seconds",
     "training_seconds_including_inner_selection", "selected_iterations",
     "actual_iterations", "trees_per_iteration", "learning_curve_diagnostics_seconds",
+    "iteration_selection_seconds",
+    "course_fit_rows",
     "preprocessing_fitted_rows", "encoded_feature_count", "early_stopping_uses_evaluation_fold",
 )
 _COMPARISON_COLUMNS = (
@@ -102,6 +104,8 @@ def _metrics(value):
 def _context(run_dir, run, nested=None):
     audit_path = run_dir / "audit.json"
     audit = _read(audit_path) if audit_path.is_file() else {}
+    if audit.get("external_data") is not None or run.get("external_data_provenance") is not None:
+        raise ValueError("External/source-assisted runs are excluded by the current course-only policy; keep historical evidence in the local archive.")
     source = run.get("source_sha256") or audit.get("source_sha256")
     if not isinstance(source, dict) or not all(name in source for name in _SOURCE_FILES):
         raise ValueError(f"{run_dir.name}: source data hashes are missing.")
@@ -140,6 +144,7 @@ def _context(run_dir, run, nested=None):
         "git": {key: _public(run.get("git", {}).get(key)) for key in
                 ("available", "commit", "dirty", "branch")},
         "source_tree_sha256": code_hash,
+        "training_data_policy": "course_train_only",
     }
 
 
@@ -150,6 +155,8 @@ def _candidate(summary_path, protocol, run_context):
             or name != summary_path.parent.name):
         raise ValueError("Candidate name must match its safe model directory name.")
     config = summary["config"]
+    from .config import require_course_only_config
+    require_course_only_config(config)
     if config.get("name") != name or config.get("model_id") != summary.get("model_id"):
         raise ValueError(f"{name}: model identity and config disagree.")
     if _hash(config) != summary.get("config_sha256"):
@@ -186,6 +193,7 @@ def _candidate(summary_path, protocol, run_context):
            "config_sha256": summary["config_sha256"],
            "run_id": run_context["run_id"], "run_complete": run_context["run_complete"]}
     detail = {"config": _public(config), "config_sha256": summary["config_sha256"],
+              "training_metric_scope": summary.get("training_metric_scope", "Historical run: consult fold metric definitions."),
               "oof_metrics": oof, "source": run_context,
               "source_summary_sha256": _file_hash(summary_path),
               "source_fold_metrics_sha256": _file_hash(csv_path),
