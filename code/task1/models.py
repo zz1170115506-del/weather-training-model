@@ -11,7 +11,7 @@ from . import LABELS
 from .features import Features
 
 MODEL_IDS = ("majority", "logistic", "numpy_cart", "numpy_forest", "sklearn_cart",
-             "sklearn_forest", "extra_trees", "hgb", "hgb_native", "bagged_hgb", "catboost", "xgboost", "svc", "histogram_nb")
+             "sklearn_forest", "extra_trees", "hgb", "hgb_native", "bagged_hgb", "ovr_hgb", "lightgbm", "catboost", "xgboost", "svc", "histogram_nb")
 
 
 class WeatherXGBoost:
@@ -100,6 +100,37 @@ def make_model(config, seed, groups=None, iterations=None):
         if iterations is not None:
             raise ValueError("Bagged HGB uses fixed member stages, not inner iteration selection.")
         return BaggedWeatherHGB(random_state=seed, **params)
+    if name == "ovr_hgb":
+        from .ovr_hgb import OvRWeatherHGB
+        if iterations is not None:
+            raise ValueError("OvR HGB uses fixed member stages, not inner iteration selection.")
+        return OvRWeatherHGB(random_state=seed, **params)
+    if name == "lightgbm":
+        try:
+            from lightgbm import LGBMClassifier
+        except ImportError as error:
+            raise ImportError("Install code/requirements-round7.txt for optional LightGBM.") from error
+        if iterations is not None:
+            raise ValueError("LightGBM uses fixed boosting stages in this course-only recipe.")
+        allowed = {"n_estimators", "learning_rate", "num_leaves", "max_depth", "min_child_samples",
+                   "min_child_weight", "reg_lambda", "reg_alpha", "subsample", "subsample_freq",
+                   "colsample_bytree", "max_bin", "min_split_gain", "cat_smooth", "cat_l2",
+                   "min_data_per_group", "max_cat_threshold", "max_cat_to_onehot", "extra_trees",
+                   "boosting_type", "objective", "num_class", "n_jobs", "device_type",
+                   "deterministic", "force_col_wise", "verbosity"}
+        if set(params) - allowed:
+            raise ValueError("Unknown LightGBM parameters; aliases, training state, callbacks and stopping overrides are not allowed.")
+        params = {"n_estimators": 1600, "learning_rate": 0.02, "num_leaves": 15,
+                  "min_child_samples": 40, "reg_lambda": 15.0,
+                  "boosting_type": "gbdt", "objective": "multiclass", "num_class": 4, "n_jobs": 1,
+                  "device_type": "cpu", "deterministic": True,
+                  "force_col_wise": True, "verbosity": -1} | params
+        if params["objective"] != "multiclass" or params["num_class"] != 4 or params["boosting_type"] != "gbdt":
+            raise ValueError("LightGBM weather models require GBDT multiclass softmax and num_class=4.")
+        if (params["n_jobs"] != 1 or params["device_type"] != "cpu"
+                or params["deterministic"] is not True or params["force_col_wise"] is not True):
+            raise ValueError("This LightGBM recipe requires deterministic CPU training with one thread and force_col_wise=true.")
+        return LGBMClassifier(random_state=seed, **params)
     if name in ("hgb", "hgb_native"):
         from sklearn.ensemble import HistGradientBoostingClassifier
         # No outer-validation-driven early stopping. Optional selection below
@@ -280,7 +311,7 @@ def fit_model(X, y, config, seed):
                                "inner_best_iteration": iterations, "criterion": criterion,
                                "scope": "Only the supplied training partition; external evaluation labels are never passed. Refit all supplied rows at the selected count.",
                                "inner_preprocessing_fitted_rows": inner_features.fitted_rows_}
-    category_mode = "hgb" if name == "hgb_native" else name in ("catboost", "histogram_nb")
+    category_mode = "hgb" if name in ("hgb_native", "lightgbm") else name in ("catboost", "histogram_nb")
     features = Features(config.get("features"), native_categories=category_mode,
                         scale=name in ("logistic", "svc"))
     preprocess_started = perf_counter()
@@ -304,9 +335,10 @@ def fit_model(X, y, config, seed):
                 "iteration_selection_seconds": iteration_selection_seconds,
                 "iteration_selection": iteration_selection,
                 "selected_iterations": iterations,
-                "actual_iterations": (int(model.n_iter_) if name in ("hgb", "hgb_native", "xgboost")
+                "actual_iterations": (int(model.n_iter_) if name in ("hgb", "hgb_native", "xgboost", "ovr_hgb", "lightgbm")
                                       else int(model.tree_count_) if name == "catboost" else None),
-                "trees_per_iteration": int(model.n_trees_per_iteration_) if name in ("hgb", "hgb_native", "xgboost") else None,
+                "trees_per_iteration": (int(model.n_trees_per_iteration_) if name in ("hgb", "hgb_native", "xgboost", "ovr_hgb")
+                                        else int(model.booster_.num_model_per_iteration()) if name == "lightgbm" else None),
                 "preprocessing_fitted_rows": features.fitted_rows_,
                 "encoded_feature_count": len(features.groups_),
                 "effective_model_parameters": (model.get_all_params() if name == "catboost" else model.get_params()),
@@ -317,6 +349,13 @@ def fit_model(X, y, config, seed):
         metadata["xgboost_booster_configuration"] = model.booster_configuration()
     if name == "bagged_hgb":
         metadata["bagging"] = model.training_diagnostics_
+    if name == "ovr_hgb":
+        metadata["ovr"] = model.training_diagnostics_
+    if name == "lightgbm":
+        metadata["lightgbm"] = {"booster_parameters": model.booster_.params,
+                                "actual_trees": int(model.booster_.num_trees()),
+                                "pandas_categorical": model.booster_.pandas_categorical,
+                                "scope": "Fixed-stage CPU multiclass model; categorical levels and preprocessing fitted only on the supplied training partition."}
     return bundle, metadata
 
 

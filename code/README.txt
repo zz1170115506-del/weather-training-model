@@ -1,86 +1,99 @@
-Dataset 1: data audit, baselines and handwritten models
-=====================================================
+Task1: one course-only workflow and a reproducible code release
+=============================================================
 
-Run from the project root with Python 3.12:
-  python3 -m venv .venv
-  .venv/bin/python -m pip install -r code/requirements.txt
-  .venv/bin/python code/dataset1_baseline.py
+Use Python 3.12. The only maintained training entry point is code/run_task1.py.
+The former dataset1_baseline.py / dataset1_custom.py standalone holdout scripts
+were retired to local history; their aggregate historical results are retained.
+Do not create a second training workflow by copying those scripts back.
 
-Run the handwritten CART and random forest comparison:
-  .venv/bin/python code/dataset1_custom.py
-  .venv/bin/python -m unittest discover -s code/tests -v
+Run these commands from the repository/package root in PowerShell. Calling
+the virtual-environment interpreter directly avoids activation-policy issues:
 
-The custom runner writes outputs/dataset1_custom/ and defaults to 100 trees.
-Its NumPy models and the sklearn reference forest use the same tree count,
-leaf-size settings, split and fitted preprocessing. The saved baseline's
-forest used 300 trees, so compare the matched models in the custom results.
-Change the count with --n-estimators 300 if needed.
+  python -m venv .venv
+  .\.venv\Scripts\python.exe -m pip install -r code/requirements-round7.txt
 
-weather_models.py implements the following without sklearn:
-  - Exact numeric CART split search using sorting and cumulative class counts.
-  - Sample-weighted Gini, depth/leaf-size/impurity stopping conditions.
-  - Leaf probabilities, batched prediction and impurity feature importance.
-  - Bootstrap sampling, per-node random features and probability averaging.
-  - Global class alignment, reproducible seeds and out-of-bag evaluation.
-The runner still uses sklearn for preprocessing, metrics and reference models.
+Use the original course Dataset1 only: train.csv, test.csv and
+sample_submission.csv. Never add public-source labels or external records.
+The formal configuration pins all three source SHA256 hashes. The program
+refuses changed inputs and retired source-assisted configurations/bundles.
 
-Bootstrap repeats count as repeated observations, including for leaf-size
-constraints. RNG, tie-breaking and bootstrap bookkeeping differ from sklearn;
-matched hyperparameters do not imply identical trees or predictions.
+  $taskData = Read-Host 'Directory containing the three original course CSVs'
+  .\.venv\Scripts\python.exe -X utf8 -B code/run_task1.py check --config configs/task1/seventh_run_course_only.json --data-dir $taskData
 
-Inputs default to comp-5434-20261-project-task-1/.
-Outputs default to outputs/dataset1_baseline/.
-Use --help to change directories, seed, or validation fraction.
+check does not fit a model. The user starts real training manually:
 
-The split is stratified, with seed 5434 and 20% validation records.
-All models use the same split. Preprocessing is fitted on training records
-only. id and label are excluded from the model inputs. No outlier clipping
-or record removal is applied. The source CSV files are never overwritten.
+  .\.venv\Scripts\python.exe -X utf8 -B code/run_task1.py train --config configs/task1/seventh_run_course_only.json --data-dir $taskData --artifact-root ../local_artifacts/task1
+  .\.venv\Scripts\python.exe -X utf8 -B code/run_task1.py results --artifact-root ../local_artifacts/task1
 
-Models: majority-class reference, logistic regression, decision tree,
-random forest, and histogram gradient boosting. These library models are
-exploratory references, not the final self-developed project algorithm.
-The best validation model is refitted on all training records to produce
-baseline test predictions. Validation performance is a model-selection
-estimate, not a Kaggle or independent final-test result.
+Historical configs remain in configs/task1/ to explain and reproduce previous
+course-only experiments; they are not the current recommended command. The
+release exporter includes only the single configuration explicitly selected.
 
-IMPORTANT: the Kaggle evaluator rejected the string Rainy. Submit integer
-labels 1..4 even though sample_submission.csv contains English names.
-Mapping: 1 Sunny, 2 Cloudy, 3 Rainy, 4 Snowy. The unified CLI now defaults
-to integers and refuses name/sample output for check/train/finalize.
-No Kaggle submission is performed by this script.
+Module responsibilities
+-----------------------
 
-Main outputs:
-  audit.json                 Schema, quality checks and source hashes.
-  environment.json           Dependency versions and hardware information.
-  metrics.csv                Validation scores and measured fit/predict times.
-  details.json               Configuration, per-class scores, confusion matrices.
-  validation_split.csv       Record IDs assigned to training or validation.
-  validation_predictions.csv True/predicted labels and probabilities by model.
-  baseline_predictions_integer.csv  Full-training-model test predictions.
-  baseline_probabilities.csv  Probabilities for each test record.
-  data_overview.png           Class balance and suspicious percentage counts.
-  baseline_comparison.png     Validation comparison and best confusion matrix.
+run_task1.py                  CLI and conservative CPU thread defaults.
+task1/data.py                 Immutable course inputs, schema and source hashes.
+task1/features.py             Fold-local preprocessing and feature transforms.
+task1/models.py               Fresh estimators, training-only weighting/stopping.
+weather_models.py             NumPy CART/Gini/forest/bootstrap/OOB algorithms.
+generative_weather.py         Autonomous histogram mixture and EM weighting.
+task1/bagged_hgb.py            Stratified member sampling and probability mean.
+task1/crossfit_weights.py      Internal OOF confidence weights; labels unchanged.
+task1/ovr_hgb.py               Custom one-vs-rest probability combination.
+task1/validation.py            Shared folds, OOF coverage and per-class metrics.
+task1/search.py, ensemble.py   Explicit selection and probability fusion.
+task1/progress.py              Training progress/heartbeat records.
+task1/artifacts.py             Frozen config, source/environment/data provenance.
+task1/submission.py            Lossless IDs, integer labels, CSV/hash validation.
+task1/results.py, plots.py     Verified local metrics and aggregate figures.
+verify_task1_release.py        Data-free package export and non-training checks.
 
-Custom outputs (outputs/dataset1_custom/):
-  metrics.csv                Matched NumPy/sklearn scores and measured times.
-  details.json               Configurations, structure summaries, OOB scores.
-  feature_importances.csv    Importance of encoded columns on training split.
-  original_feature_importances.csv  Importance summed by original attribute.
-  custom_comparison.png       Matched scores and custom forest confusion matrix.
-  feature_importance.png      Training-split custom forest attribute importance.
-  validation_split.csv        IDs; uses the same seed/split as the baseline.
-  validation_predictions.csv Validation labels/probabilities for all four models.
-  custom_predictions_integer.csv  Best custom model's full-training predictions.
-  custom_probabilities.csv    Test probabilities in integer-label order.
-  custom_model.joblib         Fitted preprocessor, custom model and input schema.
-The runner reloads the saved model and checks exact test-probability equality.
-Record-level files and model binaries remain local and are Git-ignored.
+Library learners are controls/components. Self-developed sampling, weighting,
+tree/forest, mixture-model and fusion details must be explained and evaluated;
+merely calling a ready-made classifier is insufficient for the course rubric.
 
-Custom fit times exclude shared preprocessing and include OOB calculation for
-both forest models. Total test inference includes preprocessing. Full-training
-refit disables OOB evaluation, which does not change the trained predictors.
-Feature importance is a training impurity statistic, not causal evidence.
+Outputs and scores
+------------------
 
-Runtime measurements are machine dependent. The exploratory script reports
-fit/inference durations; it does not invent epoch timings for tree models.
+Every run has a new directory; historical configs, metrics and models are not
+overwritten. Retain resolved_config.json, source/CSV/fold hashes, environment,
+per-fold effective parameters, timing, confusion matrices, selection records,
+candidate manifests and exact model-reload replay checks for later reporting.
+Model binaries and record-level probabilities/predictions remain local.
+
+Candidate letters describe export slots, not a fixed model. Read results before
+uploading. Kaggle requires id,label with 3300 predictions and a header; weather
+labels must be integers 1..4 (Sunny/Cloudy/Rainy/Snowy respectively). English
+_name.csv files are inspection aids and must not be submitted. Upload manually,
+then use record-score with the actual run, candidate, submission ID and score.
+Development OOF is not Kaggle public/private performance. No hidden-test score
+is guaranteed, capped, or manufactured by deliberately changing predictions.
+
+Code-only release for a collaborator or teacher
+----------------------------------------------
+
+Choose a new output directory outside the source checkout:
+
+  .\.venv\Scripts\python.exe -X utf8 -B code/verify_task1_release.py --config configs/task1/seventh_run_course_only.json --output ../local_releases/task1_round7
+
+The exporter copies a fixed allowlist: runtime source, handwritten algorithms,
+dependencies, this README, a package-root README and exactly one config. No
+data, models, predictions, old configs/results, Git metadata, environment or
+private notes are copied. It refuses an existing destination and writes a
+SHA256 manifest. It verifies imports/model construction, --help and a separate
+128-row generated-data check, never real-data training. That fixture does not
+replace or relax the production source hashes and produces no accuracy claim.
+
+Recheck an extracted package after installing dependencies:
+
+  python -X utf8 -B code/verify_task1_release.py --verify-only --output .
+
+The release root README supplies explicit --data-dir commands so a teacher can
+provide course inputs separately. Keep an extracted package outside a dirty
+parent Git checkout. On macOS/Linux use .venv/bin/python instead of the Windows
+interpreter path. SHA256 proves consistency, not trust in an unknown archive.
+
+Repository tests use synthetic data and handwritten artifact fixtures only:
+
+  .\.venv\Scripts\python.exe -X utf8 -B -m unittest discover -s code/tests -v

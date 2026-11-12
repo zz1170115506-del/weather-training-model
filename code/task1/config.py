@@ -116,6 +116,16 @@ def resolve_config(raw):
             raise ValueError("search.blend_pool_size exceeds the number of candidates.")
         if not 2 <= len(result["models"]) <= 16:
             raise ValueError("Nested search requires between 2 and 16 complete candidate recipes.")
+    if "cv_selection" in result:
+        selection = result["cv_selection"]
+        if "search" in result:
+            raise ValueError("cv_selection and nested search are separate evaluation modes.")
+        if (not isinstance(selection, dict) or set(selection) != {"method", "n_exports"}
+                or selection["method"] != "rank_fixed_recipes"
+                or isinstance(selection["n_exports"], bool)
+                or not isinstance(selection["n_exports"], int)
+                or not 1 <= selection["n_exports"] <= len(result["models"])):
+            raise ValueError("cv_selection requires method=rank_fixed_recipes and valid n_exports.")
     if "inner_splits" in result and (isinstance(result["inner_splits"], bool)
                                       or not isinstance(result["inner_splits"], int) or result["inner_splits"] < 2):
         raise ValueError("inner_splits must be an integer >=2.")

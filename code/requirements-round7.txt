@@ -1,0 +1,3 @@
+# Current course-only experiment, Python 3.12. Historical boosting extras are optional.
+-r requirements.txt
+lightgbm==4.7.0

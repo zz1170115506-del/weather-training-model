@@ -159,7 +159,9 @@ def run_finalize(data, config, out, label_format, frozen_recipe=None):
     save_json(out / "blend_recipe.json", recipe)
     bundles, times = {}, {}
     for candidate in config["models"]:
-        bundle, timing = fit_model(data.X, data.y, candidate, config["validation"]["model_seed"])
+        from .progress import fold_progress
+        with fold_progress(candidate["name"] + " full-refit", 1, 1, len(data.y), 0):
+            bundle, timing = fit_model(data.X, data.y, candidate, config["validation"]["model_seed"])
         bundles[candidate["name"]] = bundle
         times[candidate["name"]] = timing
     infer_started = perf_counter()
@@ -255,6 +257,7 @@ def run_train(data, config, out, label_format):
     print("[1/3] Common-fold development validation", flush=True)
     comparison = run_cv(data, config, out)
     search = None
+    cv_selection = None
     export_names = config["training"]["export_models"]
     if "search" in config:
         from .search import evaluate_search
@@ -267,6 +270,23 @@ def run_train(data, config, out, label_format):
         selected["training"] = {"export_models": export_names}
         selected["blend"] = {"n_trials": 0, "allow_class_multipliers": False}
         save_json(out / "selected_config.json", selected)
+    elif "cv_selection" in config:
+        # Rank only predeclared recipes. There is no learned OOF blend and no
+        # claim that this inexpensive development ranking is an independent test.
+        from .search import _load_base, _rank
+        folds, protocol = _folds(data, config["validation"])
+        summaries, _ = _load_base(data, config, out, folds, protocol)
+        rank = _rank(summaries)
+        export_names = [item["name"] for item in rank[:config["cv_selection"]["n_exports"]]]
+        cv_selection = {"method": "rank_fixed_recipes", "rank": rank,
+                        "selected_models": export_names,
+                        "evaluation_scope": "Development CV ranking of fixed recipes; no nested evaluation, no independent test or inferred Kaggle score. No model is forced in for family diversity."}
+        save_json(out / "cv_selection.json", cv_selection)
+        selected = deepcopy(config)
+        selected.pop("cv_selection")
+        selected["models"] = [next(m for m in config["models"] if m["name"] == name) for name in export_names]
+        selected["training"] = {"export_models": export_names}
+        save_json(out / "selected_config.json", selected)
     candidates = {}
     submissions = out / "submissions"
     submissions.mkdir()
@@ -274,6 +294,7 @@ def run_train(data, config, out, label_format):
         candidate_key = f"candidate_{chr(97 + index)}" if index < 26 else f"candidate_{index+1}"
         single = deepcopy(config)
         single.pop("search", None)
+        single.pop("cv_selection", None)
         single["models"] = [next(model for model in config["models"] if model["name"] == name)]
         single["blend"] = {"n_trials": 0, "allow_class_multipliers": False}
         single["training"] = {"export_models": [name]}
@@ -322,11 +343,14 @@ def run_train(data, config, out, label_format):
         save_json(out / "research_blend_config.json", blend_config)
     result = {"comparison": comparison, "candidates": candidates,
               "candidate_policy": ("Explicit search-selected single candidates; scores are development selection estimates, not independent test scores."
-                                   if search is not None else "Fixed named single-model candidates; no automatic Kaggle submission or OOF-based candidate replacement."),
+                                   if search is not None else cv_selection["evaluation_scope"] if cv_selection is not None
+                                   else "Fixed named single-model candidates; no automatic Kaggle submission or OOF-based candidate replacement."),
               "manual_next_step": "Review the exported candidates' CV metrics, manually choose an integer CSV in the competition File Upload window, verify the platform response, then record its actual candidate key and score.",
               "score_log_policy": "Append-only user-reported platform_scores.json entries after training."}
     if search is not None:
         result.update({"search": search, "research_blend_export": research_export})
+    if cv_selection is not None:
+        result["cv_selection"] = cv_selection
     save_json(out / "training_summary.json", result)
     print("[3/3] CSV/schema/hash and model reload checks passed. Kaggle upload is manual.", flush=True)
     return result
@@ -421,7 +445,12 @@ def execute(args):
                           "models": [model["name"] for model in config["models"]],
                           "export_models": config["training"]["export_models"],
                           "export_models_scope": ("Fixed-mode fallback only; search selects actual A/B after evaluation."
-                                                  if "search" in config else "Fixed candidate exports."),
+                                                  if "search" in config or "cv_selection" in config else "Fixed candidate exports."),
+                          "cv_selection_plan": ({"cv_fit_model_calls": count * outer,
+                              "n_exports": config["cv_selection"]["n_exports"],
+                              "nested_training_fits": 0, "learned_blend_trials": 0,
+                              "evaluation_scope": "Fixed-recipe development CV only; rank then export, no weak-family requirement."}
+                              if "cv_selection" in config else None),
                           "experiment": config.get("experiment"),
                           "training_data_policy": "course_train_only",
                           "search_plan": ({"candidate_recipes": count, "outer_folds": outer, "inner_folds": inner,
@@ -440,7 +469,7 @@ def execute(args):
                           "format_evidence": "Assignment labels are 1..4; Kaggle evaluator rejected English 'Rainy'.",
                           "platform_acceptance_verified": False, "git": git_state()}, indent=2))
         return
-    if args.stage == "finalize" and "search" in config:
+    if args.stage == "finalize" and ("search" in config or "cv_selection" in config):
         raise ValueError("Search configs require train. Reproduce an exported frozen candidate with predict, not a new unvalidated finalize.")
     if args.stage in ("finalize", "train") and args.output is not None and args.output.exists():
         raise FileExistsError(f"Refusing to overwrite {args.output}.")
